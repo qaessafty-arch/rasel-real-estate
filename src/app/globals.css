@@ -10,15 +10,34 @@
   --background-end-rgb: 2, 6, 23;
 }
 
+html {
+  color-scheme: dark !important;
+  background-color: #020617 !important;
+  overflow-x: hidden !important;
+  max-width: 100vw !important;
+  scrollbar-width: thin !important;
+  scrollbar-color: #334155 #0b0f19 !important;
+}
+
 body {
   font-family: 'Noto Sans Arabic', 'Alexandria', 'Cairo', 'Vazirmatn', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Tahoma, sans-serif;
   color: rgb(var(--foreground-rgb));
-  background-color: #030712;
+  background-color: #020617 !important;
   min-height: 100vh;
+  max-width: 100vw !important;
+  overflow-x: hidden !important;
   direction: rtl;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  scrollbar-width: thin !important;
+  scrollbar-color: #334155 #0b0f19 !important;
+}
+
+*, *::before, *::after {
+  scrollbar-width: thin !important;
+  scrollbar-color: #334155 #0b0f19 !important;
+  box-sizing: border-box;
 }
 
 /* Explicit font-family for Kurdish and Arabic texts */
@@ -33,21 +52,25 @@ html[lang="ar"],
 
 /* Custom scrollbars */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 8px !important;
+  height: 8px !important;
 }
 
 ::-webkit-scrollbar-track {
-  background: #0f172a;
+  background: #020617 !important;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #334155;
-  border-radius: 4px;
+  background: #334155 !important;
+  border-radius: 4px !important;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #d97706;
+  background: #d97706 !important;
+}
+
+::-webkit-scrollbar-corner {
+  background: #020617 !important;
 }
 
 /* Glassmorphism utility */
@@ -228,7 +251,7 @@ html[lang="ar"],
 }
 [data-theme="solid"] .bg-amber-500,
 [data-theme="solid"] .from-amber-500 {
-  background-color: #ffffff !important;
+  background-color: #f59e0b !important;
   color: #09090b !important;
 }
 [data-theme="solid"] .to-amber-600 {
@@ -432,6 +455,41 @@ html[lang="ar"],
 
 .leaflet-popup-tip {
   background: #0f172a !important;
+}
+
+/* Leaflet Zoom & Controls Dark Theme (Eliminates white zoom boxes & attribution) */
+.leaflet-bar,
+.leaflet-control-zoom {
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5) !important;
+  border-radius: 0.5rem !important;
+  overflow: hidden !important;
+}
+
+.leaflet-bar a,
+.leaflet-control-zoom-in,
+.leaflet-control-zoom-out {
+  background-color: #0f172a !important;
+  color: #f59e0b !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+.leaflet-bar a:hover,
+.leaflet-control-zoom-in:hover,
+.leaflet-control-zoom-out:hover {
+  background-color: #1e293b !important;
+  color: #fbbf24 !important;
+}
+
+.leaflet-control-attribution {
+  background: rgba(15, 23, 42, 0.85) !important;
+  color: #64748b !important;
+  font-size: 10px !important;
+  border-radius: 4px !important;
+}
+
+.leaflet-control-attribution a {
+  color: #f59e0b !important;
 }
 
 /* Cinematic Obsidian & Ambient Glow Utilities for GetLayers Landing Page */

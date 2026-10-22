@@ -445,7 +445,7 @@ export default function HomePage() {
   if (!authChecked) return null;
 
   return (
-    <div dir={lang === 'en' ? 'ltr' : 'rtl'} className={`min-h-screen flex flex-col ${getBgClass(bgPattern)} text-slate-100 font-sans selection:bg-amber-500 selection:text-slate-950 transition-colors duration-300`}>
+    <div dir={lang === 'en' ? 'ltr' : 'rtl'} className={`min-h-screen w-full max-w-full overflow-x-hidden flex flex-col ${getBgClass(bgPattern)} text-slate-100 font-sans selection:bg-amber-500 selection:text-slate-950 transition-colors duration-300`}>
       
       {/* Login Modal: Opened only when requested or when an admin action is performed */}
       <LoginModal

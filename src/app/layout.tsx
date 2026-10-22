@@ -15,9 +15,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="ckb" dir="rtl">
+    <html lang="ckb" dir="rtl" className="dark bg-slate-950" style={{ colorScheme: 'dark', backgroundColor: '#020617' }}>
       <head>
-        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
+        <meta name="color-scheme" content="dark" />
+        <meta name="theme-color" content="#020617" />
         {/* Preload Google Fonts for Kurdish Sorani Typography */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
@@ -26,7 +28,7 @@ export default function RootLayout({
           rel="stylesheet" 
         />
       </head>
-      <body className="bg-slate-950 text-slate-100 antialiased selection:bg-amber-500 selection:text-slate-900">
+      <body className="bg-slate-950 text-slate-100 antialiased selection:bg-amber-500 selection:text-slate-900 overflow-x-hidden min-h-screen">
         {children}
       </body>
     </html>
