@@ -18,13 +18,18 @@ export type PropertyStatus = 'available' | 'rented' | 'sold' | 'reserved' | 'und
 
 export type Currency = 'USD' | 'IQD';
 
+export type UITheme = 'gold' | 'sapphire' | 'emerald' | 'pearl';
+
+export type ViewMode = 'grid' | 'list' | 'split';
+
 export interface LandDetails {
-  frontage_meter?: number; // بەرەی شەقام بە مەتر
+  frontage_meter?: number; // بەرەی پێشەوە / پانی بە مەتر
+  depth_meter?: number; // قووڵی / درێژی بە مەتر
   street_width?: number; // پانی شەقام
-  is_corner?: boolean; // گۆشەیە یان نا
+  is_corner?: boolean; // گۆشەیە یان نا (سەر دوو شەقام)
   zoning_type?: string; // سڕف، زراعی، تجاری، تاپۆ
-  area_donum?: number; // دۆنم
-  area_olk?: number; // ئۆڵک
+  area_donum?: number; // دۆنم (١ دۆنم = ٢٥٠٠ م²)
+  area_olk?: number; // ئۆڵک (١ ئۆڵک = ١٠٠ م²)
 }
 
 export interface Property {

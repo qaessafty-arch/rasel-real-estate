@@ -25,7 +25,7 @@ import {
   Percent
 } from 'lucide-react';
 import { Property } from '@/types';
-import { formatPrice, getPropertyTypeLabel, getPropertyPurposeLabel, getPropertyStatusLabel, generateWhatsAppMessage } from '@/lib/utils';
+import { formatPrice, getPropertyTypeLabel, getPropertyPurposeLabel, getPropertyStatusLabel, generateWhatsAppMessage, formatArea, sqmToDonum } from '@/lib/utils';
 import { Language, translations } from '@/lib/i18n';
 
 interface PropertyDetailModalProps {
@@ -71,6 +71,7 @@ export const PropertyDetailModal: React.FC<PropertyDetailModalProps> = ({
   };
 
   const isLand = property.property_type === 'commercial_land' || property.property_type === 'agriculture_land';
+  const areaInfo = formatArea(property.area_sqm, property.land_details, lang);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-slate-950/85 backdrop-blur-md overflow-y-auto">
@@ -269,22 +270,40 @@ export const PropertyDetailModal: React.FC<PropertyDetailModalProps> = ({
             </div>
           )}
 
-          {/* Land Detailed Specs (If Land) */}
-          {isLand && property.land_details && (
+          {/* Measurements & Land Detailed Specs */}
+          {property.land_details && (
             <div className="p-4 rounded-2xl bg-slate-950/40 border border-slate-800 space-y-3">
               <h4 className="text-xs font-bold text-amber-400 uppercase tracking-wider flex items-center gap-1.5">
                 <Compass className="w-4 h-4" />
-                <span>{t.land_details}</span>
+                <span>وردەکاری پێوانە و سەنەد (Measurements & Deed)</span>
               </h4>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
-                <div className="p-3 rounded-xl bg-slate-900 border border-slate-800 text-center">
-                  <span className="text-slate-400 block mb-1">{t.frontage}</span>
-                  <span className="font-mono font-bold text-white">{property.land_details.frontage_meter || '—'} مەتر</span>
-                </div>
-                <div className="p-3 rounded-xl bg-slate-900 border border-slate-800 text-center">
-                  <span className="text-slate-400 block mb-1">{t.street_width}</span>
-                  <span className="font-mono font-bold text-white">{property.land_details.street_width || '—'} مەتر</span>
-                </div>
+                {property.land_details.frontage_meter && (
+                  <div className="p-3 rounded-xl bg-slate-900 border border-slate-800 text-center">
+                    <span className="text-slate-400 block mb-1">{t.frontage}</span>
+                    <span className="font-mono font-bold text-white text-sm">{property.land_details.frontage_meter} مەتر</span>
+                  </div>
+                )}
+                {property.land_details.depth_meter && (
+                  <div className="p-3 rounded-xl bg-slate-900 border border-slate-800 text-center">
+                    <span className="text-slate-400 block mb-1">{t.depth || 'قووڵی / درێژی'}</span>
+                    <span className="font-mono font-bold text-white text-sm">{property.land_details.depth_meter} مەتر</span>
+                  </div>
+                )}
+                {property.land_details.frontage_meter && property.land_details.depth_meter && (
+                  <div className="p-3 rounded-xl bg-slate-900 border border-slate-800 text-center">
+                    <span className="text-slate-400 block mb-1">{t.dimensions || 'پێوانەی بەرە و قووڵی'}</span>
+                    <span className="font-mono font-bold text-amber-300 text-sm">
+                      {property.land_details.frontage_meter} × {property.land_details.depth_meter} م
+                    </span>
+                  </div>
+                )}
+                {property.land_details.street_width && (
+                  <div className="p-3 rounded-xl bg-slate-900 border border-slate-800 text-center">
+                    <span className="text-slate-400 block mb-1">{t.street_width}</span>
+                    <span className="font-mono font-bold text-white text-sm">{property.land_details.street_width} مەتر</span>
+                  </div>
+                )}
                 <div className="p-3 rounded-xl bg-slate-900 border border-slate-800 text-center">
                   <span className="text-slate-400 block mb-1">{t.zoning}</span>
                   <span className="font-bold text-amber-300">{property.land_details.zoning_type || 'تاپۆ'}</span>
@@ -305,7 +324,12 @@ export const PropertyDetailModal: React.FC<PropertyDetailModalProps> = ({
             </div>
             <div className="p-4 rounded-xl bg-slate-950/40 border border-slate-800 text-center">
               <span className="text-xs text-slate-400 block mb-1">{t.area}</span>
-              <span className="text-sm font-bold text-slate-200">{property.area_sqm} م²</span>
+              <span className="text-sm font-bold text-slate-200">{areaInfo.primary}</span>
+              {areaInfo.badge && (
+                <span className="block text-xs text-amber-400 font-bold mt-1">
+                  {areaInfo.badge}
+                </span>
+              )}
             </div>
             <div className="p-4 rounded-xl bg-slate-950/40 border border-slate-800 text-center">
               <span className="text-xs text-slate-400 block mb-1">{t.bedrooms}</span>

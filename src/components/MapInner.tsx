@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMapEvents, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import { Property } from '@/types';
-import { formatPrice, getPropertyTypeLabel, getPropertyPurposeLabel } from '@/lib/utils';
+import { formatPrice, getPropertyTypeLabel, getPropertyPurposeLabel, formatArea } from '@/lib/utils';
 import { Eye, MapPin, Copy, Check, Navigation, Search } from 'lucide-react';
 import { Language, translations } from '@/lib/i18n';
 
@@ -224,8 +224,13 @@ export default function MapInner({ properties, onSelectProperty, lang = 'ckb' }:
                       {t.project}: {property.project_name} (نهۆم: {property.floor_number || 1})
                     </div>
                   )}
-                  <div className="text-sm font-black text-amber-400 font-mono mb-2">
-                    {formatPrice(property.price, property.currency, lang)}
+                  <div className="flex items-center justify-between text-xs mb-2">
+                    <span className="text-sm font-black text-amber-400 font-mono">
+                      {formatPrice(property.price, property.currency, lang)}
+                    </span>
+                    <span className="text-[11px] text-slate-300 font-semibold font-mono bg-slate-800/80 px-2 py-0.5 rounded">
+                      {formatArea(property.area_sqm, property.land_details, lang).primary}
+                    </span>
                   </div>
                   <button
                     onClick={() => onSelectProperty(property)}

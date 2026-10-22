@@ -12,9 +12,18 @@ import {
   Sparkles,
   RotateCcw,
   Settings,
-  ShieldCheck
+  ShieldCheck,
+  LayoutGrid,
+  List,
+  Columns,
+  Eye,
+  Edit3,
+  Send,
+  ExternalLink,
+  Ruler
 } from 'lucide-react';
-import { Property, Contract, FinancialTransaction, PropertyStatus } from '@/types';
+import { Property, Contract, FinancialTransaction, PropertyStatus, UITheme, ViewMode } from '@/types';
+import { formatArea, formatPrice, getPropertyStatusLabel, getPropertyTypeLabel, getPropertyPurposeLabel, generateWhatsAppMessage } from '@/lib/utils';
 import { dataService } from '@/lib/storage';
 import { Navbar } from '@/components/Navbar';
 import { LoginModal } from '@/components/LoginModal';
@@ -33,20 +42,52 @@ export default function HomePage() {
   // Trilingual State: 'ckb' (Kurdish) | 'ar' (Arabic) | 'en' (English)
   const [lang, setLang] = useState<Language>('ckb');
 
+  // Chooseable UI Theme & Layout Modes
+  const [theme, setTheme] = useState<UITheme>('gold');
+  const [viewMode, setViewMode] = useState<ViewMode>('grid');
+
   // Authentication & Security state: Public by default!
   const [isUnlocked, setIsUnlocked] = useState(false);
   const [loginModalOpen, setLoginModalOpen] = useState(false);
   const [authChecked, setAuthChecked] = useState(false);
 
-  // Load language preference from local storage
+  // Load theme and language preference from local storage
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const savedLang = localStorage.getItem('rasel_lang') as Language;
       if (savedLang === 'en' || savedLang === 'ckb' || savedLang === 'ar') {
         setLang(savedLang);
       }
+
+      const savedTheme = localStorage.getItem('rasel_ui_theme') as UITheme;
+      if (savedTheme && ['gold', 'sapphire', 'emerald', 'pearl'].includes(savedTheme)) {
+        setTheme(savedTheme);
+        document.documentElement.setAttribute('data-theme', savedTheme);
+      } else {
+        document.documentElement.setAttribute('data-theme', 'gold');
+      }
+
+      const savedView = localStorage.getItem('rasel_view_mode') as ViewMode;
+      if (savedView && ['grid', 'list', 'split'].includes(savedView)) {
+        setViewMode(savedView);
+      }
     }
   }, []);
+
+  const handleThemeChange = (newTheme: UITheme) => {
+    setTheme(newTheme);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('rasel_ui_theme', newTheme);
+      document.documentElement.setAttribute('data-theme', newTheme);
+    }
+  };
+
+  const handleViewModeChange = (mode: ViewMode) => {
+    setViewMode(mode);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('rasel_view_mode', mode);
+    }
+  };
 
   const handleSelectLang = (nextLang: Language) => {
     setLang(nextLang);
@@ -93,6 +134,7 @@ export default function HomePage() {
   const [selectedCondition, setSelectedCondition] = useState<string>('all');
   const [selectedStatus, setSelectedStatus] = useState<string>('all');
   const [selectedCity, setSelectedCity] = useState<string>('all');
+  const [selectedAreaRange, setSelectedAreaRange] = useState<string>('all');
 
   // Check initial login state
   useEffect(() => {
@@ -205,9 +247,17 @@ export default function HomePage() {
         return false;
       }
 
+      // Measurement / Area Range filter
+      if (selectedAreaRange !== 'all') {
+        if (selectedAreaRange === 'under_200' && item.area_sqm >= 200) return false;
+        if (selectedAreaRange === '200_500' && (item.area_sqm < 200 || item.area_sqm > 500)) return false;
+        if (selectedAreaRange === '500_2500' && (item.area_sqm < 500 || item.area_sqm >= 2500)) return false;
+        if (selectedAreaRange === 'donum_plus' && item.area_sqm < 2500 && (!item.land_details?.area_donum || item.land_details.area_donum <= 0)) return false;
+      }
+
       return true;
     });
-  }, [properties, searchQuery, selectedType, selectedPurpose, selectedPayment, selectedCondition, selectedStatus, selectedCity]);
+  }, [properties, searchQuery, selectedType, selectedPurpose, selectedPayment, selectedCondition, selectedStatus, selectedCity, selectedAreaRange]);
 
   // Handlers for Properties
   const handleOpenAdd = () => {
@@ -320,6 +370,7 @@ export default function HomePage() {
     selectedCondition !== 'all' || 
     selectedStatus !== 'all' || 
     selectedCity !== 'all' || 
+    selectedAreaRange !== 'all' || 
     Boolean(searchQuery.trim());
 
   const resetAllFilters = () => {
@@ -329,6 +380,7 @@ export default function HomePage() {
     setSelectedCondition('all');
     setSelectedStatus('all');
     setSelectedCity('all');
+    setSelectedAreaRange('all');
     setSearchQuery('');
   };
 
@@ -362,6 +414,8 @@ export default function HomePage() {
         lang={lang}
         onToggleLang={handleToggleLang}
         onChangeLang={handleSelectLang}
+        theme={theme}
+        onChangeTheme={handleThemeChange}
       />
 
       {/* Main Workspace Body */}
@@ -638,6 +692,25 @@ export default function HomePage() {
                   </select>
                 </div>
 
+                {/* 7. Measurement & Area Filter */}
+                <div>
+                  <label className="block text-slate-400 font-semibold mb-1 flex items-center gap-1">
+                    <Ruler className="w-3.5 h-3.5 text-amber-400" />
+                    <span>{t.area || 'ڕووبەر'}</span>
+                  </label>
+                  <select
+                    value={selectedAreaRange}
+                    onChange={(e) => setSelectedAreaRange(e.target.value)}
+                    className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-800 text-white text-xs outline-none focus:border-amber-500"
+                  >
+                    <option value="all">{t.all_areas || 'هەموو ڕووبەرەکان'}</option>
+                    <option value="under_200">{t.area_small || 'کەمتر لە ٢٠٠ م²'}</option>
+                    <option value="200_500">{t.area_medium || '٢٠٠ بۆ ٥٠٠ م²'}</option>
+                    <option value="500_2500">{t.area_large || '٥٠٠ بۆ ٢,٥٠٠ م²'}</option>
+                    <option value="donum_plus">{t.area_donum_plus || '١ دۆنم و زیاتر (+٢٥٠٠م²)'}</option>
+                  </select>
+                </div>
+
               </div>
 
               {/* Filter Reset if any active */}
@@ -656,6 +729,56 @@ export default function HomePage() {
               )}
 
             </div>
+
+            {/* CHOOSEABLE VIEW MODE TOOLBAR (Grid / Compact List / Split Map) */}
+            {properties.length > 0 && filteredProperties.length > 0 && (
+              <div className="flex flex-wrap items-center justify-between gap-3 px-2 py-1">
+                <div className="text-xs text-slate-400">
+                  {t.found_count} <span className="text-amber-400 font-bold">{filteredProperties.length}</span> {t.properties}
+                </div>
+
+                <div className="flex items-center gap-1 p-1 rounded-xl bg-slate-900 border border-slate-800 text-xs">
+                  <button
+                    onClick={() => handleViewModeChange('grid')}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-bold transition-all ${
+                      viewMode === 'grid'
+                        ? 'bg-amber-500 text-slate-950 shadow-md shadow-amber-500/20'
+                        : 'text-slate-400 hover:text-white'
+                    }`}
+                    title={t.view_grid || 'کارتەکان'}
+                  >
+                    <LayoutGrid className="w-3.5 h-3.5" />
+                    <span className="hidden sm:inline">{t.view_grid || 'کارتەکان'}</span>
+                  </button>
+
+                  <button
+                    onClick={() => handleViewModeChange('list')}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-bold transition-all ${
+                      viewMode === 'list'
+                        ? 'bg-amber-500 text-slate-950 shadow-md shadow-amber-500/20'
+                        : 'text-slate-400 hover:text-white'
+                    }`}
+                    title={t.view_list || 'لیستەی چڕ'}
+                  >
+                    <List className="w-3.5 h-3.5" />
+                    <span className="hidden sm:inline">{t.view_list || 'لیستەی چڕ'}</span>
+                  </button>
+
+                  <button
+                    onClick={() => handleViewModeChange('split')}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-bold transition-all ${
+                      viewMode === 'split'
+                        ? 'bg-amber-500 text-slate-950 shadow-md shadow-amber-500/20'
+                        : 'text-slate-400 hover:text-white'
+                    }`}
+                    title={t.view_split || 'نەخشە و لیست'}
+                  >
+                    <Columns className="w-3.5 h-3.5" />
+                    <span className="hidden sm:inline">{t.view_split || 'نەخشە و لیست'}</span>
+                  </button>
+                </div>
+              </div>
+            )}
 
             {/* Properties Grid or Empty State */}
             {properties.length === 0 ? (
@@ -701,7 +824,135 @@ export default function HomePage() {
                   {t.new_property}
                 </button>
               </div>
+            ) : viewMode === 'list' ? (
+              /* 1. CHOOSEABLE COMPACT LIST / TABLE VIEW */
+              <div className="rounded-2xl glass-card border border-slate-800 overflow-hidden">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-right text-xs">
+                    <thead className="bg-slate-950/80 text-slate-400 uppercase text-[11px] border-b border-slate-800">
+                      <tr>
+                        <th className="p-3.5">کۆد و وێنە</th>
+                        <th className="p-3.5">ناوی موڵک و ناونیشان</th>
+                        <th className="p-3.5">جۆر و مەبەست</th>
+                        <th className="p-3.5">ڕووبەر و پێوانە</th>
+                        <th className="p-3.5">نرخ و مامەڵە</th>
+                        <th className="p-3.5">بارودۆخ</th>
+                        <th className="p-3.5 text-center">کردارەکان</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-800/60">
+                      {filteredProperties.map((p) => {
+                        const areaI = formatArea(p.area_sqm, p.land_details, lang);
+                        const statusI = getPropertyStatusLabel(p.status, lang);
+                        return (
+                          <tr key={p.id} className="hover:bg-slate-800/30 transition-colors">
+                            <td className="p-3.5">
+                              <div className="flex items-center gap-2.5">
+                                <img
+                                  src={p.images?.[0] || 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=400&q=80'}
+                                  alt=""
+                                  className="w-12 h-10 rounded-lg object-cover bg-slate-900 border border-slate-800 cursor-pointer"
+                                  onClick={() => setDetailProperty(p)}
+                                />
+                                <span className="font-mono text-amber-400 font-bold">{p.property_code}</span>
+                              </div>
+                            </td>
+                            <td className="p-3.5">
+                              <div 
+                                onClick={() => setDetailProperty(p)} 
+                                className="font-bold text-white hover:text-amber-400 cursor-pointer line-clamp-1"
+                              >
+                                {p.title}
+                              </div>
+                              <div className="text-[11px] text-slate-400 flex items-center gap-1 mt-0.5">
+                                <MapPin className="w-3 h-3 text-amber-400" />
+                                <span>{p.city} - {p.neighborhood || p.address}</span>
+                              </div>
+                            </td>
+                            <td className="p-3.5">
+                              <span className="font-semibold text-slate-300 block">{getPropertyTypeLabel(p.property_type, lang)}</span>
+                              <span className="text-[10px] text-amber-400">{getPropertyPurposeLabel(p.purpose, lang)}</span>
+                            </td>
+                            <td className="p-3.5 font-mono">
+                              <span className="font-bold text-white block">{areaI.primary}</span>
+                              {areaI.badge && (
+                                <span className="text-[10px] text-amber-400 font-semibold">{areaI.badge}</span>
+                              )}
+                            </td>
+                            <td className="p-3.5 font-mono">
+                              <span className="font-bold text-emerald-400 block text-sm">
+                                {formatPrice(p.price, p.currency, lang)}
+                              </span>
+                              <span className="text-[10px] text-slate-400">
+                                {p.payment_method === 'installments' ? t.installments : t.cash}
+                              </span>
+                            </td>
+                            <td className="p-3.5">
+                              <span className={`inline-block px-2.5 py-1 rounded-full text-[10px] font-bold border ${statusI.bg}`}>
+                                {statusI.label}
+                              </span>
+                            </td>
+                            <td className="p-3.5">
+                              <div className="flex items-center justify-center gap-1.5">
+                                <button
+                                  onClick={() => setDetailProperty(p)}
+                                  className="p-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white"
+                                  title="بینین"
+                                >
+                                  <Eye className="w-4 h-4" />
+                                </button>
+                                {isUnlocked && (
+                                  <>
+                                    <button
+                                      onClick={() => handleEditProperty(p)}
+                                      className="p-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-amber-400 hover:text-amber-300"
+                                      title="دەستکاری"
+                                    >
+                                      <Edit3 className="w-4 h-4" />
+                                    </button>
+                                    <button
+                                      onClick={() => handleDeleteProperty(p.id)}
+                                      className="p-1.5 rounded-lg bg-slate-900 hover:bg-rose-950/40 text-slate-400 hover:text-rose-400"
+                                      title="سڕینەوە"
+                                    >
+                                      <Trash2 className="w-4 h-4" />
+                                    </button>
+                                  </>
+                                )}
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            ) : viewMode === 'split' ? (
+              /* 2. CHOOSEABLE SPLIT MAP & LIST VIEW */
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+                <div className="sticky top-24 h-[650px] rounded-3xl overflow-hidden border border-slate-800 shadow-xl">
+                  <PropertyMap
+                    properties={filteredProperties}
+                    lang={lang}
+                    onSelectProperty={(p) => setDetailProperty(p)}
+                  />
+                </div>
+                <div className="space-y-4 max-h-[700px] overflow-y-auto pr-1">
+                  {filteredProperties.map((property) => (
+                    <PropertyCard
+                      key={property.id}
+                      property={property}
+                      lang={lang}
+                      onView={(p) => setDetailProperty(p)}
+                      onEdit={handleEditProperty}
+                      onDelete={handleDeleteProperty}
+                    />
+                  ))}
+                </div>
+              </div>
             ) : (
+              /* 3. CHOOSEABLE LUXURY GRID VIEW (Default) */
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {filteredProperties.map((property) => (
                   <PropertyCard
@@ -779,6 +1030,8 @@ export default function HomePage() {
         initialTab={backupModalTab}
         onClose={() => setBackupModalOpen(false)}
         onDataRestored={loadData}
+        theme={theme}
+        onChangeTheme={handleThemeChange}
       />
 
       {/* Footer */}

@@ -13,7 +13,7 @@ import {
   Sparkles
 } from 'lucide-react';
 import { Property } from '@/types';
-import { formatPrice, getPropertyTypeLabel, getPropertyPurposeLabel, getPropertyStatusLabel, generateWhatsAppMessage } from '@/lib/utils';
+import { formatPrice, getPropertyTypeLabel, getPropertyPurposeLabel, getPropertyStatusLabel, generateWhatsAppMessage, formatArea } from '@/lib/utils';
 import { Language, translations } from '@/lib/i18n';
 
 interface PropertyCardProps {
@@ -36,6 +36,7 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
   const mainImage = property.images && property.images.length > 0 
     ? property.images[0] 
     : 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80';
+  const areaInfo = formatArea(property.area_sqm, property.land_details, lang);
 
   const handleWhatsApp = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -132,7 +133,12 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
           <div className="grid grid-cols-3 gap-2 py-2 px-3 rounded-xl bg-slate-900/60 border border-slate-800/80 text-center text-xs mb-3.5">
             <div>
               <span className="block text-[11px] text-slate-400">{t.area}</span>
-              <span className="font-bold text-slate-200">{property.area_sqm} م²</span>
+              <span className="font-bold text-slate-200">{areaInfo.primary}</span>
+              {areaInfo.badge && (
+                <span className="block text-[10px] text-amber-400 font-bold truncate mt-0.5">
+                  {areaInfo.badge}
+                </span>
+              )}
             </div>
             <div>
               <span className="block text-[11px] text-slate-400">{property.bedrooms ? t.bedrooms : t.floors}</span>

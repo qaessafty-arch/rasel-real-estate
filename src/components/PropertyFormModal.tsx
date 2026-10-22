@@ -16,10 +16,13 @@ import {
   UserCheck,
   Compass,
   FileCheck2,
-  Calendar
+  Calendar,
+  Ruler,
+  Calculator
 } from 'lucide-react';
 import { Property, PropertyType, PropertyPurpose, PropertyStatus, Currency, PaymentMethod, PropertyCondition } from '@/types';
 import { Language, translations } from '@/lib/i18n';
+import { formatArea, donumToSqm, sqmToDonum } from '@/lib/utils';
 
 interface PropertyFormModalProps {
   isOpen: boolean;
@@ -95,10 +98,73 @@ export const PropertyFormModal: React.FC<PropertyFormModalProps> = ({
   const [imageUrlInput, setImageUrlInput] = useState('');
   const [featureInput, setFeatureInput] = useState('');
 
+  // Measurement calculation state
+  const [measurementMode, setMeasurementMode] = useState<'sqm' | 'dimensions' | 'donum'>('sqm');
+  const [frontageInput, setFrontageInput] = useState<number | ''>('');
+  const [depthInput, setDepthInput] = useState<number | ''>('');
+  const [donumInput, setDonumInput] = useState<number | ''>('');
+  const [olkInput, setOlkInput] = useState<number | ''>('');
+
+  const handleDimensionsChange = (f: number | '', d: number | '') => {
+    setFrontageInput(f);
+    setDepthInput(d);
+    if (f !== '' && d !== '' && Number(f) > 0 && Number(d) > 0) {
+      const calculatedArea = Number(f) * Number(d);
+      setFormData((prev) => ({
+        ...prev,
+        area_sqm: calculatedArea,
+        land_details: {
+          ...prev.land_details,
+          frontage_meter: Number(f),
+          depth_meter: Number(d),
+        },
+      }));
+    }
+  };
+
+  const handleDonumChange = (don: number | '', ol: number | '') => {
+    setDonumInput(don);
+    setOlkInput(ol);
+    const calculatedSqm = donumToSqm(Number(don || 0), Number(ol || 0));
+    if (calculatedSqm > 0) {
+      setFormData((prev) => ({
+        ...prev,
+        area_sqm: calculatedSqm,
+        land_details: {
+          ...prev.land_details,
+          area_donum: Number(don || 0),
+          area_olk: Number(ol || 0),
+        },
+      }));
+    }
+  };
+
+  const handleSqmChange = (val: number) => {
+    const { donum, olk } = sqmToDonum(val);
+    setFormData((prev) => ({
+      ...prev,
+      area_sqm: val,
+      land_details: {
+        ...prev.land_details,
+        area_donum: donum,
+        area_olk: olk,
+      },
+    }));
+    setDonumInput(donum || '');
+    setOlkInput(olk || '');
+  };
+
   // Pre-fill if editing or auto-generate code if creating
   useEffect(() => {
     if (editingProperty) {
       setFormData(editingProperty);
+      if (editingProperty.land_details?.frontage_meter) setFrontageInput(editingProperty.land_details.frontage_meter);
+      if (editingProperty.land_details?.depth_meter) setDepthInput(editingProperty.land_details.depth_meter);
+      if (editingProperty.area_sqm >= 2500 || editingProperty.land_details?.area_donum) {
+        const { donum, olk } = sqmToDonum(editingProperty.area_sqm);
+        setDonumInput(donum || '');
+        setOlkInput(olk || '');
+      }
     } else {
       const nextCode = `RSL-${100 + existingCount + 1}`;
       setFormData({
@@ -564,16 +630,105 @@ export const PropertyFormModal: React.FC<PropertyFormModalProps> = ({
                   className="w-full px-3 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white text-xs outline-none"
                 />
               </div>
-              <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1">{t.area} (م²)*</label>
-                <input
-                  type="number"
-                  required
-                  min="1"
-                  value={formData.area_sqm || ''}
-                  onChange={(e) => setFormData({ ...formData, area_sqm: Number(e.target.value) })}
-                  className="w-full px-3 py-2.5 rounded-xl bg-slate-950 border border-slate-800 font-mono text-white text-xs outline-none"
-                />
+              
+              {/* Interactive Measurement Calculator */}
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <label className="block text-xs font-semibold text-slate-300">
+                    {t.area} *
+                  </label>
+                  
+                  {/* Mode Switcher */}
+                  <div className="flex items-center gap-1 p-0.5 rounded-lg bg-slate-900 border border-slate-800 text-[10px]">
+                    <button
+                      type="button"
+                      onClick={() => setMeasurementMode('sqm')}
+                      className={`px-2 py-0.5 rounded font-bold transition-all ${
+                        measurementMode === 'sqm' ? 'bg-amber-500 text-slate-950' : 'text-slate-400 hover:text-white'
+                      }`}
+                    >
+                      م²
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setMeasurementMode('dimensions')}
+                      className={`px-2 py-0.5 rounded font-bold transition-all ${
+                        measurementMode === 'dimensions' ? 'bg-amber-500 text-slate-950' : 'text-slate-400 hover:text-white'
+                      }`}
+                    >
+                      بەرە × قووڵی
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setMeasurementMode('donum')}
+                      className={`px-2 py-0.5 rounded font-bold transition-all ${
+                        measurementMode === 'donum' ? 'bg-amber-500 text-slate-950' : 'text-slate-400 hover:text-white'
+                      }`}
+                    >
+                      دۆنم / ئۆڵک
+                    </button>
+                  </div>
+                </div>
+
+                {measurementMode === 'sqm' && (
+                  <input
+                    type="number"
+                    required
+                    min="1"
+                    value={formData.area_sqm || ''}
+                    onChange={(e) => handleSqmChange(Number(e.target.value))}
+                    placeholder="ڕووبەر بە مەتر دووجا (م²)"
+                    className="w-full px-3 py-2.5 rounded-xl bg-slate-950 border border-slate-800 font-mono text-white text-xs outline-none focus:border-amber-500"
+                  />
+                )}
+
+                {measurementMode === 'dimensions' && (
+                  <div className="grid grid-cols-2 gap-2">
+                    <input
+                      type="number"
+                      min="1"
+                      value={frontageInput}
+                      onChange={(e) => handleDimensionsChange(e.target.value === '' ? '' : Number(e.target.value), depthInput)}
+                      placeholder="پانی/بەرە (م)"
+                      className="w-full px-2.5 py-2 rounded-xl bg-slate-950 border border-amber-500/40 font-mono text-white text-xs outline-none"
+                    />
+                    <input
+                      type="number"
+                      min="1"
+                      value={depthInput}
+                      onChange={(e) => handleDimensionsChange(frontageInput, e.target.value === '' ? '' : Number(e.target.value))}
+                      placeholder="قووڵی/درێژی (م)"
+                      className="w-full px-2.5 py-2 rounded-xl bg-slate-950 border border-amber-500/40 font-mono text-white text-xs outline-none"
+                    />
+                  </div>
+                )}
+
+                {measurementMode === 'donum' && (
+                  <div className="grid grid-cols-2 gap-2">
+                    <input
+                      type="number"
+                      min="0"
+                      step="any"
+                      value={donumInput}
+                      onChange={(e) => handleDonumChange(e.target.value === '' ? '' : Number(e.target.value), olkInput)}
+                      placeholder="دۆنم (٢٥٠٠م²)"
+                      className="w-full px-2.5 py-2 rounded-xl bg-slate-950 border border-amber-500/40 font-mono text-white text-xs outline-none"
+                    />
+                    <input
+                      type="number"
+                      min="0"
+                      max="24"
+                      value={olkInput}
+                      onChange={(e) => handleDonumChange(donumInput, e.target.value === '' ? '' : Number(e.target.value))}
+                      placeholder="ئۆڵک (١٠٠م²)"
+                      className="w-full px-2.5 py-2 rounded-xl bg-slate-950 border border-amber-500/40 font-mono text-white text-xs outline-none"
+                    />
+                  </div>
+                )}
+
+                <div className="text-[11px] text-amber-400 font-semibold px-1">
+                  {formatArea(formData.area_sqm || 0, formData.land_details, lang).fullDescription}
+                </div>
               </div>
             </div>
 
@@ -625,21 +780,47 @@ export const PropertyFormModal: React.FC<PropertyFormModalProps> = ({
 
               <div className="p-4 rounded-2xl bg-slate-950/60 border border-slate-800 grid grid-cols-2 sm:grid-cols-4 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1">{t.frontage}</label>
+                  <label className="block text-xs font-semibold text-slate-300 mb-1">{t.frontage} (م)</label>
                   <input
                     type="number"
                     value={formData.land_details?.frontage_meter || ''}
-                    onChange={(e) => setFormData({
-                      ...formData,
-                      land_details: { ...formData.land_details, frontage_meter: Number(e.target.value) }
-                    })}
-                    placeholder="نموونە: 12 مەتر"
+                    onChange={(e) => {
+                      const f = Number(e.target.value);
+                      const d = formData.land_details?.depth_meter;
+                      setFormData({
+                        ...formData,
+                        area_sqm: f && d ? f * d : formData.area_sqm,
+                        land_details: { ...formData.land_details, frontage_meter: f }
+                      });
+                      setFrontageInput(f || '');
+                    }}
+                    placeholder="نموونە: 12"
                     className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-800 font-mono text-white text-xs outline-none"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1">{t.street_width}</label>
+                  <label className="block text-xs font-semibold text-slate-300 mb-1">{t.depth || 'قووڵی'} (م)</label>
+                  <input
+                    type="number"
+                    value={formData.land_details?.depth_meter || ''}
+                    onChange={(e) => {
+                      const d = Number(e.target.value);
+                      const f = formData.land_details?.frontage_meter;
+                      setFormData({
+                        ...formData,
+                        area_sqm: f && d ? f * d : formData.area_sqm,
+                        land_details: { ...formData.land_details, depth_meter: d }
+                      });
+                      setDepthInput(d || '');
+                    }}
+                    placeholder="نموونە: 25"
+                    className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-800 font-mono text-white text-xs outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-slate-300 mb-1">{t.street_width} (م)</label>
                   <input
                     type="number"
                     value={formData.land_details?.street_width || ''}
@@ -647,7 +828,7 @@ export const PropertyFormModal: React.FC<PropertyFormModalProps> = ({
                       ...formData,
                       land_details: { ...formData.land_details, street_width: Number(e.target.value) }
                     })}
-                    placeholder="نموونە: 20 مەتر"
+                    placeholder="نموونە: 20"
                     className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-800 font-mono text-white text-xs outline-none"
                   />
                 </div>
@@ -661,12 +842,12 @@ export const PropertyFormModal: React.FC<PropertyFormModalProps> = ({
                       ...formData,
                       land_details: { ...formData.land_details, zoning_type: e.target.value }
                     })}
-                    placeholder="تاپۆی سڕف، زراعی، بازرگانی..."
+                    placeholder="تاپۆی سڕف، زراعی..."
                     className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-800 text-white text-xs outline-none"
                   />
                 </div>
 
-                <div className="flex items-center gap-2 pt-6">
+                <div className="col-span-2 sm:col-span-4 flex items-center justify-between pt-2 border-t border-slate-800/80">
                   <label className="flex items-center gap-2 cursor-pointer select-none text-xs text-white">
                     <input
                       type="checkbox"
@@ -677,8 +858,14 @@ export const PropertyFormModal: React.FC<PropertyFormModalProps> = ({
                       })}
                       className="rounded bg-slate-950 border-slate-700 text-amber-500 focus:ring-amber-500 w-4 h-4"
                     />
-                    <span>{t.corner} (لەسەر دوو شەقام)</span>
+                    <span>{t.corner} (لەسەر دوو شەقام / رووکن)</span>
                   </label>
+
+                  {formData.land_details?.frontage_meter && formData.land_details?.depth_meter ? (
+                    <span className="text-xs text-amber-400 font-mono font-bold">
+                      {formData.land_details.frontage_meter} × {formData.land_details.depth_meter} = {formData.land_details.frontage_meter * formData.land_details.depth_meter} م²
+                    </span>
+                  ) : null}
                 </div>
               </div>
             </div>

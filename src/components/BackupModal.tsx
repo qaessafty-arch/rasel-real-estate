@@ -21,16 +21,20 @@ import {
   Eye,
   EyeOff,
   Settings,
-  Sparkles
+  Sparkles,
+  Palette
 } from 'lucide-react';
 import { dataService } from '@/lib/storage';
 import { getSupabaseConfig, testConnection, normalizeSupabaseUrl, normalizeSupabaseKey } from '@/lib/supabase';
+import { UITheme } from '@/types';
 
 interface BackupModalProps {
   isOpen: boolean;
   onClose: () => void;
   onDataRestored: () => void;
   initialTab?: 'security' | 'supabase' | 'backup';
+  theme?: UITheme;
+  onChangeTheme?: (theme: UITheme) => void;
 }
 
 export const BackupModal: React.FC<BackupModalProps> = ({
@@ -38,6 +42,8 @@ export const BackupModal: React.FC<BackupModalProps> = ({
   onClose,
   onDataRestored,
   initialTab = 'security',
+  theme = 'gold',
+  onChangeTheme,
 }) => {
   const [activeTab, setActiveTab] = useState<'backup' | 'supabase' | 'security'>(initialTab);
   const [successMsg, setSuccessMsg] = useState('');
@@ -657,6 +663,43 @@ export const BackupModal: React.FC<BackupModalProps> = ({
                 پاشەکەوتکردنی وشەی نهێنی نوێ
               </button>
             </form>
+
+            {/* 3. CHOOSEABLE UI THEME */}
+            <div className="p-5 rounded-2xl bg-slate-950/60 border border-slate-800 space-y-3">
+              <div className="space-y-1">
+                <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                  <Palette className="w-4 h-4 text-amber-400" />
+                  <span>شێوازی ڕووکار و دیزاین (Choose UI Theme)</span>
+                </h3>
+                <p className="text-xs text-slate-400 leading-relaxed">
+                  دیزاینی دڵخوازی خۆت هەڵبژێرە بە ڕەنگ و ستایلی جیاواز.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 pt-1">
+                {[
+                  { id: 'gold' as UITheme, label: 'زێڕینی لوکس', sub: 'Obsidian Gold', icon: '🌟', border: 'border-amber-500/50', bg: 'bg-amber-500/10' },
+                  { id: 'sapphire' as UITheme, label: 'شینی شاهانە', sub: 'Royal Sapphire', icon: '💎', border: 'border-sky-500/50', bg: 'bg-sky-500/10' },
+                  { id: 'emerald' as UITheme, label: 'زمڕودی شاهانە', sub: 'Emerald Oasis', icon: '🌲', border: 'border-emerald-500/50', bg: 'bg-emerald-500/10' },
+                  { id: 'pearl' as UITheme, label: 'ڕووناکی مۆدێرن', sub: 'Modern Pearl', icon: '☀️', border: 'border-slate-400/50', bg: 'bg-slate-200/20' },
+                ].map((item) => (
+                  <button
+                    key={item.id}
+                    type="button"
+                    onClick={() => onChangeTheme && onChangeTheme(item.id)}
+                    className={`p-3 rounded-2xl border text-center transition-all ${item.bg} ${
+                      theme === item.id 
+                        ? `${item.border} ring-2 ring-amber-500/40 shadow-lg scale-102` 
+                        : 'border-slate-800 opacity-70 hover:opacity-100 hover:border-slate-700'
+                    }`}
+                  >
+                    <div className="text-xl mb-1">{item.icon}</div>
+                    <div className="text-xs font-bold text-white">{item.label}</div>
+                    <div className="text-[10px] text-slate-400 font-mono">{item.sub}</div>
+                  </button>
+                ))}
+              </div>
+            </div>
 
           </div>
         )}

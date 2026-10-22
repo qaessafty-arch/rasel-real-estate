@@ -56,11 +56,83 @@ export function getPropertyStatusLabel(status: string, lang: Language = 'ckb'): 
   }
 }
 
+/**
+ * Format area in Kurdish / Iraqi real estate units:
+ * 1 Donum = 2,500 m²
+ * 1 Olk = 100 m² (25 Olk = 1 Donum)
+ */
+export function formatArea(areaSqm?: number, landDetails?: Property['land_details'], lang: Language = 'ckb'): {
+  primary: string;
+  badge?: string;
+  fullDescription: string;
+} {
+  const sqmUnit = lang === 'en' ? 'm²' : 'م²';
+  const donumUnit = lang === 'en' ? 'Donum' : lang === 'ar' ? 'دونم' : 'دۆنم';
+  const olkUnit = lang === 'en' ? 'Olk' : lang === 'ar' ? 'أولك' : 'ئۆڵک';
+
+  if (!areaSqm || areaSqm <= 0) {
+    return { primary: `0 ${sqmUnit}`, fullDescription: `0 ${sqmUnit}` };
+  }
+
+  const primary = `${formatNumber(areaSqm)} ${sqmUnit}`;
+  let badge: string | undefined = undefined;
+
+  // Dimensions badge (e.g. 10 × 20m)
+  if (landDetails?.frontage_meter && landDetails?.depth_meter) {
+    badge = `${landDetails.frontage_meter} × ${landDetails.depth_meter}م`;
+  }
+
+  // If >= 2500 sqm (or explicitly has donum), calculate donums and olks
+  if (areaSqm >= 2500 || (landDetails?.area_donum && landDetails.area_donum > 0)) {
+    const donums = Math.floor(areaSqm / 2500);
+    const remainderSqm = areaSqm % 2500;
+    const olks = Math.floor(remainderSqm / 100);
+    const leftoverSqm = remainderSqm % 100;
+
+    let donumStr = `${formatNumber(donums)} ${donumUnit}`;
+    if (olks > 0) {
+      donumStr += ` ${lang === 'en' ? 'and' : 'و'} ${olks} ${olkUnit}`;
+    }
+    if (leftoverSqm > 0) {
+      donumStr += ` (${leftoverSqm} ${sqmUnit})`;
+    }
+    badge = donumStr;
+    return {
+      primary,
+      badge,
+      fullDescription: `${primary} (${donumStr})`
+    };
+  }
+
+  if (badge) {
+    return {
+      primary,
+      badge,
+      fullDescription: `${primary} (${badge})`
+    };
+  }
+
+  return { primary, fullDescription: primary };
+}
+
+export function donumToSqm(donum: number, olk: number = 0): number {
+  return (Number(donum || 0) * 2500) + (Number(olk || 0) * 100);
+}
+
+export function sqmToDonum(sqm: number): { donum: number; olk: number; remainderSqm: number } {
+  const donum = Math.floor(sqm / 2500);
+  const remainder = sqm % 2500;
+  const olk = Math.floor(remainder / 100);
+  const remainderSqm = remainder % 100;
+  return { donum, olk, remainderSqm };
+}
+
 export function generateWhatsAppMessage(property: Property, lang: Language = 'ckb'): string {
   const t = translations[lang] as any;
   const price = formatPrice(property.price, property.currency, lang);
   const purpose = getPropertyPurposeLabel(property.purpose, lang);
   const type = getPropertyTypeLabel(property.property_type, lang);
+  const areaInfo = formatArea(property.area_sqm, property.land_details, lang);
 
   const text = `🏡 *RASEL REAL ESTATE*
 ━━━━━━━━━━━━━━━━━
@@ -68,11 +140,11 @@ export function generateWhatsAppMessage(property: Property, lang: Language = 'ck
 🆔 ${t.code || 'کۆد'}: *${property.property_code}*
 🏷️ ${t.property_type}: *${type}* (${purpose})
 💰 ${t.price || 'نرخ'}: *${price}*
-📐 ${t.area}: *${property.area_sqm} m²*
+📐 ${t.area}: *${areaInfo.fullDescription}*
 📍 ${t.city}: *${property.city} - ${property.neighborhood || property.address}*
 ${property.project_name ? `🏢 ${t.project}: *${property.project_name}* (نهۆم: ${property.floor_number || 1})` : ''}
 ${property.payment_method === 'installments' ? `💳 پێشەکی: ${formatPrice(property.down_payment || 0, property.currency, lang)} - قیست: ${property.installment_cycle || 'مانگانە'}` : ''}
-${property.land_details?.frontage_meter ? `📐 بەرەی شەقام: ${property.land_details.frontage_meter}م | پانی شەقام: ${property.land_details.street_width}م` : ''}
+${property.land_details?.frontage_meter ? `📐 بەرەی شەقام: ${property.land_details.frontage_meter}م ${property.land_details.depth_meter ? `× ${property.land_details.depth_meter}م قووڵی` : ''} | پانی شەقام: ${property.land_details.street_width || '—'}م` : ''}
 ${property.video_url ? `🎥 ڤیدیۆ: ${property.video_url}` : ''}
 📞 بۆ پەیوەندی و زانیاری زیاتر: ${property.owner_contact?.phone || '0750xxxxxxx'}`;
 

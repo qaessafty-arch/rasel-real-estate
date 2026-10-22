@@ -16,10 +16,12 @@ import {
   Globe, 
   ChevronDown, 
   Key,
-  Settings
+  Settings,
+  Palette
 } from 'lucide-react';
 import { isSupabaseConfigured } from '@/lib/supabase';
 import { Language, translations } from '@/lib/i18n';
+import { UITheme } from '@/types';
 
 interface NavbarProps {
   activeTab: 'dashboard' | 'properties' | 'map' | 'contracts' | 'accounting';
@@ -34,6 +36,8 @@ interface NavbarProps {
   lang: Language;
   onToggleLang: () => void;
   onChangeLang?: (lang: Language) => void;
+  theme?: UITheme;
+  onChangeTheme?: (theme: UITheme) => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -49,10 +53,20 @@ export const Navbar: React.FC<NavbarProps> = ({
   lang,
   onToggleLang,
   onChangeLang,
+  theme = 'gold',
+  onChangeTheme,
 }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [langMenuOpen, setLangMenuOpen] = useState(false);
-  const t = translations[lang];
+  const [themeMenuOpen, setThemeMenuOpen] = useState(false);
+  const t = translations[lang] as any;
+
+  const themeOptions: { id: UITheme; label: string; icon: string; dotClass: string }[] = [
+    { id: 'gold', label: t.theme_gold || 'زێڕینی لوکس', icon: '🌟', dotClass: 'bg-amber-400' },
+    { id: 'sapphire', label: t.theme_sapphire || 'شینی شاهانە', icon: '💎', dotClass: 'bg-sky-400' },
+    { id: 'emerald', label: t.theme_emerald || 'زمڕودی شاهانە', icon: '🌲', dotClass: 'bg-emerald-400' },
+    { id: 'pearl', label: t.theme_pearl || 'ڕووناکی مۆدێرن', icon: '☀️', dotClass: 'bg-slate-300' },
+  ];
 
   interface NavItem {
     id: 'dashboard' | 'properties' | 'map' | 'contracts' | 'accounting';
@@ -182,6 +196,50 @@ export const Navbar: React.FC<NavbarProps> = ({
                         <span>{l.label}</span>
                       </span>
                       {lang === l.code && <span className="w-2 h-2 rounded-full bg-amber-400" />}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* UI Theme Selector Dropdown */}
+            <div className="relative">
+              <button
+                onClick={() => setThemeMenuOpen(!themeMenuOpen)}
+                className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-800 hover:border-amber-500/30 text-xs font-bold transition-all shadow-sm"
+                title={t.theme || 'شێوازی دیزاین'}
+              >
+                <Palette className="w-4 h-4 text-amber-400" />
+                <span className="hidden md:inline">
+                  {themeOptions.find((o) => o.id === theme)?.icon}
+                </span>
+                <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
+              </button>
+
+              {themeMenuOpen && (
+                <div className="absolute right-0 rtl:right-auto rtl:left-0 mt-2 w-48 rounded-xl bg-slate-900 border border-slate-800 shadow-2xl py-1 z-50">
+                  <div className="px-3 py-1.5 text-[10px] uppercase tracking-wider text-slate-400 font-bold border-b border-slate-800">
+                    {t.theme || 'شێوازی دیزاین'}
+                  </div>
+                  {themeOptions.map((opt) => (
+                    <button
+                      key={opt.id}
+                      onClick={() => {
+                        if (onChangeTheme) onChangeTheme(opt.id);
+                        setThemeMenuOpen(false);
+                      }}
+                      className={`w-full flex items-center justify-between px-3 py-2 text-xs font-semibold transition-all ${
+                        theme === opt.id
+                          ? 'bg-amber-500/10 text-amber-400 font-bold'
+                          : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                      }`}
+                    >
+                      <span className="flex items-center gap-2">
+                        <span className={`w-2.5 h-2.5 rounded-full ${opt.dotClass}`} />
+                        <span>{opt.icon}</span>
+                        <span>{opt.label}</span>
+                      </span>
+                      {theme === opt.id && <span className="w-2 h-2 rounded-full bg-amber-400" />}
                     </button>
                   ))}
                 </div>
@@ -329,6 +387,33 @@ export const Navbar: React.FC<NavbarProps> = ({
               </button>
             );
           })}
+
+          {/* Mobile Theme Selector */}
+          <div className="pt-2 border-t border-slate-800">
+            <div className="text-[11px] font-bold text-slate-400 mb-2 flex items-center gap-1.5">
+              <Palette className="w-3.5 h-3.5 text-amber-400" />
+              <span>{t.theme || 'شێوازی دیزاین'}</span>
+            </div>
+            <div className="grid grid-cols-2 gap-1.5">
+              {themeOptions.map((opt) => (
+                <button
+                  key={opt.id}
+                  onClick={() => {
+                    if (onChangeTheme) onChangeTheme(opt.id);
+                  }}
+                  className={`flex items-center gap-2 p-2 rounded-xl text-xs font-semibold border transition-all ${
+                    theme === opt.id
+                      ? 'bg-amber-500/15 text-amber-300 border-amber-500/40 font-bold'
+                      : 'bg-slate-900 text-slate-400 border-slate-800'
+                  }`}
+                >
+                  <span className={`w-2 h-2 rounded-full ${opt.dotClass}`} />
+                  <span>{opt.icon}</span>
+                  <span className="truncate">{opt.label}</span>
+                </button>
+              ))}
+            </div>
+          </div>
 
           <div className="pt-3 border-t border-slate-800 grid grid-cols-2 gap-2">
             {isAdmin ? (
