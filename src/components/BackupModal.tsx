@@ -26,7 +26,7 @@ import {
 } from 'lucide-react';
 import { dataService } from '@/lib/storage';
 import { getSupabaseConfig, testConnection, normalizeSupabaseUrl, normalizeSupabaseKey } from '@/lib/supabase';
-import { UITheme } from '@/types';
+import { UITheme, UIBackground } from '@/types';
 
 interface BackupModalProps {
   isOpen: boolean;
@@ -35,6 +35,8 @@ interface BackupModalProps {
   initialTab?: 'security' | 'supabase' | 'backup';
   theme?: UITheme;
   onChangeTheme?: (theme: UITheme) => void;
+  bgPattern?: UIBackground;
+  onChangeBgPattern?: (bg: UIBackground) => void;
 }
 
 export const BackupModal: React.FC<BackupModalProps> = ({
@@ -44,6 +46,8 @@ export const BackupModal: React.FC<BackupModalProps> = ({
   initialTab = 'security',
   theme = 'gold',
   onChangeTheme,
+  bgPattern = 'obsidian',
+  onChangeBgPattern,
 }) => {
   const [activeTab, setActiveTab] = useState<'backup' | 'supabase' | 'security'>(initialTab);
   const [successMsg, setSuccessMsg] = useState('');
@@ -693,6 +697,46 @@ export const BackupModal: React.FC<BackupModalProps> = ({
                     className={`p-3 rounded-2xl border text-center transition-all ${item.bg} ${
                       theme === item.id 
                         ? `${item.border} ring-2 ring-amber-500/40 shadow-lg scale-102` 
+                        : 'border-slate-800 opacity-70 hover:opacity-100 hover:border-slate-700'
+                    }`}
+                  >
+                    <div className="text-xl mb-1">{item.icon}</div>
+                    <div className="text-xs font-bold text-white">{item.label}</div>
+                    <div className="text-[10px] text-slate-400 font-mono">{item.sub}</div>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* 4. CHOOSEABLE BACKGROUND PATTERN */}
+            <div className="p-5 rounded-2xl bg-slate-950/60 border border-slate-800 space-y-3">
+              <div className="space-y-1">
+                <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                  <Sparkles className="w-4 h-4 text-amber-400" />
+                  <span>پشتینەی پڕۆژە (Choose Background Pattern)</span>
+                </h3>
+                <p className="text-xs text-slate-400 leading-relaxed">
+                  نەخشە و پاشبنەمای دڵخوازی خۆت هەڵبژێرە وەک تۆپۆگرافی زەوی، تۆڕی ئەندازیاری، یان کاربۆن.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2.5 pt-1">
+                {[
+                  { id: 'obsidian' as UIBackground, label: 'تاریکی ئۆبسیدیان', sub: 'Obsidian Glow', icon: '🌌' },
+                  { id: 'topographic' as UIBackground, label: 'تۆپۆگرافی زەوی', sub: 'Topographic Contours', icon: '🗺️' },
+                  { id: 'blueprint' as UIBackground, label: 'نەخشەی ئەندازیاری', sub: 'Blueprint Grid', icon: '📐' },
+                  { id: 'dots' as UIBackground, label: 'خاڵبەندی مۆدێرن', sub: 'Dot Matrix', icon: '⁖' },
+                  { id: 'carbon' as UIBackground, label: 'کاربۆنی تاریک', sub: 'Carbon Dark', icon: '🏁' },
+                  { id: 'aurora' as UIBackground, label: 'تیشکی ئەرخەوانی', sub: 'Aurora Ambient', icon: '✨' },
+                  { id: 'pearl' as UIBackground, label: 'مرواری ڕۆژ', sub: 'Pearl Daylight', icon: '☀️' },
+                ].map((item) => (
+                  <button
+                    key={item.id}
+                    type="button"
+                    onClick={() => onChangeBgPattern && onChangeBgPattern(item.id)}
+                    className={`p-3 rounded-2xl border text-center transition-all bg-slate-900/60 ${
+                      bgPattern === item.id 
+                        ? 'border-amber-500/70 ring-2 ring-amber-500/40 shadow-lg scale-102 font-bold text-amber-400' 
                         : 'border-slate-800 opacity-70 hover:opacity-100 hover:border-slate-700'
                     }`}
                   >

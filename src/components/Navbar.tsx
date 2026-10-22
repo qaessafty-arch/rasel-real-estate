@@ -17,11 +17,14 @@ import {
   ChevronDown, 
   Key,
   Settings,
-  Palette
+  Palette,
+  Layers,
+  Sparkles,
+  LayoutGrid
 } from 'lucide-react';
 import { isSupabaseConfigured } from '@/lib/supabase';
 import { Language, translations } from '@/lib/i18n';
-import { UITheme } from '@/types';
+import { UITheme, UIBackground, PropertyDivision } from '@/types';
 
 interface NavbarProps {
   activeTab: 'dashboard' | 'properties' | 'map' | 'contracts' | 'accounting';
@@ -38,6 +41,10 @@ interface NavbarProps {
   onChangeLang?: (lang: Language) => void;
   theme?: UITheme;
   onChangeTheme?: (theme: UITheme) => void;
+  bgPattern?: UIBackground;
+  onChangeBgPattern?: (bg: UIBackground) => void;
+  selectedDivision?: PropertyDivision;
+  onSelectDivision?: (division: PropertyDivision) => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -55,10 +62,16 @@ export const Navbar: React.FC<NavbarProps> = ({
   onChangeLang,
   theme = 'gold',
   onChangeTheme,
+  bgPattern = 'obsidian',
+  onChangeBgPattern,
+  selectedDivision = 'all',
+  onSelectDivision,
 }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [langMenuOpen, setLangMenuOpen] = useState(false);
   const [themeMenuOpen, setThemeMenuOpen] = useState(false);
+  const [divisionMenuOpen, setDivisionMenuOpen] = useState(false);
+  const [customizerTab, setCustomizerTab] = useState<'themes' | 'backgrounds'>('themes');
   const t = translations[lang] as any;
 
   const themeOptions: { id: UITheme; label: string; icon: string; dotClass: string }[] = [
@@ -69,6 +82,24 @@ export const Navbar: React.FC<NavbarProps> = ({
     { id: 'solid', label: t.theme_solid || 'ڕەشی پڕ', icon: '⬛', dotClass: 'bg-zinc-200' },
     { id: 'minimalism', label: t.theme_minimalism || 'سادەی مۆدێرن', icon: '⚪', dotClass: 'bg-slate-400' },
     { id: 'brutalism', label: t.theme_brutalism || 'بروتالیزمی وشک', icon: '🧱', dotClass: 'bg-yellow-400' },
+  ];
+
+  const bgOptions: { id: UIBackground; label: string; icon: string }[] = [
+    { id: 'obsidian', label: t.bg_obsidian || 'تاریکی ئۆبسیدیان', icon: '🌌' },
+    { id: 'topographic', label: t.bg_topographic || 'تۆپۆگرافی زەوی', icon: '🗺️' },
+    { id: 'blueprint', label: t.bg_blueprint || 'نەخشەی ئەندازیاری', icon: '📐' },
+    { id: 'dots', label: t.bg_dots || 'خاڵبەندی مۆدێرن', icon: '⁖' },
+    { id: 'carbon', label: t.bg_carbon || 'کاربۆنی تاریک', icon: '🏁' },
+    { id: 'aurora', label: t.bg_aurora || 'تیشکی شین و سەوز', icon: '✨' },
+    { id: 'pearl', label: t.bg_pearl || 'مرواری ڕۆژ', icon: '☀️' },
+  ];
+
+  const divisionOptions: { id: PropertyDivision; label: string; icon: string; desc: string }[] = [
+    { id: 'all', label: t.divide_all || 'هەموو موڵکەکان', icon: '🏢', desc: 'تەواوی موڵک و زەوییەکان' },
+    { id: 'residential', label: t.divide_residential || 'نیشتەجێبوون', icon: '🏡', desc: t.divide_residential_desc || 'خانوو، ڤێلا، شوقە' },
+    { id: 'land', label: t.divide_land || 'زەوی و باخچە', icon: '🌾', desc: t.divide_land_desc || 'کشتوکاڵی، نیشتەجێبوون، پیشەسازی' },
+    { id: 'commercial', label: t.divide_commercial || 'شوێنی بازرگانی', icon: '🏬', desc: t.divide_commercial_desc || 'دووکان، ئۆفیس، باڵەخانە، کۆگا' },
+    { id: 'projects', label: t.divide_projects || 'پڕۆژە نوێیەکان', icon: '🏗️', desc: t.divide_projects_desc || 'باڵەخانە و تاوەرەکان' },
   ];
 
   interface NavItem {
@@ -164,6 +195,66 @@ export const Navbar: React.FC<NavbarProps> = ({
                 </button>
               );
             })}
+
+            {/* Category Division Menu Trigger */}
+            <div className="relative">
+              <button
+                onClick={() => setDivisionMenuOpen(!divisionMenuOpen)}
+                className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-bold border transition-all ${
+                  selectedDivision && selectedDivision !== 'all'
+                    ? 'bg-amber-500/15 text-amber-300 border-amber-500/40 shadow-sm'
+                    : 'text-slate-300 hover:text-white border-transparent hover:bg-slate-800/60'
+                }`}
+                title={t.divide_menu || 'مێنیوی دابەشکردنی بەشەکان'}
+              >
+                <Layers className="w-4 h-4 text-amber-400" />
+                <span>{t.divisions || 'بەشەکان'}</span>
+                {selectedDivision && selectedDivision !== 'all' && (
+                  <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+                )}
+                <ChevronDown className="w-3 h-3 text-slate-400" />
+              </button>
+
+              {divisionMenuOpen && (
+                <div className="absolute top-full mt-2 w-64 rounded-xl bg-slate-900 border border-slate-800 shadow-2xl py-1.5 z-50 rtl:right-auto rtl:left-0">
+                  <div className="px-3 py-1.5 text-[10px] uppercase font-bold text-slate-400 border-b border-slate-800 flex items-center justify-between">
+                    <span className="flex items-center gap-1">
+                      <Layers className="w-3 h-3 text-amber-400" />
+                      <span>{t.divide_menu || 'دابەشکردنی بەشەکان'}</span>
+                    </span>
+                    <span className="text-[9px] text-amber-400 font-mono">RASEL</span>
+                  </div>
+                  <div className="p-1 space-y-0.5">
+                    {divisionOptions.map((div) => (
+                      <button
+                        key={div.id}
+                        onClick={() => {
+                          if (onSelectDivision) onSelectDivision(div.id);
+                          setActiveTab('properties');
+                          setDivisionMenuOpen(false);
+                        }}
+                        className={`w-full text-right rtl:text-right ltr:text-left px-3 py-2 rounded-lg text-xs transition-all flex items-center justify-between ${
+                          selectedDivision === div.id
+                            ? 'bg-amber-500/15 text-amber-300 font-bold border border-amber-500/30'
+                            : 'text-slate-300 hover:bg-slate-800 hover:text-white border border-transparent'
+                        }`}
+                      >
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm">{div.icon}</span>
+                          <div>
+                            <div className="font-semibold text-white">{div.label}</div>
+                            <div className="text-[10px] text-slate-400 font-normal leading-tight">{div.desc}</div>
+                          </div>
+                        </div>
+                        {selectedDivision === div.id && (
+                          <span className="w-2 h-2 rounded-full bg-amber-400" />
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
           </nav>
 
           {/* Desktop Right Actions */}
@@ -205,12 +296,12 @@ export const Navbar: React.FC<NavbarProps> = ({
               )}
             </div>
 
-            {/* UI Theme Selector Dropdown */}
+            {/* UI Theme & Background Selector Dropdown */}
             <div className="relative">
               <button
                 onClick={() => setThemeMenuOpen(!themeMenuOpen)}
                 className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-800 hover:border-amber-500/30 text-xs font-bold transition-all shadow-sm"
-                title={t.theme || 'شێوازی دیزاین'}
+                title={`${t.theme || 'ڕووکار'} & ${t.background || 'پشتینە'}`}
               >
                 <Palette className="w-4 h-4 text-amber-400" />
                 <span className="hidden md:inline">
@@ -220,31 +311,77 @@ export const Navbar: React.FC<NavbarProps> = ({
               </button>
 
               {themeMenuOpen && (
-                <div className="absolute right-0 rtl:right-auto rtl:left-0 mt-2 w-56 rounded-xl bg-slate-900 border border-slate-800 shadow-2xl py-1 z-50">
-                  <div className="px-3 py-1.5 text-[10px] uppercase tracking-wider text-slate-400 font-bold border-b border-slate-800">
-                    {t.theme || 'شێوازی دیزاین'}
-                  </div>
-                  {themeOptions.map((opt) => (
+                <div className="absolute right-0 rtl:right-auto rtl:left-0 mt-2 w-64 rounded-2xl bg-slate-900 border border-slate-800 shadow-2xl py-2 z-50">
+                  {/* Tabs: Theme / Background */}
+                  <div className="px-2.5 pb-2 flex items-center gap-1 border-b border-slate-800 text-[11px]">
                     <button
-                      key={opt.id}
-                      onClick={() => {
-                        if (onChangeTheme) onChangeTheme(opt.id);
-                        setThemeMenuOpen(false);
-                      }}
-                      className={`w-full flex items-center justify-between px-3 py-2 text-xs font-semibold transition-all ${
-                        theme === opt.id
-                          ? 'bg-amber-500/10 text-amber-400 font-bold'
-                          : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                      type="button"
+                      onClick={() => setCustomizerTab('themes')}
+                      className={`flex-1 py-1 rounded-lg font-bold text-center transition-all ${
+                        customizerTab === 'themes'
+                          ? 'bg-amber-500 text-slate-950 shadow-sm'
+                          : 'text-slate-400 hover:text-white hover:bg-slate-800'
                       }`}
                     >
-                      <span className="flex items-center gap-2">
-                        <span className={`w-2.5 h-2.5 rounded-full ${opt.dotClass}`} />
-                        <span>{opt.icon}</span>
-                        <span>{opt.label}</span>
-                      </span>
-                      {theme === opt.id && <span className="w-2 h-2 rounded-full bg-amber-400" />}
+                      🎨 {t.theme || 'ڕووکار'}
                     </button>
-                  ))}
+                    <button
+                      type="button"
+                      onClick={() => setCustomizerTab('backgrounds')}
+                      className={`flex-1 py-1 rounded-lg font-bold text-center transition-all ${
+                        customizerTab === 'backgrounds'
+                          ? 'bg-amber-500 text-slate-950 shadow-sm'
+                          : 'text-slate-400 hover:text-white hover:bg-slate-800'
+                      }`}
+                    >
+                      🖼️ {t.background || 'پشتینە'}
+                    </button>
+                  </div>
+
+                  <div className="max-h-72 overflow-y-auto p-1 space-y-0.5">
+                    {customizerTab === 'themes' ? (
+                      themeOptions.map((opt) => (
+                        <button
+                          key={opt.id}
+                          onClick={() => {
+                            if (onChangeTheme) onChangeTheme(opt.id);
+                          }}
+                          className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition-all ${
+                            theme === opt.id
+                              ? 'bg-amber-500/10 text-amber-400 font-bold border border-amber-500/30'
+                              : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                          }`}
+                        >
+                          <span className="flex items-center gap-2">
+                            <span className={`w-2.5 h-2.5 rounded-full ${opt.dotClass}`} />
+                            <span>{opt.icon}</span>
+                            <span>{opt.label}</span>
+                          </span>
+                          {theme === opt.id && <span className="w-2 h-2 rounded-full bg-amber-400" />}
+                        </button>
+                      ))
+                    ) : (
+                      bgOptions.map((opt) => (
+                        <button
+                          key={opt.id}
+                          onClick={() => {
+                            if (onChangeBgPattern) onChangeBgPattern(opt.id);
+                          }}
+                          className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition-all ${
+                            bgPattern === opt.id
+                              ? 'bg-amber-500/10 text-amber-400 font-bold border border-amber-500/30'
+                              : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                          }`}
+                        >
+                          <span className="flex items-center gap-2">
+                            <span>{opt.icon}</span>
+                            <span>{opt.label}</span>
+                          </span>
+                          {bgPattern === opt.id && <span className="w-2 h-2 rounded-full bg-amber-400" />}
+                        </button>
+                      ))
+                    )}
+                  </div>
                 </div>
               )}
             </div>
@@ -391,6 +528,34 @@ export const Navbar: React.FC<NavbarProps> = ({
             );
           })}
 
+          {/* Mobile Category Divisions */}
+          <div className="pt-2 border-t border-slate-800">
+            <div className="text-[11px] font-bold text-slate-400 mb-2 flex items-center gap-1.5">
+              <Layers className="w-3.5 h-3.5 text-amber-400" />
+              <span>{t.divide_menu || 'دابەشکردنی بەشەکان'}</span>
+            </div>
+            <div className="grid grid-cols-2 gap-1.5">
+              {divisionOptions.map((div) => (
+                <button
+                  key={div.id}
+                  onClick={() => {
+                    if (onSelectDivision) onSelectDivision(div.id);
+                    setActiveTab('properties');
+                    setMobileMenuOpen(false);
+                  }}
+                  className={`flex items-center gap-2 p-2 rounded-xl text-xs font-semibold border transition-all text-right rtl:text-right ${
+                    selectedDivision === div.id
+                      ? 'bg-amber-500/15 text-amber-300 border-amber-500/40 font-bold'
+                      : 'bg-slate-900 text-slate-300 border-slate-800'
+                  }`}
+                >
+                  <span>{div.icon}</span>
+                  <span className="truncate">{div.label}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+
           {/* Mobile Theme Selector */}
           <div className="pt-2 border-t border-slate-800">
             <div className="text-[11px] font-bold text-slate-400 mb-2 flex items-center gap-1.5">
@@ -413,6 +578,32 @@ export const Navbar: React.FC<NavbarProps> = ({
                   <span className={`w-2 h-2 rounded-full ${opt.dotClass}`} />
                   <span>{opt.icon}</span>
                   <span className="truncate">{opt.label}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Mobile Background Selector */}
+          <div className="pt-2 border-t border-slate-800">
+            <div className="text-[11px] font-bold text-slate-400 mb-2 flex items-center gap-1.5">
+              <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+              <span>{t.background || 'پشتینەی پڕۆژە'}</span>
+            </div>
+            <div className="grid grid-cols-2 gap-1.5">
+              {bgOptions.map((bg) => (
+                <button
+                  key={bg.id}
+                  onClick={() => {
+                    if (onChangeBgPattern) onChangeBgPattern(bg.id);
+                  }}
+                  className={`flex items-center gap-2 p-2 rounded-xl text-xs font-semibold border transition-all ${
+                    bgPattern === bg.id
+                      ? 'bg-amber-500/15 text-amber-300 border-amber-500/40 font-bold'
+                      : 'bg-slate-900 text-slate-400 border-slate-800'
+                  }`}
+                >
+                  <span>{bg.icon}</span>
+                  <span className="truncate">{bg.label}</span>
                 </button>
               ))}
             </div>

@@ -20,9 +20,10 @@ import {
   Edit3,
   Send,
   ExternalLink,
-  Ruler
+  Ruler,
+  Layers
 } from 'lucide-react';
-import { Property, Contract, FinancialTransaction, PropertyStatus, UITheme, ViewMode } from '@/types';
+import { Property, Contract, FinancialTransaction, PropertyStatus, UITheme, UIBackground, PropertyDivision, ViewMode } from '@/types';
 import { formatArea, formatPrice, getPropertyStatusLabel, getPropertyTypeLabel, getPropertyPurposeLabel, generateWhatsAppMessage } from '@/lib/utils';
 import { dataService } from '@/lib/storage';
 import { Navbar } from '@/components/Navbar';
@@ -42,16 +43,21 @@ export default function HomePage() {
   // Trilingual State: 'ckb' (Kurdish) | 'ar' (Arabic) | 'en' (English)
   const [lang, setLang] = useState<Language>('ckb');
 
-  // Chooseable UI Theme & Layout Modes
+  // Chooseable UI Theme, Background & Layout Modes
   const [theme, setTheme] = useState<UITheme>('gold');
+  const [bgPattern, setBgPattern] = useState<UIBackground>('obsidian');
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
+
+  // Category Division & Grouped Sections state
+  const [selectedDivision, setSelectedDivision] = useState<PropertyDivision>('all');
+  const [isDividedSections, setIsDividedSections] = useState<boolean>(false);
 
   // Authentication & Security state: Public by default!
   const [isUnlocked, setIsUnlocked] = useState(false);
   const [loginModalOpen, setLoginModalOpen] = useState(false);
   const [authChecked, setAuthChecked] = useState(false);
 
-  // Load theme and language preference from local storage
+  // Load theme, background and language preference from local storage
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const savedLang = localStorage.getItem('rasel_lang') as Language;
@@ -67,6 +73,11 @@ export default function HomePage() {
         document.documentElement.setAttribute('data-theme', 'gold');
       }
 
+      const savedBg = localStorage.getItem('rasel_ui_bg') as UIBackground;
+      if (savedBg && ['obsidian', 'blueprint', 'topographic', 'dots', 'carbon', 'aurora', 'pearl'].includes(savedBg)) {
+        setBgPattern(savedBg);
+      }
+
       const savedView = localStorage.getItem('rasel_view_mode') as ViewMode;
       if (savedView && ['grid', 'list', 'split'].includes(savedView)) {
         setViewMode(savedView);
@@ -79,6 +90,25 @@ export default function HomePage() {
     if (typeof window !== 'undefined') {
       localStorage.setItem('rasel_ui_theme', newTheme);
       document.documentElement.setAttribute('data-theme', newTheme);
+    }
+  };
+
+  const handleBgPatternChange = (newBg: UIBackground) => {
+    setBgPattern(newBg);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('rasel_ui_bg', newBg);
+    }
+  };
+
+  const getBgClass = (bg: UIBackground) => {
+    switch (bg) {
+      case 'blueprint': return 'bg-pattern-blueprint';
+      case 'topographic': return 'bg-pattern-topographic';
+      case 'dots': return 'bg-pattern-dots';
+      case 'carbon': return 'bg-pattern-carbon';
+      case 'aurora': return 'bg-pattern-aurora';
+      case 'pearl': return 'bg-pattern-pearl';
+      default: return 'bg-pattern-obsidian';
     }
   };
 
@@ -255,9 +285,36 @@ export default function HomePage() {
         if (selectedAreaRange === 'donum_plus' && item.area_sqm < 2500 && (!item.land_details?.area_donum || item.land_details.area_donum <= 0)) return false;
       }
 
+      // Category Division filter (Residential, Lands, Commercial, Projects)
+      if (selectedDivision !== 'all') {
+        const resTypes = ['house', 'villa', 'apartment'];
+        const landTypes = ['residential_land', 'commercial_land', 'agricultural_land', 'industrial_land', 'farm'];
+        const commTypes = ['shop', 'office', 'building', 'warehouse', 'showroom'];
+
+        if (selectedDivision === 'residential' && !resTypes.includes(item.property_type)) return false;
+        if (selectedDivision === 'land' && !landTypes.includes(item.property_type)) return false;
+        if (selectedDivision === 'commercial' && !commTypes.includes(item.property_type)) return false;
+        if (selectedDivision === 'projects' && !item.project_name && item.property_type !== 'building') return false;
+      }
+
       return true;
     });
-  }, [properties, searchQuery, selectedType, selectedPurpose, selectedPayment, selectedCondition, selectedStatus, selectedCity, selectedAreaRange]);
+  }, [properties, searchQuery, selectedType, selectedPurpose, selectedPayment, selectedCondition, selectedStatus, selectedCity, selectedAreaRange, selectedDivision]);
+
+  // Counts by Division
+  const divisionCounts = useMemo(() => {
+    const resTypes = ['house', 'villa', 'apartment'];
+    const landTypes = ['residential_land', 'commercial_land', 'agricultural_land', 'industrial_land', 'farm'];
+    const commTypes = ['shop', 'office', 'building', 'warehouse', 'showroom'];
+
+    return {
+      all: properties.length,
+      residential: properties.filter((p) => resTypes.includes(p.property_type)).length,
+      land: properties.filter((p) => landTypes.includes(p.property_type)).length,
+      commercial: properties.filter((p) => commTypes.includes(p.property_type)).length,
+      projects: properties.filter((p) => Boolean(p.project_name) || p.property_type === 'building').length,
+    };
+  }, [properties]);
 
   // Handlers for Properties
   const handleOpenAdd = () => {
@@ -381,13 +438,14 @@ export default function HomePage() {
     setSelectedStatus('all');
     setSelectedCity('all');
     setSelectedAreaRange('all');
+    setSelectedDivision('all');
     setSearchQuery('');
   };
 
   if (!authChecked) return null;
 
   return (
-    <div dir={lang === 'en' ? 'ltr' : 'rtl'} className="min-h-screen flex flex-col bg-slate-950 text-slate-100 font-sans selection:bg-amber-500 selection:text-slate-950">
+    <div dir={lang === 'en' ? 'ltr' : 'rtl'} className={`min-h-screen flex flex-col ${getBgClass(bgPattern)} text-slate-100 font-sans selection:bg-amber-500 selection:text-slate-950 transition-colors duration-300`}>
       
       {/* Login Modal: Opened only when requested or when an admin action is performed */}
       <LoginModal
@@ -416,6 +474,10 @@ export default function HomePage() {
         onChangeLang={handleSelectLang}
         theme={theme}
         onChangeTheme={handleThemeChange}
+        bgPattern={bgPattern}
+        onChangeBgPattern={handleBgPatternChange}
+        selectedDivision={selectedDivision}
+        onSelectDivision={(div) => setSelectedDivision(div)}
       />
 
       {/* Main Workspace Body */}
@@ -559,6 +621,113 @@ export default function HomePage() {
                 </div>
               </div>
             )}
+
+            {/* CATEGORY & DIVISION MENU ("مێنیوی دابەشکردنی بەشەکان") */}
+            <div className="p-4 sm:p-5 rounded-3xl glass-card border border-slate-800 space-y-4 shadow-xl">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-2xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-400 shadow-inner">
+                    <Layers className="w-5 h-5 stroke-[2.2]" />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <h3 className="text-sm sm:text-base font-black text-white">
+                        {t.divide_menu || 'مێنیوی دابەشکردنی بەشەکان'}
+                      </h3>
+                      <span className="text-[11px] px-2 py-0.5 rounded-full bg-slate-900 border border-slate-800 text-amber-400 font-mono font-bold">
+                        {filteredProperties.length} {t.properties}
+                      </span>
+                    </div>
+                    <p className="text-xs text-slate-400 mt-0.5">
+                      دابەشکردنی خێرا بەپێی نیشتەجێبوون، زەوی و باخچە، شوێنی بازرگانی، و پڕۆژە نوێیەکان
+                    </p>
+                  </div>
+                </div>
+
+                {/* Section Grouping Toggle Button */}
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setIsDividedSections(!isDividedSections)}
+                    className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold border transition-all ${
+                      isDividedSections
+                        ? 'bg-amber-500 text-slate-950 border-amber-500 shadow-lg shadow-amber-500/25 scale-102'
+                        : 'bg-slate-900 text-slate-300 border-slate-800 hover:text-white hover:border-slate-700'
+                    }`}
+                    title="پیشاندانی هەموو بەشەکان بە دەستەبەندی جیاوازی سەر شاشە"
+                  >
+                    <LayoutGrid className="w-4 h-4" />
+                    <span>{isDividedSections ? (t.section_view || 'دابەشکراو بە بەشەکان (چالاکە)') : (t.section_view || 'دابەشکردن بەپێی بەش')}</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Major Divisions Selector Buttons */}
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2.5 pt-1">
+                {[
+                  { id: 'all' as PropertyDivision, label: t.divide_all || 'هەموو موڵکەکان', icon: '🏢', count: divisionCounts.all, desc: 'سەرجەم موڵکەکان' },
+                  { id: 'residential' as PropertyDivision, label: t.divide_residential || 'نیشتەجێبوون', icon: '🏡', count: divisionCounts.residential, desc: 'خانوو، ڤێلا، شوقە' },
+                  { id: 'land' as PropertyDivision, label: t.divide_land || 'زەوی و باخچە', icon: '🌾', count: divisionCounts.land, desc: 'کشتوکاڵی، نیشتەجێبوون' },
+                  { id: 'commercial' as PropertyDivision, label: t.divide_commercial || 'شوێنی بازرگانی', icon: '🏬', count: divisionCounts.commercial, desc: 'دووکان، ئۆفیس، کۆگا' },
+                  { id: 'projects' as PropertyDivision, label: t.divide_projects || 'پڕۆژە نوێیەکان', icon: '🏗️', count: divisionCounts.projects, desc: 'تاوەر و باڵەخانەکان' },
+                ].map((div) => {
+                  const isSelected = selectedDivision === div.id;
+                  return (
+                    <button
+                      key={div.id}
+                      onClick={() => setSelectedDivision(div.id)}
+                      className={`flex flex-col justify-between p-3 rounded-2xl border text-right rtl:text-right transition-all ${
+                        isSelected
+                          ? 'bg-amber-500/15 border-amber-500/60 shadow-lg shadow-amber-500/10 ring-1 ring-amber-500/40'
+                          : 'bg-slate-900/60 border-slate-800/80 hover:bg-slate-850 hover:border-slate-700'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between w-full mb-1">
+                        <span className="text-xl">{div.icon}</span>
+                        <span className={`text-[11px] font-mono px-2 py-0.5 rounded-full font-bold ${
+                          isSelected ? 'bg-amber-500 text-slate-950' : 'bg-slate-800 text-slate-300'
+                        }`}>
+                          {div.count}
+                        </span>
+                      </div>
+                      <div>
+                        <div className={`text-xs font-bold ${isSelected ? 'text-amber-300' : 'text-white'}`}>
+                          {div.label}
+                        </div>
+                        <div className="text-[10px] text-slate-400 truncate mt-0.5 font-normal">
+                          {div.desc}
+                        </div>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Quick Deal Type Row */}
+              <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-slate-800/80 text-xs">
+                <span className="text-[11px] text-slate-400 font-semibold flex items-center gap-1.5 ml-1">
+                  <span>{t.quick_filter_deal || 'جۆری مامەڵە'}:</span>
+                </span>
+                {[
+                  { id: 'all', label: 'هەموو مامەڵەکان' },
+                  { id: 'sale', label: '🏷️ فرۆشتن (نەقد)' },
+                  { id: 'rent', label: '🔑 بەکرێدان' },
+                  { id: 'exchange', label: '🔄 ئاڵوگۆڕ' },
+                  { id: 'investment', label: '💼 وەبەرهێنان' },
+                ].map((deal) => (
+                  <button
+                    key={deal.id}
+                    onClick={() => setSelectedPurpose(deal.id)}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all ${
+                      selectedPurpose === deal.id
+                        ? 'bg-amber-500 text-slate-950 border-amber-500 font-bold shadow-sm'
+                        : 'bg-slate-900/60 text-slate-400 border-slate-800 hover:text-white hover:border-slate-700'
+                    }`}
+                  >
+                    {deal.label}
+                  </button>
+                ))}
+              </div>
+            </div>
 
             {/* Search & Comprehensive Filters Bar */}
             <div className="p-4 rounded-2xl glass-card border border-slate-800 space-y-4">
@@ -951,6 +1120,87 @@ export default function HomePage() {
                   ))}
                 </div>
               </div>
+            ) : isDividedSections ? (
+              /* 4. CHOOSEABLE DIVIDED SECTIONS VIEW */
+              <div className="space-y-8">
+                {[
+                  {
+                    id: 'residential',
+                    title: t.divide_residential || 'نیشتەجێبوون (خانوو، ڤێلا، شوقە)',
+                    desc: 'خانووەکان، ڤێلای شاهانە، و شوقەی نیشتەجێبوون بۆ فرۆشتن و کرێ',
+                    icon: '🏡',
+                    badgeColor: 'bg-sky-500/20 text-sky-400 border-sky-500/30',
+                    items: filteredProperties.filter((p) => ['house', 'villa', 'apartment'].includes(p.property_type)),
+                  },
+                  {
+                    id: 'land',
+                    title: t.divide_land || 'زەوی و باخچە (کشتوکاڵی، نیشتەجێبوون، پیشەسازی)',
+                    desc: 'زەوییەکان بە پێوانەی ورد، دۆنم، ئۆڵک، بەرە و قووڵی',
+                    icon: '🌾',
+                    badgeColor: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
+                    items: filteredProperties.filter((p) => ['residential_land', 'commercial_land', 'agricultural_land', 'industrial_land', 'farm'].includes(p.property_type)),
+                  },
+                  {
+                    id: 'commercial',
+                    title: t.divide_commercial || 'شوێنی بازرگانی (دووکان، ئۆفیس، باڵەخانە)',
+                    desc: 'دووکانی بازاڕ، کۆگا، ئۆفیس و باڵەخانەی بازرگانی و وەبەرهێنان',
+                    icon: '🏬',
+                    badgeColor: 'bg-purple-500/20 text-purple-400 border-purple-500/30',
+                    items: filteredProperties.filter((p) => ['shop', 'office', 'building', 'warehouse', 'showroom'].includes(p.property_type)),
+                  },
+                  {
+                    id: 'projects',
+                    title: t.divide_projects || 'پڕۆژە نوێیەکان و تاوەرەکان',
+                    desc: 'پڕۆژە بەردەستەکان و پڕۆژەی لەژێر دروستکردن',
+                    icon: '🏗️',
+                    badgeColor: 'bg-rose-500/20 text-rose-400 border-rose-500/30',
+                    items: filteredProperties.filter((p) => Boolean(p.project_name) || p.property_type === 'building'),
+                  },
+                ].map((sec) => (
+                  <div key={sec.id} className="space-y-4 p-5 sm:p-6 rounded-3xl glass-card border border-slate-800 shadow-xl">
+                    <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-slate-800/80">
+                      <div className="flex items-center gap-3">
+                        <span className="text-2xl p-2.5 rounded-2xl bg-slate-900 border border-slate-800">{sec.icon}</span>
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <h3 className="text-base sm:text-lg font-black text-white">{sec.title}</h3>
+                            <span className={`text-xs px-2.5 py-0.5 rounded-full font-mono font-bold border ${sec.badgeColor}`}>
+                              {sec.items.length} {t.properties}
+                            </span>
+                          </div>
+                          <p className="text-xs text-slate-400 mt-0.5">{sec.desc}</p>
+                        </div>
+                      </div>
+                      <button
+                        onClick={handleOpenAdd}
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-amber-400 text-xs font-bold border border-slate-800 transition-all"
+                      >
+                        <PlusCircle className="w-3.5 h-3.5" />
+                        <span>زیادکردن لەم بەشە</span>
+                      </button>
+                    </div>
+
+                    {sec.items.length === 0 ? (
+                      <div className="p-8 text-center text-xs text-slate-500 italic bg-slate-950/40 rounded-2xl border border-slate-900">
+                        هیچ موڵکێک لەم بەشەدا نەدۆزرایەوە بەپێی فلتەرەکان
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {sec.items.map((property) => (
+                          <PropertyCard
+                            key={property.id}
+                            property={property}
+                            lang={lang}
+                            onView={(p) => setDetailProperty(p)}
+                            onEdit={handleEditProperty}
+                            onDelete={handleDeleteProperty}
+                          />
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
             ) : (
               /* 3. CHOOSEABLE LUXURY GRID VIEW (Default) */
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -1032,6 +1282,8 @@ export default function HomePage() {
         onDataRestored={loadData}
         theme={theme}
         onChangeTheme={handleThemeChange}
+        bgPattern={bgPattern}
+        onChangeBgPattern={handleBgPatternChange}
       />
 
       {/* Footer */}
