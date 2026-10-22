@@ -19,7 +19,9 @@ import {
   Zap,
   Trash2,
   Eye,
-  EyeOff
+  EyeOff,
+  Settings,
+  Sparkles
 } from 'lucide-react';
 import { dataService } from '@/lib/storage';
 import { getSupabaseConfig, testConnection, normalizeSupabaseUrl, normalizeSupabaseKey } from '@/lib/supabase';
@@ -28,14 +30,16 @@ interface BackupModalProps {
   isOpen: boolean;
   onClose: () => void;
   onDataRestored: () => void;
+  initialTab?: 'security' | 'supabase' | 'backup';
 }
 
 export const BackupModal: React.FC<BackupModalProps> = ({
   isOpen,
   onClose,
   onDataRestored,
+  initialTab = 'security',
 }) => {
-  const [activeTab, setActiveTab] = useState<'backup' | 'supabase' | 'security'>('supabase');
+  const [activeTab, setActiveTab] = useState<'backup' | 'supabase' | 'security'>(initialTab);
   const [successMsg, setSuccessMsg] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
 
@@ -53,6 +57,13 @@ export const BackupModal: React.FC<BackupModalProps> = ({
   const [showNewPin, setShowNewPin] = useState(false);
   const [clearingData, setClearingData] = useState(false);
   const [showClearConfirm, setShowClearConfirm] = useState(false);
+
+  // Sync initial tab when modal opens or prop changes
+  useEffect(() => {
+    if (initialTab) {
+      setActiveTab(initialTab);
+    }
+  }, [initialTab, isOpen]);
 
   // Load existing configuration
   useEffect(() => {
@@ -235,40 +246,52 @@ export const BackupModal: React.FC<BackupModalProps> = ({
         
         {/* Header */}
         <div className="flex items-center justify-between pb-4 border-b border-slate-800 mb-6">
-          <div className="flex items-center gap-2">
-            <Database className="w-5 h-5 text-amber-400" />
-            <h2 className="text-xl font-black text-white">بەستنەوە بە داتابەیس و پاشەکەوت</h2>
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 shadow-md shadow-amber-500/10">
+              <Settings className="w-5 h-5 stroke-[2.2]" />
+            </div>
+            <div>
+              <h2 className="text-lg sm:text-xl font-black text-white">
+                ڕێکخستنەکانی سیستەم (Settings)
+              </h2>
+              <p className="text-xs text-amber-400/90 font-medium">
+                وشەی نهێنی، سفرکردنەوەی داتا بۆ کڕیار، سوپابەیس و پاشەکەوت
+              </p>
+            </div>
           </div>
-          <button onClick={onClose} className="p-1.5 rounded-lg bg-slate-800 text-slate-400 hover:text-white">
+          <button onClick={onClose} className="p-2 rounded-xl bg-slate-800 text-slate-400 hover:text-white transition-all">
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Tab switch */}
-        <div className="flex items-center gap-2 p-1 rounded-xl bg-slate-950 border border-slate-800 mb-6 text-xs">
+        <div className="flex items-center gap-1.5 p-1 rounded-xl bg-slate-950 border border-slate-800 mb-6 text-xs">
           <button
-            onClick={() => setActiveTab('supabase')}
-            className={`flex-1 py-2 px-3 rounded-lg font-bold transition-all ${
-              activeTab === 'supabase' ? 'bg-amber-500 text-slate-950' : 'text-slate-400 hover:text-white'
+            onClick={() => setActiveTab('security')}
+            className={`flex-1 py-2 px-3 rounded-lg font-bold transition-all flex items-center justify-center gap-1.5 ${
+              activeTab === 'security' ? 'bg-amber-500 text-slate-950 shadow-md shadow-amber-500/20' : 'text-slate-400 hover:text-white'
             }`}
           >
-            بەستنەوە بە Supabase
+            <ShieldCheck className="w-4 h-4" />
+            <span>ڕێکخستن و سفرکردنەوە</span>
+          </button>
+          <button
+            onClick={() => setActiveTab('supabase')}
+            className={`flex-1 py-2 px-3 rounded-lg font-bold transition-all flex items-center justify-center gap-1.5 ${
+              activeTab === 'supabase' ? 'bg-amber-500 text-slate-950 shadow-md shadow-amber-500/20' : 'text-slate-400 hover:text-white'
+            }`}
+          >
+            <Server className="w-4 h-4" />
+            <span>داتابەیسی هەوری (Supabase)</span>
           </button>
           <button
             onClick={() => setActiveTab('backup')}
-            className={`flex-1 py-2 px-3 rounded-lg font-bold transition-all ${
-              activeTab === 'backup' ? 'bg-amber-500 text-slate-950' : 'text-slate-400 hover:text-white'
+            className={`flex-1 py-2 px-3 rounded-lg font-bold transition-all flex items-center justify-center gap-1.5 ${
+              activeTab === 'backup' ? 'bg-amber-500 text-slate-950 shadow-md shadow-amber-500/20' : 'text-slate-400 hover:text-white'
             }`}
           >
-            پاشەکەوت و گەڕاندنەوە
-          </button>
-          <button
-            onClick={() => setActiveTab('security')}
-            className={`flex-1 py-2 px-3 rounded-lg font-bold transition-all ${
-              activeTab === 'security' ? 'bg-amber-500 text-slate-950' : 'text-slate-400 hover:text-white'
-            }`}
-          >
-            وشەی نهێنی و پاراستن
+            <Database className="w-4 h-4" />
+            <span>پاشەکەوت و هێنانەوە</span>
           </button>
         </div>
 
@@ -526,49 +549,116 @@ export const BackupModal: React.FC<BackupModalProps> = ({
           </div>
         )}
 
-        {/* Tab 3: Security & PIN */}
+        {/* Tab 3: Security & PIN & Reset Data */}
         {activeTab === 'security' && (
-          <form onSubmit={handleSavePin} className="space-y-4">
-            <div className="p-4 rounded-2xl bg-slate-950/60 border border-slate-800 space-y-2">
-              <h3 className="text-sm font-bold text-white flex items-center gap-2">
-                <ShieldCheck className="w-4 h-4 text-amber-400" />
-                <span>گۆڕینی وشەی نهێنی دەستگەیشتن</span>
-              </h3>
-              <p className="text-xs text-slate-400 leading-relaxed">
-                دەتوانیت وشەی نهێنی نوێ دابنێیت بۆ دەستگەیشتن بە دەسەڵاتەکانی ئەدمین و پاراستنی سیستەمەکە.
+          <div className="space-y-6">
+            
+            {/* 1. RESET INFORMATION FOR CUSTOMER */}
+            <div className="p-5 rounded-2xl bg-rose-950/20 border border-rose-900/40 space-y-3">
+              <div className="flex items-center justify-between">
+                <h3 className="text-sm font-bold text-rose-300 flex items-center gap-2">
+                  <Trash2 className="w-4 h-4 text-rose-400" />
+                  <span>سفرکردنەوەی هەموو زانیارییەکان بۆ کڕیار (Reset All Data)</span>
+                </h3>
+                <span className="text-[11px] px-2.5 py-0.5 rounded-full bg-rose-500/10 text-rose-400 border border-rose-500/20 font-bold">
+                  سڕینەوەی گشتی
+                </span>
+              </div>
+              <p className="text-xs text-slate-300 leading-relaxed">
+                سڕینەوەی یەکجاری سەرجەم موڵکە نموونەییەکان، گرێبەستەکان و ژمێریارییەکان، بۆ ئەوەی کڕیارەکەت پەڕەیەکی تەواو سپی و خاوێن وەربگرێت و خۆی دەستبکات بە داخڵکردنی داتاکانی.
               </p>
-            </div>
 
-            <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1.5">
-                وشەی نهێنی نوێ بنووسە:
-              </label>
-              <div className="relative flex items-center">
-                <input
-                  type={showNewPin ? 'text' : 'password'}
-                  value={newPin}
-                  onChange={(e) => setNewPin(e.target.value)}
-                  placeholder="وشەی نهێنی نوێ (نموونە: rasel7788)"
-                  className="w-full pl-10 pr-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white font-mono text-sm outline-none focus:border-amber-500"
-                />
+              {showClearConfirm ? (
+                <div className="p-4 rounded-xl bg-slate-950 border border-rose-500/60 space-y-3">
+                  <p className="text-xs text-rose-300 font-bold">
+                    ⚠️ ئایا تەواو دڵنیایت لە سفرکردنەوەی سەرجەم زانیارییەکان؟
+                  </p>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={handleClearAllData}
+                      disabled={clearingData}
+                      className="flex-1 py-2.5 px-3 rounded-lg bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs shadow-md transition-all active:scale-95"
+                    >
+                      {clearingData ? 'دەسڕێتەوە...' : 'بەڵێ، دڵنیام هەموو داتاکان بسڕەوە'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setShowClearConfirm(false)}
+                      className="py-2.5 px-4 rounded-lg bg-slate-800 text-slate-300 hover:text-white font-bold text-xs"
+                    >
+                      پەشیمانبوونەوە
+                    </button>
+                  </div>
+                </div>
+              ) : (
                 <button
                   type="button"
-                  onClick={() => setShowNewPin(!showNewPin)}
-                  className="absolute left-2.5 text-slate-400 hover:text-amber-400 p-1"
-                  title={showNewPin ? "شاردنەوە" : "پیشاندان"}
+                  onClick={() => setShowClearConfirm(true)}
+                  className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-rose-600/90 hover:bg-rose-600 text-white font-bold text-xs shadow-md transition-all active:scale-95"
                 >
-                  {showNewPin ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  <Trash2 className="w-4 h-4" />
+                  <span>سفرکردنەوەی هەموو زانیارییەکان (Reset)</span>
+                </button>
+              )}
+
+              <div className="pt-2 flex items-center justify-between text-xs text-slate-500 border-t border-rose-950/40">
+                <span>دەتەوێت داتای نموونەیی بگەڕێنیتەوە؟</span>
+                <button
+                  type="button"
+                  onClick={handleResetDemo}
+                  className="text-amber-400 hover:underline flex items-center gap-1 font-semibold"
+                >
+                  <RotateCcw className="w-3.5 h-3.5" />
+                  <span>گەڕاندنەوە بۆ داتای نموونەیی سەرەتایی</span>
                 </button>
               </div>
             </div>
 
-            <button
-              type="submit"
-              className="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs"
-            >
-              پاشەکەوتکردنی وشەی نهێنی نوێ
-            </button>
-          </form>
+            {/* 2. CHANGE MASTER PASSWORD */}
+            <form onSubmit={handleSavePin} className="p-5 rounded-2xl bg-slate-950/60 border border-slate-800 space-y-4">
+              <div className="space-y-1">
+                <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                  <ShieldCheck className="w-4 h-4 text-amber-400" />
+                  <span>گۆڕینی وشەی نهێنی بەڕێوەبەر (Master Password)</span>
+                </h3>
+                <p className="text-xs text-slate-400 leading-relaxed">
+                  وشەی نهێنی بنەڕەتی ئێستا: <span className="font-mono text-amber-400 font-bold">Ibo0909</span>. دەتوانیت لەم بەشەدا بیگۆڕیت بۆ هەر وشەیەکی تر.
+                </p>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+                  وشەی نهێنی نوێ بنووسە:
+                </label>
+                <div className="relative flex items-center">
+                  <input
+                    type={showNewPin ? 'text' : 'password'}
+                    value={newPin}
+                    onChange={(e) => setNewPin(e.target.value)}
+                    placeholder="وشەی نهێنی نوێ بنووسە..."
+                    className="w-full pl-10 pr-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white font-mono text-sm outline-none focus:border-amber-500"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowNewPin(!showNewPin)}
+                    className="absolute left-2.5 text-slate-400 hover:text-amber-400 p-1"
+                    title={showNewPin ? "شاردنەوە" : "پیشاندان"}
+                  >
+                    {showNewPin ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                className="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs shadow-md transition-all active:scale-95"
+              >
+                پاشەکەوتکردنی وشەی نهێنی نوێ
+              </button>
+            </form>
+
+          </div>
         )}
 
         <div className="mt-6 pt-4 border-t border-slate-800 flex justify-end">

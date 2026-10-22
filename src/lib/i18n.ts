@@ -109,6 +109,8 @@ export const translations = {
     donum: 'دۆنم',
     olk: 'ئۆڵک',
     confirm_delete: 'دڵنیایت لە سڕینەوەی ئەم موڵکە بە یەکجاری؟',
+    settings: 'ڕێکخستنەکان',
+    reset_data: 'سفرکردنەوەی هەموو داتاکان',
   },
 
   ar: {
@@ -219,6 +221,8 @@ export const translations = {
     donum: 'دونم',
     olk: 'أولك',
     confirm_delete: 'هل أنت متأكد من حذف هذا العقار نهائياً؟',
+    settings: 'الإعدادات',
+    reset_data: 'إعادة ضبط كافة البيانات',
   },
 
   en: {
@@ -329,5 +333,7 @@ export const translations = {
     donum: 'Donum',
     olk: 'Olk',
     confirm_delete: 'Are you sure you want to delete this property permanently?',
+    settings: 'Settings',
+    reset_data: 'Reset All Data',
   }
 };

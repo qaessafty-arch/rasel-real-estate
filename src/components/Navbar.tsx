@@ -15,7 +15,8 @@ import {
   HardDrive, 
   Globe, 
   ChevronDown, 
-  Key
+  Key,
+  Settings
 } from 'lucide-react';
 import { isSupabaseConfigured } from '@/lib/supabase';
 import { Language, translations } from '@/lib/i18n';
@@ -25,6 +26,7 @@ interface NavbarProps {
   setActiveTab: (tab: 'dashboard' | 'properties' | 'map' | 'contracts' | 'accounting') => void;
   onOpenAddModal: () => void;
   onOpenBackupModal: () => void;
+  onOpenSettingsModal?: () => void;
   onLockSystem: () => void;
   onOpenLoginModal: () => void;
   isAdmin: boolean;
@@ -39,6 +41,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   setActiveTab,
   onOpenAddModal,
   onOpenBackupModal,
+  onOpenSettingsModal,
   onLockSystem,
   onOpenLoginModal,
   isAdmin,
@@ -212,6 +215,16 @@ export const Navbar: React.FC<NavbarProps> = ({
             {/* Admin Status & Actions */}
             {isAdmin ? (
               <div className="flex items-center gap-2">
+                {/* Dedicated Settings Button */}
+                <button
+                  onClick={onOpenSettingsModal || onOpenBackupModal}
+                  title="ڕێکخستنەکانی سیستەم (Settings)"
+                  className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-amber-400 hover:text-amber-300 border border-slate-800 hover:border-amber-500/40 text-xs font-bold transition-all shadow-sm active:scale-95"
+                >
+                  <Settings className="w-4 h-4 text-amber-400" />
+                  <span>{t.settings || 'ڕێکخستنەکان'}</span>
+                </button>
+
                 <button
                   onClick={onOpenBackupModal}
                   title={t.backup_db}
@@ -320,6 +333,17 @@ export const Navbar: React.FC<NavbarProps> = ({
           <div className="pt-3 border-t border-slate-800 grid grid-cols-2 gap-2">
             {isAdmin ? (
               <>
+                <button
+                  onClick={() => {
+                    if (onOpenSettingsModal) onOpenSettingsModal();
+                    else onOpenBackupModal();
+                    setMobileMenuOpen(false);
+                  }}
+                  className="col-span-2 flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl bg-amber-500/10 text-amber-400 text-xs font-bold border border-amber-500/30"
+                >
+                  <Settings className="w-4 h-4" />
+                  <span>{t.settings || 'ڕێکخستنەکان'}</span>
+                </button>
                 <button
                   onClick={() => {
                     onOpenBackupModal();

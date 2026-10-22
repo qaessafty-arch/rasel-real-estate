@@ -10,7 +10,9 @@ import {
   X,
   Trash2,
   Sparkles,
-  RotateCcw
+  RotateCcw,
+  Settings,
+  ShieldCheck
 } from 'lucide-react';
 import { Property, Contract, FinancialTransaction, PropertyStatus } from '@/types';
 import { dataService } from '@/lib/storage';
@@ -75,7 +77,13 @@ export default function HomePage() {
   const [editingProperty, setEditingProperty] = useState<Property | null>(null);
   const [detailProperty, setDetailProperty] = useState<Property | null>(null);
   const [backupModalOpen, setBackupModalOpen] = useState(false);
+  const [backupModalTab, setBackupModalTab] = useState<'security' | 'supabase' | 'backup'>('security');
   const [showClearConfirm, setShowClearConfirm] = useState(false);
+
+  const handleOpenSettings = (tab: 'security' | 'supabase' | 'backup' = 'security') => {
+    setBackupModalTab(tab);
+    setBackupModalOpen(true);
+  };
 
   // Filter & Search state
   const [searchQuery, setSearchQuery] = useState('');
@@ -345,7 +353,8 @@ export default function HomePage() {
         activeTab={activeTab}
         setActiveTab={setActiveTab}
         onOpenAddModal={handleOpenAdd}
-        onOpenBackupModal={() => requireAdmin(() => setBackupModalOpen(true))}
+        onOpenBackupModal={() => requireAdmin(() => handleOpenSettings('supabase'))}
+        onOpenSettingsModal={() => requireAdmin(() => handleOpenSettings('security'))}
         onOpenLoginModal={() => setLoginModalOpen(true)}
         onLockSystem={handleLock}
         isAdmin={isUnlocked}
@@ -357,6 +366,47 @@ export default function HomePage() {
 
       {/* Main Workspace Body */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+        
+        {/* Admin Quick Control Bar (Visible when logged in) */}
+        {isUnlocked && (
+          <div className="flex flex-wrap items-center justify-between gap-4 p-4 sm:p-5 rounded-2xl bg-slate-900/90 border border-amber-500/30 shadow-xl shadow-amber-500/5">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-400">
+                <ShieldCheck className="w-5 h-5 stroke-[2.2]" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <h3 className="text-sm font-bold text-white">دەسەڵاتی بەڕێوەبەر (Admin Mode) چالاکە</h3>
+                  <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                    Online
+                  </span>
+                </div>
+                <p className="text-xs text-slate-400">
+                  دەتوانیت ڕێکخستنەکان بگۆڕیت، وشەی نهێنی نوێ بکەیتەوە، یان هەموو داتاکان سفر بکەیتەوە بۆ کڕیار.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2.5">
+              <button
+                onClick={() => handleOpenSettings('security')}
+                className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs shadow-md shadow-amber-500/20 transition-all active:scale-95"
+              >
+                <Settings className="w-4 h-4" />
+                <span>ڕێکخستنەکان (Settings)</span>
+              </button>
+
+              <button
+                onClick={() => handleOpenSettings('security')}
+                className="flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-rose-950/40 hover:bg-rose-900/60 text-rose-300 hover:text-white border border-rose-900/50 text-xs font-bold transition-all active:scale-95"
+                title="سفرکردنەوەی هەموو داتاکان بۆ کڕیار"
+              >
+                <Trash2 className="w-4 h-4 text-rose-400" />
+                <span>سفرکردنەوە بۆ کڕیار</span>
+              </button>
+            </div>
+          </div>
+        )}
         
         {/* TAB 1: DASHBOARD */}
         {activeTab === 'dashboard' && (
@@ -726,6 +776,7 @@ export default function HomePage() {
       {/* Backup & Supabase Settings Modal */}
       <BackupModal
         isOpen={backupModalOpen}
+        initialTab={backupModalTab}
         onClose={() => setBackupModalOpen(false)}
         onDataRestored={loadData}
       />
