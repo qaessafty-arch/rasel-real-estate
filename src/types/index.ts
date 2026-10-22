@@ -18,7 +18,7 @@ export type PropertyStatus = 'available' | 'rented' | 'sold' | 'reserved' | 'und
 
 export type Currency = 'USD' | 'IQD';
 
-export type UITheme = 'gold' | 'sapphire' | 'emerald' | 'pearl';
+export type UITheme = 'gold' | 'sapphire' | 'emerald' | 'pearl' | 'solid' | 'minimalism' | 'brutalism';
 
 export type ViewMode = 'grid' | 'list' | 'split';
 

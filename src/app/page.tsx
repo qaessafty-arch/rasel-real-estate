@@ -60,7 +60,7 @@ export default function HomePage() {
       }
 
       const savedTheme = localStorage.getItem('rasel_ui_theme') as UITheme;
-      if (savedTheme && ['gold', 'sapphire', 'emerald', 'pearl'].includes(savedTheme)) {
+      if (savedTheme && ['gold', 'sapphire', 'emerald', 'pearl', 'solid', 'minimalism', 'brutalism'].includes(savedTheme)) {
         setTheme(savedTheme);
         document.documentElement.setAttribute('data-theme', savedTheme);
       } else {

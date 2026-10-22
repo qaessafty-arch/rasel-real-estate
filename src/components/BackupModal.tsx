@@ -676,12 +676,15 @@ export const BackupModal: React.FC<BackupModalProps> = ({
                 </p>
               </div>
 
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 pt-1">
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2.5 pt-1">
                 {[
                   { id: 'gold' as UITheme, label: 'زێڕینی لوکس', sub: 'Obsidian Gold', icon: '🌟', border: 'border-amber-500/50', bg: 'bg-amber-500/10' },
                   { id: 'sapphire' as UITheme, label: 'شینی شاهانە', sub: 'Royal Sapphire', icon: '💎', border: 'border-sky-500/50', bg: 'bg-sky-500/10' },
                   { id: 'emerald' as UITheme, label: 'زمڕودی شاهانە', sub: 'Emerald Oasis', icon: '🌲', border: 'border-emerald-500/50', bg: 'bg-emerald-500/10' },
                   { id: 'pearl' as UITheme, label: 'ڕووناکی مۆدێرن', sub: 'Modern Pearl', icon: '☀️', border: 'border-slate-400/50', bg: 'bg-slate-200/20' },
+                  { id: 'solid' as UITheme, label: 'ڕەشی پڕ', sub: 'Solid Pitch', icon: '⬛', border: 'border-zinc-400/50', bg: 'bg-zinc-800/30' },
+                  { id: 'minimalism' as UITheme, label: 'سادەی مۆدێرن', sub: 'Minimalism', icon: '⚪', border: 'border-slate-400/50', bg: 'bg-slate-800/30' },
+                  { id: 'brutalism' as UITheme, label: 'بروتالیزمی وشک', sub: 'Dry Brutalism', icon: '🧱', border: 'border-yellow-400/60', bg: 'bg-yellow-500/15' },
                 ].map((item) => (
                   <button
                     key={item.id}

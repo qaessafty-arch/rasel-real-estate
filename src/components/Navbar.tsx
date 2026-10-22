@@ -66,6 +66,9 @@ export const Navbar: React.FC<NavbarProps> = ({
     { id: 'sapphire', label: t.theme_sapphire || 'شینی شاهانە', icon: '💎', dotClass: 'bg-sky-400' },
     { id: 'emerald', label: t.theme_emerald || 'زمڕودی شاهانە', icon: '🌲', dotClass: 'bg-emerald-400' },
     { id: 'pearl', label: t.theme_pearl || 'ڕووناکی مۆدێرن', icon: '☀️', dotClass: 'bg-slate-300' },
+    { id: 'solid', label: t.theme_solid || 'ڕەشی پڕ', icon: '⬛', dotClass: 'bg-zinc-200' },
+    { id: 'minimalism', label: t.theme_minimalism || 'سادەی مۆدێرن', icon: '⚪', dotClass: 'bg-slate-400' },
+    { id: 'brutalism', label: t.theme_brutalism || 'بروتالیزمی وشک', icon: '🧱', dotClass: 'bg-yellow-400' },
   ];
 
   interface NavItem {
@@ -217,7 +220,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               </button>
 
               {themeMenuOpen && (
-                <div className="absolute right-0 rtl:right-auto rtl:left-0 mt-2 w-48 rounded-xl bg-slate-900 border border-slate-800 shadow-2xl py-1 z-50">
+                <div className="absolute right-0 rtl:right-auto rtl:left-0 mt-2 w-56 rounded-xl bg-slate-900 border border-slate-800 shadow-2xl py-1 z-50">
                   <div className="px-3 py-1.5 text-[10px] uppercase tracking-wider text-slate-400 font-bold border-b border-slate-800">
                     {t.theme || 'شێوازی دیزاین'}
                   </div>
