@@ -1,7 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { normalizeSupabaseUrl, normalizeSupabaseKey } from '@/lib/supabase';
+import { verifySessionRequest } from '@/lib/serverAuth';
 
 export async function POST(req: NextRequest) {
+  // Enforce server authorization
+  const auth = verifySessionRequest(req);
+  if (!auth.authenticated) {
+    return NextResponse.json(
+      { success: false, message: 'ڕێگەپێنەدراوە! پێویستە وەک بەڕێوەبەر بچیتە ژوورەوە.' },
+      { status: 401 }
+    );
+  }
+
   try {
     const { url, key } = await req.json();
 

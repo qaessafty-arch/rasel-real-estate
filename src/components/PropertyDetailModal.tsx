@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   X, 
   MapPin, 
@@ -22,11 +22,28 @@ import {
   Clock,
   ExternalLink,
   ShieldAlert,
-  Percent
+  Percent,
+  Image as ImageIcon,
+  Box
 } from 'lucide-react';
+import dynamic from 'next/dynamic';
 import { Property } from '@/types';
 import { formatPrice, getPropertyTypeLabel, getPropertyPurposeLabel, getPropertyStatusLabel, generateWhatsAppMessage, formatArea, sqmToDonum } from '@/lib/utils';
 import { Language, translations } from '@/lib/i18n';
+
+// Client-only lazy load for 3D visualizer
+const Property3DVisualizer = dynamic(
+  () => import('@/components/Property3DVisualizer').then((mod) => mod.Property3DVisualizer),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="flex flex-col items-center justify-center p-8 rounded-2xl glass-panel border border-slate-800 text-center text-amber-400 h-80">
+        <div className="w-8 h-8 border-2 border-amber-400 border-t-transparent rounded-full animate-spin mb-3" />
+        <span className="text-xs font-bold">خەریکی بارکردنی مۆدێلی ٣D...</span>
+      </div>
+    ),
+  }
+);
 
 interface PropertyDetailModalProps {
   property: Property | null;
@@ -45,7 +62,19 @@ export const PropertyDetailModal: React.FC<PropertyDetailModalProps> = ({
 }) => {
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [copied, setCopied] = useState(false);
+  const [mediaTab, setMediaTab] = useState<'photos' | '3d'>('photos');
   const t = translations[lang] as any;
+
+  // Keyboard Escape listener
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [onClose]);
 
   if (!property) return null;
 
@@ -74,7 +103,12 @@ export const PropertyDetailModal: React.FC<PropertyDetailModalProps> = ({
   const areaInfo = formatArea(property.area_sqm, property.land_details, lang);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-slate-950/85 backdrop-blur-md overflow-y-auto">
+    <div 
+      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-slate-950/85 backdrop-blur-md overflow-y-auto"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="property-detail-title"
+    >
       <div className="relative w-full max-w-4xl max-h-[92vh] overflow-y-auto rounded-3xl glass-panel border border-slate-700 shadow-2xl bg-slate-900 text-right">
         
         {/* Modal Header */}
@@ -132,36 +166,74 @@ export const PropertyDetailModal: React.FC<PropertyDetailModalProps> = ({
 
         <div className="p-4 sm:p-6 space-y-6">
           
-          {/* Main Photo Gallery */}
-          <div className="space-y-3">
-            <div className="relative aspect-[16/9] sm:aspect-[21/9] rounded-2xl overflow-hidden bg-slate-950 border border-slate-800">
-              <img
-                src={images[selectedImageIndex] || images[0]}
-                alt={property.title}
-                className="w-full h-full object-cover"
-              />
-              <div className="absolute bottom-3 right-3 px-3 py-1 rounded-lg bg-black/70 backdrop-blur-md text-xs text-white">
-                {selectedImageIndex + 1} / {images.length}
-              </div>
+          {/* Media Header & Mode Switcher */}
+          <div className="flex items-center justify-between pb-1 border-b border-slate-800">
+            <h3 id="property-detail-title" className="text-base font-bold text-white flex items-center gap-2">
+              <Building2 className="w-4 h-4 text-amber-400" />
+              <span>پێشانگای وێنە و مۆدێلی ٣D</span>
+            </h3>
+            <div className="flex items-center p-1 rounded-xl bg-slate-800/80 border border-slate-700/60">
+              <button
+                type="button"
+                onClick={() => setMediaTab('photos')}
+                className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold transition-all ${
+                  mediaTab === 'photos'
+                    ? 'bg-amber-500 text-slate-950 shadow'
+                    : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                <ImageIcon className="w-3.5 h-3.5" />
+                <span>وێنەکان ({images.length})</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setMediaTab('3d')}
+                className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold transition-all ${
+                  mediaTab === '3d'
+                    ? 'bg-amber-500 text-slate-950 shadow'
+                    : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                <Box className="w-3.5 h-3.5" />
+                <span>مۆدێلی ئەندازیاری ٣D</span>
+              </button>
             </div>
-
-            {/* Thumbnail switcher */}
-            {images.length > 1 && (
-              <div className="flex items-center gap-2 overflow-x-auto pb-2">
-                {images.map((img, idx) => (
-                  <button
-                    key={idx}
-                    onClick={() => setSelectedImageIndex(idx)}
-                    className={`relative w-20 h-14 rounded-xl overflow-hidden shrink-0 border-2 transition-all ${
-                      selectedImageIndex === idx ? 'border-amber-400 scale-105' : 'border-slate-800 opacity-60 hover:opacity-100'
-                    }`}
-                  >
-                    <img src={img} alt={`Thumbnail ${idx}`} className="w-full h-full object-cover" />
-                  </button>
-                ))}
-              </div>
-            )}
           </div>
+
+          {/* Conditional Media Rendering */}
+          {mediaTab === '3d' ? (
+            <Property3DVisualizer property={property} />
+          ) : (
+            <div className="space-y-3">
+              <div className="relative aspect-[16/9] sm:aspect-[21/9] rounded-2xl overflow-hidden bg-slate-950 border border-slate-800">
+                <img
+                  src={images[selectedImageIndex] || images[0]}
+                  alt={property.title}
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute bottom-3 right-3 px-3 py-1 rounded-lg bg-black/70 backdrop-blur-md text-xs text-white">
+                  {selectedImageIndex + 1} / {images.length}
+                </div>
+              </div>
+
+              {/* Thumbnail switcher */}
+              {images.length > 1 && (
+                <div className="flex items-center gap-2 overflow-x-auto pb-2">
+                  {images.map((img, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => setSelectedImageIndex(idx)}
+                      className={`relative w-20 h-14 rounded-xl overflow-hidden shrink-0 border-2 transition-all ${
+                        selectedImageIndex === idx ? 'border-amber-400 scale-105' : 'border-slate-800 opacity-60 hover:opacity-100'
+                      }`}
+                    >
+                      <img src={img} alt={`Thumbnail ${idx}`} className="w-full h-full object-cover" />
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Video Tour Section (if available) */}
           {property.video_url && (

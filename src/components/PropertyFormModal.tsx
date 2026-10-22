@@ -23,6 +23,7 @@ import {
 import { Property, PropertyType, PropertyPurpose, PropertyStatus, Currency, PaymentMethod, PropertyCondition } from '@/types';
 import { Language, translations } from '@/lib/i18n';
 import { formatArea, donumToSqm, sqmToDonum } from '@/lib/utils';
+import { compressImageFile } from '@/lib/imageCompressor';
 
 interface PropertyFormModalProps {
   isOpen: boolean;
@@ -97,6 +98,19 @@ export const PropertyFormModal: React.FC<PropertyFormModalProps> = ({
 
   const [imageUrlInput, setImageUrlInput] = useState('');
   const [featureInput, setFeatureInput] = useState('');
+  const [isCompressing, setIsCompressing] = useState(false);
+
+  // Keyboard Escape listener
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
 
   // Measurement calculation state
   const [measurementMode, setMeasurementMode] = useState<'sqm' | 'dimensions' | 'donum'>('sqm');
@@ -109,7 +123,10 @@ export const PropertyFormModal: React.FC<PropertyFormModalProps> = ({
     setFrontageInput(f);
     setDepthInput(d);
     if (f !== '' && d !== '' && Number(f) > 0 && Number(d) > 0) {
-      const calculatedArea = Number(f) * Number(d);
+      const calculatedArea = Math.round(Number(f) * Number(d) * 100) / 100;
+      const { donum, olk } = sqmToDonum(calculatedArea);
+      setDonumInput(donum || '');
+      setOlkInput(olk || '');
       setFormData((prev) => ({
         ...prev,
         area_sqm: calculatedArea,
@@ -117,6 +134,8 @@ export const PropertyFormModal: React.FC<PropertyFormModalProps> = ({
           ...prev.land_details,
           frontage_meter: Number(f),
           depth_meter: Number(d),
+          area_donum: donum,
+          area_olk: olk,
         },
       }));
     }
@@ -238,23 +257,36 @@ export const PropertyFormModal: React.FC<PropertyFormModalProps> = ({
     }
   };
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
-    if (!files) return;
+    if (!files || files.length === 0) return;
 
-    Array.from(files).forEach((file) => {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        const base64 = event.target?.result as string;
-        if (base64) {
-          setFormData((prev) => ({
-            ...prev,
-            images: [...(prev.images || []), base64],
-          }));
+    setIsCompressing(true);
+    try {
+      const compressedList: string[] = [];
+      for (const file of Array.from(files)) {
+        try {
+          const compressed = await compressImageFile(file, {
+            maxWidth: 1600,
+            maxHeight: 1600,
+            quality: 0.82,
+            format: 'image/webp',
+          });
+          compressedList.push(compressed);
+        } catch (err) {
+          console.warn('Failed to compress image:', err);
         }
-      };
-      reader.readAsDataURL(file);
-    });
+      }
+      if (compressedList.length > 0) {
+        setFormData((prev) => ({
+          ...prev,
+          images: [...(prev.images || []), ...compressedList],
+        }));
+      }
+    } finally {
+      setIsCompressing(false);
+      e.target.value = '';
+    }
   };
 
   const handleRemoveImage = (index: number) => {
@@ -341,7 +373,12 @@ export const PropertyFormModal: React.FC<PropertyFormModalProps> = ({
   const isLand = formData.property_type === 'commercial_land' || formData.property_type === 'agriculture_land';
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-slate-950/85 backdrop-blur-md overflow-y-auto">
+    <div 
+      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-slate-950/85 backdrop-blur-md overflow-y-auto"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="property-form-title"
+    >
       <div className="relative w-full max-w-4xl max-h-[92vh] overflow-y-auto rounded-3xl glass-panel border border-slate-700 shadow-2xl bg-slate-900 text-right">
         
         {/* Header */}
@@ -909,19 +946,26 @@ export const PropertyFormModal: React.FC<PropertyFormModalProps> = ({
             </div>
 
             {/* Direct file upload from device */}
-            <div className="flex items-center justify-center p-4 border-2 border-dashed border-slate-800 hover:border-amber-500/50 rounded-2xl bg-slate-950/40 text-center cursor-pointer transition-all">
-              <label className="cursor-pointer flex flex-col items-center">
-                <Upload className="w-7 h-7 text-amber-400 mb-2" />
-                <span className="text-xs font-bold text-white mb-0.5">وێنە لە کۆمپیوتەر یان مۆبایلەکەت باربکە</span>
-                <span className="text-[11px] text-slate-500">پشتگیری JPG, PNG, WEBP</span>
-                <input
-                  type="file"
-                  multiple
-                  accept="image/*"
-                  onChange={handleFileUpload}
-                  className="hidden"
-                />
-              </label>
+            <div className="relative flex items-center justify-center p-4 border-2 border-dashed border-slate-800 hover:border-amber-500/50 rounded-2xl bg-slate-950/40 text-center cursor-pointer transition-all">
+              {isCompressing ? (
+                <div className="flex flex-col items-center py-2 text-amber-400">
+                  <div className="w-6 h-6 border-2 border-amber-400 border-t-transparent rounded-full animate-spin mb-2" />
+                  <span className="text-xs font-bold">خەریکی گونجاندن و کەمکردنەوەی قەبارەی وێنەیە بۆ WebP...</span>
+                </div>
+              ) : (
+                <label className="cursor-pointer flex flex-col items-center">
+                  <Upload className="w-7 h-7 text-amber-400 mb-2" />
+                  <span className="text-xs font-bold text-white mb-0.5">وێنە لە کۆمپیوتەر یان مۆبایلەکەت باربکە</span>
+                  <span className="text-[11px] text-slate-500">پشتگیری JPG, PNG, WEBP — بە شێوەی خۆکار قەبارەی دادەبەزێندرێت</span>
+                  <input
+                    type="file"
+                    multiple
+                    accept="image/*"
+                    onChange={handleFileUpload}
+                    className="hidden"
+                  />
+                </label>
+              )}
             </div>
 
             {/* Image Previews */}

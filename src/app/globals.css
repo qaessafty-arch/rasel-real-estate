@@ -597,3 +597,45 @@ html[lang="ar"],
     radial-gradient(#cbd5e1 1px, transparent 1px);
   background-size: auto, 24px 24px;
 }
+
+/* ==========================================================================
+   PRINT FLYER STYLES (Professional Real Estate PDF / Print Export)
+   ========================================================================== */
+@media print {
+  body, html {
+    background: #ffffff !important;
+    color: #0f172a !important;
+    color-scheme: light !important;
+  }
+
+  nav, 
+  header, 
+  button, 
+  .no-print {
+    display: none !important;
+  }
+
+  .glass-panel,
+  .glass-card {
+    background: #ffffff !important;
+    border: 1px solid #e2e8f0 !important;
+    box-shadow: none !important;
+    color: #0f172a !important;
+  }
+
+  [role="dialog"] {
+    position: static !important;
+    background: #ffffff !important;
+    padding: 0 !important;
+  }
+
+  [role="dialog"] > div {
+    max-width: 100% !important;
+    max-height: none !important;
+    overflow: visible !important;
+    border: none !important;
+    box-shadow: none !important;
+    background: #ffffff !important;
+    color: #0f172a !important;
+  }
+}

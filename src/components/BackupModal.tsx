@@ -26,6 +26,7 @@ import {
 } from 'lucide-react';
 import { dataService } from '@/lib/storage';
 import { getSupabaseConfig, testConnection, normalizeSupabaseUrl, normalizeSupabaseKey } from '@/lib/supabase';
+import { setCustomPin } from '@/lib/auth';
 import { UITheme, UIBackground } from '@/types';
 
 interface BackupModalProps {
@@ -74,6 +75,18 @@ export const BackupModal: React.FC<BackupModalProps> = ({
       setActiveTab(initialTab);
     }
   }, [initialTab, isOpen]);
+
+  // Keyboard Escape listener
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
 
   // Load existing configuration
   useEffect(() => {
@@ -238,11 +251,11 @@ export const BackupModal: React.FC<BackupModalProps> = ({
     }
   };
 
-  const handleSavePin = (e: React.FormEvent) => {
+  const handleSavePin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (newPin.trim().length >= 4) {
-      localStorage.setItem('rasel_custom_pin', newPin.trim());
-      setSuccessMsg('وشەی نهێنی بە سەرکەوتوویی گۆڕدرا!');
+    const success = await setCustomPin(newPin);
+    if (success) {
+      setSuccessMsg('وشەی نهێنی بە سەرکەوتوویی و پارێزراوی (SHA-256) نوێکرایەوە!');
       setNewPin('');
       setTimeout(() => setSuccessMsg(''), 4000);
     } else {
@@ -251,7 +264,12 @@ export const BackupModal: React.FC<BackupModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-slate-950/80 backdrop-blur-md overflow-y-auto">
+    <div 
+      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-slate-950/80 backdrop-blur-md overflow-y-auto"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="settings-modal-title"
+    >
       <div className="relative w-full max-w-2xl max-h-[92vh] overflow-y-auto rounded-3xl glass-panel border border-slate-700 shadow-2xl bg-slate-900 text-right p-6">
         
         {/* Header */}

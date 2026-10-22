@@ -38,6 +38,8 @@ import { AccountingView } from '@/components/AccountingView';
 import { BackupModal } from '@/components/BackupModal';
 import { VoiceSearch } from '@/components/VoiceSearch';
 import { Language, translations } from '@/lib/i18n';
+import { checkServerSession, clearSession } from '@/lib/auth';
+import { usePropertyFilters } from '@/hooks/usePropertyFilters';
 
 export default function HomePage() {
   // Trilingual State: 'ckb' (Kurdish) | 'ar' (Arabic) | 'en' (English)
@@ -48,8 +50,7 @@ export default function HomePage() {
   const [bgPattern, setBgPattern] = useState<UIBackground>('obsidian');
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
 
-  // Category Division & Grouped Sections state
-  const [selectedDivision, setSelectedDivision] = useState<PropertyDivision>('all');
+  // Category Division & Grouped Sections state (managed by usePropertyFilters)
   const [isDividedSections, setIsDividedSections] = useState<boolean>(false);
 
   // Authentication & Security state: Public by default!
@@ -156,26 +157,45 @@ export default function HomePage() {
     setBackupModalOpen(true);
   };
 
-  // Filter & Search state
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedType, setSelectedType] = useState<string>('all');
-  const [selectedPurpose, setSelectedPurpose] = useState<string>('all');
-  const [selectedPayment, setSelectedPayment] = useState<string>('all');
-  const [selectedCondition, setSelectedCondition] = useState<string>('all');
-  const [selectedStatus, setSelectedStatus] = useState<string>('all');
-  const [selectedCity, setSelectedCity] = useState<string>('all');
-  const [selectedAreaRange, setSelectedAreaRange] = useState<string>('all');
+  // Decoupled Property Filters and Live Search Hook
+  const {
+    searchQuery,
+    setSearchQuery,
+    selectedType,
+    setSelectedType,
+    selectedPurpose,
+    setSelectedPurpose,
+    selectedPayment,
+    setSelectedPayment,
+    selectedCondition,
+    setSelectedCondition,
+    selectedStatus,
+    setSelectedStatus,
+    selectedCity,
+    setSelectedCity,
+    selectedAreaRange,
+    setSelectedAreaRange,
+    selectedDivision,
+    setSelectedDivision,
+    availableCities,
+    isFilterActive,
+    resetFilters,
+    filteredProperties,
+    divisionCounts,
+  } = usePropertyFilters(properties);
 
   // Check initial login state
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const isLocalUnlocked = localStorage.getItem('rasel_auth_unlocked') === 'true';
-      const isSessionUnlocked = sessionStorage.getItem('rasel_auth_unlocked') === 'true';
-      if (isLocalUnlocked || isSessionUnlocked) {
-        setIsUnlocked(true);
+    async function verifyAuth() {
+      if (typeof window !== 'undefined') {
+        const isAuthed = await checkServerSession();
+        if (isAuthed) {
+          setIsUnlocked(true);
+        }
       }
+      setAuthChecked(true);
     }
-    setAuthChecked(true);
+    verifyAuth();
   }, []);
 
   // Fetch initial data
@@ -214,107 +234,6 @@ export default function HomePage() {
   const stats = useMemo(() => {
     return dataService.calculateStats(properties, transactions);
   }, [properties, transactions]);
-
-  // Cities extracted dynamically
-  const availableCities = useMemo(() => {
-    const set = new Set(properties.map((p) => p.city).filter(Boolean));
-    return Array.from(set);
-  }, [properties]);
-
-  // Filtered properties
-  const filteredProperties = useMemo(() => {
-    return properties.filter((item) => {
-      // Search query (matches title, code, city, neighborhood, address, project, notes, owner, freelancer)
-      if (searchQuery.trim()) {
-        const query = searchQuery.toLowerCase().trim();
-        const matchTitle = item.title?.toLowerCase().includes(query);
-        const matchCode = item.property_code?.toLowerCase().includes(query);
-        const matchCity = item.city?.toLowerCase().includes(query);
-        const matchAddress = item.address?.toLowerCase().includes(query);
-        const matchProject = item.project_name?.toLowerCase().includes(query);
-        const matchNotes = item.notes?.toLowerCase().includes(query);
-        const matchOwner = item.owner_contact?.name?.toLowerCase().includes(query);
-        const matchFreelancer = item.freelancer_name?.toLowerCase().includes(query);
-        
-        if (!matchTitle && !matchCode && !matchCity && !matchAddress && !matchProject && !matchNotes && !matchOwner && !matchFreelancer) {
-          return false;
-        }
-      }
-
-      // Property type filter
-      if (selectedType !== 'all' && item.property_type !== selectedType) {
-        return false;
-      }
-
-      // Purpose filter (sale, rent, exchange, investment)
-      if (selectedPurpose !== 'all' && item.purpose !== selectedPurpose) {
-        return false;
-      }
-
-      // Payment method filter (cash, installments, exchange)
-      if (selectedPayment !== 'all') {
-        if (item.payment_method) {
-          if (item.payment_method !== selectedPayment) return false;
-        } else {
-          if (selectedPayment === 'installments' && !item.installment_count) return false;
-        }
-      }
-
-      // Condition filter (brand_new, used)
-      if (selectedCondition !== 'all') {
-        if (item.condition && item.condition !== selectedCondition) {
-          return false;
-        }
-      }
-
-      // Status filter
-      if (selectedStatus !== 'all' && item.status !== selectedStatus) {
-        return false;
-      }
-
-      // City filter
-      if (selectedCity !== 'all' && item.city !== selectedCity) {
-        return false;
-      }
-
-      // Measurement / Area Range filter
-      if (selectedAreaRange !== 'all') {
-        if (selectedAreaRange === 'under_200' && item.area_sqm >= 200) return false;
-        if (selectedAreaRange === '200_500' && (item.area_sqm < 200 || item.area_sqm > 500)) return false;
-        if (selectedAreaRange === '500_2500' && (item.area_sqm < 500 || item.area_sqm >= 2500)) return false;
-        if (selectedAreaRange === 'donum_plus' && item.area_sqm < 2500 && (!item.land_details?.area_donum || item.land_details.area_donum <= 0)) return false;
-      }
-
-      // Category Division filter (Residential, Lands, Commercial, Projects)
-      if (selectedDivision !== 'all') {
-        const resTypes = ['house', 'villa', 'apartment'];
-        const landTypes = ['residential_land', 'commercial_land', 'agricultural_land', 'industrial_land', 'farm'];
-        const commTypes = ['shop', 'office', 'building', 'warehouse', 'showroom'];
-
-        if (selectedDivision === 'residential' && !resTypes.includes(item.property_type)) return false;
-        if (selectedDivision === 'land' && !landTypes.includes(item.property_type)) return false;
-        if (selectedDivision === 'commercial' && !commTypes.includes(item.property_type)) return false;
-        if (selectedDivision === 'projects' && !item.project_name && item.property_type !== 'building') return false;
-      }
-
-      return true;
-    });
-  }, [properties, searchQuery, selectedType, selectedPurpose, selectedPayment, selectedCondition, selectedStatus, selectedCity, selectedAreaRange, selectedDivision]);
-
-  // Counts by Division
-  const divisionCounts = useMemo(() => {
-    const resTypes = ['house', 'villa', 'apartment'];
-    const landTypes = ['residential_land', 'commercial_land', 'agricultural_land', 'industrial_land', 'farm'];
-    const commTypes = ['shop', 'office', 'building', 'warehouse', 'showroom'];
-
-    return {
-      all: properties.length,
-      residential: properties.filter((p) => resTypes.includes(p.property_type)).length,
-      land: properties.filter((p) => landTypes.includes(p.property_type)).length,
-      commercial: properties.filter((p) => commTypes.includes(p.property_type)).length,
-      projects: properties.filter((p) => Boolean(p.project_name) || p.property_type === 'building').length,
-    };
-  }, [properties]);
 
   // Handlers for Properties
   const handleOpenAdd = () => {
@@ -414,33 +333,11 @@ export default function HomePage() {
 
   // Lock system (returns to guest/public mode)
   const handleLock = () => {
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem('rasel_auth_unlocked');
-      sessionStorage.removeItem('rasel_auth_unlocked');
-    }
+    clearSession();
     setIsUnlocked(false);
   };
 
-  const isFilterActive = selectedType !== 'all' || 
-    selectedPurpose !== 'all' || 
-    selectedPayment !== 'all' || 
-    selectedCondition !== 'all' || 
-    selectedStatus !== 'all' || 
-    selectedCity !== 'all' || 
-    selectedAreaRange !== 'all' || 
-    Boolean(searchQuery.trim());
-
-  const resetAllFilters = () => {
-    setSelectedType('all');
-    setSelectedPurpose('all');
-    setSelectedPayment('all');
-    setSelectedCondition('all');
-    setSelectedStatus('all');
-    setSelectedCity('all');
-    setSelectedAreaRange('all');
-    setSelectedDivision('all');
-    setSearchQuery('');
-  };
+  const resetAllFilters = resetFilters;
 
   if (!authChecked) return null;
 

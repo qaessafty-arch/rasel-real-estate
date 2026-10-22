@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { randomUUID } from 'crypto';
 import { normalizeSupabaseUrl, normalizeSupabaseKey } from '@/lib/supabase';
+import { verifySessionRequest } from '@/lib/serverAuth';
 
 function ensureUUID(id: string | null | undefined): string {
   if (!id) return randomUUID();
@@ -11,6 +12,15 @@ function ensureUUID(id: string | null | undefined): string {
 }
 
 export async function POST(req: NextRequest) {
+  // Enforce server authorization
+  const auth = verifySessionRequest(req);
+  if (!auth.authenticated) {
+    return NextResponse.json(
+      { success: false, message: 'ڕێگەپێنەدراوە! پێویستە وەک بەڕێوەبەر بچیتە ژوورەوە.' },
+      { status: 401 }
+    );
+  }
+
   try {
     const { url, key, properties, contracts, transactions } = await req.json();
 

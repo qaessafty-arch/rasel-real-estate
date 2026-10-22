@@ -18,6 +18,7 @@ import {
   Sparkles
 } from 'lucide-react';
 import { dataService } from '@/lib/storage';
+import { loginWithServer, setCustomPin } from '@/lib/auth';
 
 interface LoginModalProps {
   isOpen: boolean;
@@ -48,33 +49,37 @@ export const LoginModal: React.FC<LoginModalProps> = ({
   const [showResetConfirm, setShowResetConfirm] = useState(false);
   const [isResetting, setIsResetting] = useState(false);
 
+  // Keyboard Escape listener
+  React.useEffect(() => {
+    if (!isOpen || !onClose) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
 
-    // Primary master key: 'Ibo0909' (or custom stored key)
-    const customKey = typeof window !== 'undefined' ? localStorage.getItem('rasel_custom_pin') : null;
-    const validKeys = ['Ibo0909', 'ibo0909', customKey].filter(Boolean);
-
-    if (validKeys.includes(password.trim())) {
-      if (remember && typeof window !== 'undefined') {
-        localStorage.setItem('rasel_auth_unlocked', 'true');
-      } else if (typeof window !== 'undefined') {
-        sessionStorage.setItem('rasel_auth_unlocked', 'true');
-      }
+    const res = await loginWithServer(password, remember);
+    if (res.success) {
       onSuccess();
     } else {
-      setError('وشەی نهێنی هەڵەیە! تکایە وشەی ڕاست بنووسە.');
+      setError(res.message || 'وشەی نهێنی هەڵەیە! تکایە وشەی ڕاست بنووسە.');
     }
   };
 
-  const handleSaveNewPassword = (e: React.FormEvent) => {
+  const handleSaveNewPassword = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (newPassword.trim().length >= 4) {
-      localStorage.setItem('rasel_custom_pin', newPassword.trim());
-      setSettingsSuccess('وشەی نهێنی نوێ بە سەرکەوتوویی پاشەکەوت کرا!');
+    const success = await setCustomPin(newPassword);
+    if (success) {
+      setSettingsSuccess('وشەی نهێنی نوێ بە پارێزراوی (SHA-256) پاشەکەوت کرا!');
       setNewPassword('');
       setTimeout(() => setSettingsSuccess(''), 4000);
     } else {
@@ -96,7 +101,12 @@ export const LoginModal: React.FC<LoginModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/90 backdrop-blur-md">
+    <div 
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/90 backdrop-blur-md"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="login-modal-title"
+    >
       <div className="w-full max-w-md p-6 sm:p-8 rounded-3xl glass-panel border border-amber-500/30 shadow-2xl shadow-amber-500/10 text-center relative overflow-hidden bg-slate-900/95">
         
         {/* Top Right Close Button */}
