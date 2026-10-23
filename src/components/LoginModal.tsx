@@ -1,23 +1,24 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Building2, 
   Lock, 
   Eye, 
   EyeOff, 
-  ArrowLeft, 
   ShieldCheck, 
   X,
-  KeyRound
+  KeyRound,
+  Users,
+  UserCheck
 } from 'lucide-react';
-import { loginWithServer } from '@/lib/auth';
+import { loginWithServer, getEmployees } from '@/lib/auth';
+import { Employee, UserSession } from '@/types';
 
 interface LoginModalProps {
   isOpen: boolean;
-  onSuccess: () => void;
+  onSuccess: (user?: UserSession) => void;
   onClose?: () => void;
-  onResetData?: () => void;
 }
 
 export const LoginModal: React.FC<LoginModalProps> = ({ 
@@ -25,20 +26,27 @@ export const LoginModal: React.FC<LoginModalProps> = ({
   onSuccess, 
   onClose,
 }) => {
-  // Login form state
   const [password, setPassword] = useState('');
+  const [username, setUsername] = useState('');
+  const [selectedEmp, setSelectedEmp] = useState<Employee | null>(null);
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [remember, setRemember] = useState(true);
   const [loading, setLoading] = useState(false);
+  const [employees, setEmployees] = useState<Employee[]>([]);
+
+  // Load available staff list on open
+  useEffect(() => {
+    if (isOpen) {
+      setEmployees(getEmployees());
+    }
+  }, [isOpen]);
 
   // Keyboard Escape listener
-  React.useEffect(() => {
+  useEffect(() => {
     if (!isOpen || !onClose) return;
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        onClose();
-      }
+      if (e.key === 'Escape') onClose();
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
@@ -52,18 +60,27 @@ export const LoginModal: React.FC<LoginModalProps> = ({
     setLoading(true);
 
     try {
-      const res = await loginWithServer(password, remember);
-      if (res.success) {
+      const res = await loginWithServer(password, remember, selectedEmp ? selectedEmp.username : username);
+      if (res.success && res.user) {
         setPassword('');
-        onSuccess();
+        setUsername('');
+        setSelectedEmp(null);
+        onSuccess(res.user);
       } else {
-        setError(res.message || 'وشەی نهێنی هەڵەیە!');
+        setError(res.message || 'وشەی نهێنی یان PIN هەڵەیە!');
       }
-    } catch (err) {
+    } catch {
       setError('هەڵەیەک ڕوویدا لە کاتی چوونەژوورەوە.');
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleSelectStaff = (emp: Employee) => {
+    setSelectedEmp(emp);
+    setUsername(emp.username);
+    setPassword('');
+    setError('');
   };
 
   return (
@@ -73,7 +90,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
       aria-modal="true"
       aria-labelledby="login-modal-title"
     >
-      <div className="w-full max-w-md p-6 sm:p-8 rounded-3xl glass-panel border border-amber-500/30 shadow-2xl shadow-amber-500/10 text-center relative overflow-hidden bg-slate-900/95">
+      <div className="w-full max-w-md p-6 sm:p-8 rounded-3xl glass-panel border border-amber-500/30 shadow-2xl shadow-amber-500/10 text-center relative overflow-hidden bg-slate-900/98">
         
         {/* Top Close Button */}
         {onClose && (
@@ -94,21 +111,66 @@ export const LoginModal: React.FC<LoginModalProps> = ({
         <h2 id="login-modal-title" className="text-xl sm:text-2xl font-black text-white tracking-wide mb-1">
           NASHVILLE HOUSE
         </h2>
-        <p className="text-xs text-amber-400/90 font-medium mb-6">
-          چوونەژوورەوەی ستاف و بەڕێوەبەر (Admin Access)
+        <p className="text-xs text-amber-400/90 font-medium mb-4">
+          چوونەژوورەوەی ستاف و بەڕێوەبەر (Staff Portal)
         </p>
+
+        {/* Quick Staff Account Switcher Chips */}
+        <div className="mb-4">
+          <div className="text-[11px] text-slate-400 font-semibold mb-2 text-right">
+            هەڵبژاردنی هەژمار (یان ڕاستەوخۆ PIN بنووسە):
+          </div>
+          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
+            <button
+              type="button"
+              onClick={() => {
+                setSelectedEmp(null);
+                setUsername('admin');
+                setError('');
+              }}
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1 shrink-0 ${
+                !selectedEmp || selectedEmp.role === 'admin'
+                  ? 'bg-amber-500 text-slate-950 shadow-sm'
+                  : 'bg-slate-950 text-slate-400 border border-slate-800 hover:text-white'
+              }`}
+            >
+              <span>👑</span>
+              <span>بەڕێوەبەر</span>
+            </button>
+
+            {employees.filter(e => e.role === 'employee').map((emp) => (
+              <button
+                key={emp.id}
+                type="button"
+                onClick={() => handleSelectStaff(emp)}
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1 shrink-0 ${
+                  selectedEmp?.id === emp.id
+                    ? 'bg-sky-500 text-slate-950 shadow-sm'
+                    : 'bg-slate-950 text-slate-400 border border-slate-800 hover:text-white'
+                }`}
+              >
+                <span>👤</span>
+                <span>{emp.name.split(' ')[0]}</span>
+              </button>
+            ))}
+          </div>
+        </div>
 
         {/* SECURE LOGIN FORM */}
         <form onSubmit={handleLogin} className="space-y-4">
           
-          <div className="p-3 rounded-xl bg-slate-950/70 border border-slate-800 text-right text-xs text-slate-300 flex items-center gap-2">
+          <div className="p-2.5 rounded-xl bg-slate-950/70 border border-slate-800 text-right text-[11px] text-slate-300 flex items-center gap-2">
             <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
-            <span>ئەم بەشە پارێزراوە؛ وشەی نهێنی بنووسە بۆ دەستگەیشتن بە ئەدمین.</span>
+            <span>
+              {selectedEmp 
+                ? `چوونەژوورەوە وەک کارمەند: ${selectedEmp.name}` 
+                : 'وشەی نهێنی سەرپەرشتیار (Ibo0909) یان PINی کارمەندان بنووسە.'}
+            </span>
           </div>
 
           <div className="text-right">
             <label className="block text-xs font-semibold text-slate-300 mb-1.5">
-              وشەی نهێنی چوونەژوورەوە
+              {selectedEmp ? `PINی تایبەت بە ${selectedEmp.name}` : 'وشەی نهێنی یان PIN'}
             </label>
             
             <div className="relative flex items-center">
@@ -119,15 +181,13 @@ export const LoginModal: React.FC<LoginModalProps> = ({
                   setPassword(e.target.value);
                   setError('');
                 }}
-                placeholder="وشەی نهێنی بنووسە..."
+                placeholder={selectedEmp ? `PINی ${selectedEmp.name} بنووسە...` : "Ibo0909 یان PIN بنووسە..."}
                 autoFocus
                 className="w-full px-12 py-3 rounded-xl bg-slate-950 border border-slate-700/80 focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 text-white placeholder-slate-500 outline-none text-center font-mono text-base transition-all"
               />
               
-              {/* Right Side Key Icon */}
               <KeyRound className="w-5 h-5 text-slate-500 absolute right-3.5 pointer-events-none" />
 
-              {/* Left Side Password Show/Hide Toggle Button */}
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
@@ -153,30 +213,25 @@ export const LoginModal: React.FC<LoginModalProps> = ({
                 onChange={(e) => setRemember(e.target.checked)}
                 className="rounded bg-slate-950 border-slate-700 text-amber-500 focus:ring-amber-500"
               />
-              <span>بمپارێزە لەسەر ئەم ئامێرە (Remember Me)</span>
+              <span>لەبیرم مەبە لەسەر ئەم ئامێرە</span>
             </label>
+            <span className="text-[11px] text-slate-500">SHA-256 Secure</span>
           </div>
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black text-sm shadow-lg shadow-amber-500/20 transition-all flex items-center justify-center gap-2 active:scale-95 disabled:opacity-50"
+            className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-bold text-sm shadow-lg shadow-amber-500/25 transition-all active:scale-95 disabled:opacity-50"
           >
-            <span>{loading ? 'چاوەڕوانبە...' : 'چوونەژوورەوە'}</span>
-            <ArrowLeft className="w-4 h-4 stroke-[2.5]" />
+            {loading ? 'خەریکی چوونەژوورەوەیە...' : selectedEmp ? `چوونەژوورەوە وەک ${selectedEmp.name}` : 'چوونەژوورەوە'}
           </button>
-
-          {onClose && (
-            <button
-              type="button"
-              onClick={onClose}
-              className="w-full py-2.5 px-4 rounded-xl bg-slate-950 hover:bg-slate-800 text-slate-400 hover:text-white font-semibold text-xs border border-slate-800 transition-all"
-            >
-              گەڕانەوە بۆ سەیرکردنی گشتی موڵکەکان (Public Mode)
-            </button>
-          )}
-
         </form>
+
+        {/* Demo Credentials Hint */}
+        <div className="mt-4 pt-3 border-t border-slate-800 text-[11px] text-slate-500 text-right space-y-1 font-mono">
+          <div>👑 ئەدمین: <span className="text-amber-400">Ibo0909</span></div>
+          <div>👤 کارمەند ١: <span className="text-sky-400">1122</span> (ئاراس) | کارمەند ٢: <span className="text-sky-400">3344</span> (سارا)</div>
+        </div>
 
       </div>
     </div>

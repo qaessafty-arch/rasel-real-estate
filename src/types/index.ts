@@ -161,3 +161,26 @@ export interface SystemStats {
   netProfitUSD: number;
   totalInvestmentValueUSD: number;
 }
+
+export type UserRole = 'admin' | 'employee';
+
+export interface Employee {
+  id: string;
+  name: string;
+  username: string;
+  pin: string; // password or 4-digit PIN
+  phone?: string;
+  role: UserRole;
+  status: 'active' | 'inactive';
+  created_at: string;
+}
+
+export interface UserSession {
+  id: string;
+  name: string;
+  username: string;
+  role: UserRole;
+  phone?: string;
+  token?: string;
+  expiresAt?: number;
+}

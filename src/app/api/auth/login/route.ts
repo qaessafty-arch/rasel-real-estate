@@ -27,24 +27,63 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const { password, customPinHash, remember = true } = body;
+    const { password, customPinHash, remember = true, username, employees = [] } = body;
 
     if (!password || typeof password !== 'string') {
       return NextResponse.json(
-        { success: false, message: 'تکایە وشەی نهێنی بنووسە!' },
+        { success: false, message: 'تکایە وشەی نهێنی یان PIN بنووسە!' },
         { status: 400 }
       );
     }
 
-    // 2. Server-side password verification
-    const isValid = verifyAdminPassword(password, customPinHash);
+    const trimmed = password.trim();
+    const trimmedUser = username?.trim().toLowerCase();
 
-    if (!isValid) {
+    // 2. Server-side password verification
+    let matchedUser: any = null;
+
+    // A. Check Admin
+    const isAdmin = verifyAdminPassword(trimmed, customPinHash);
+    if (isAdmin) {
+      matchedUser = {
+        id: 'emp-admin',
+        name: 'بەڕێوەبەری گشتی (Admin)',
+        username: 'admin',
+        role: 'admin',
+        phone: '0750 000 0000'
+      };
+    } else if (Array.isArray(employees) && employees.length > 0) {
+      // B. Check Employees
+      const emp = employees.find((e: any) => {
+        if (trimmedUser) {
+          return e.username?.toLowerCase() === trimmedUser && e.pin === trimmed;
+        }
+        return e.pin === trimmed;
+      });
+
+      if (emp) {
+        if (emp.status === 'inactive') {
+          return NextResponse.json(
+            { success: false, message: 'ئەم هەژمارە لەلایەن بەڕێوەبەرەوە ناچالاک کراوە!' },
+            { status: 403 }
+          );
+        }
+        matchedUser = {
+          id: emp.id,
+          name: emp.name,
+          username: emp.username,
+          role: emp.role || 'employee',
+          phone: emp.phone
+        };
+      }
+    }
+
+    if (!matchedUser) {
       return NextResponse.json(
         { 
           success: false, 
           code: 'INVALID_CREDENTIALS',
-          message: 'وشەی نهێنی هەڵەیە! تکایە وشەی ڕاست بنووسە.',
+          message: 'وشەی نهێنی یان PIN هەڵەیە! تکایە زانیاری دروست بنووسە.',
           remainingAttempts: rateCheck.remaining
         },
         { status: 401 }
@@ -57,15 +96,15 @@ export async function POST(req: NextRequest) {
     // 3. Issue cryptographically signed session token
     const durationDays = remember ? 7 : 1;
     const expiresAt = Date.now() + durationDays * 24 * 60 * 60 * 1000;
-    const token = createSignedToken({ role: 'admin', expiresAt });
+    const token = createSignedToken({ role: matchedUser.role, expiresAt, user: matchedUser });
 
     // 4. Set secure HTTP-only cookie
     const response = NextResponse.json({
       success: true,
       token,
       expiresAt,
-      user: { role: 'admin' },
-      message: 'چوونەژوورەوە وەک سەرپەرشتیار بە سەرکەوتوویی ئەنجامدرا.'
+      user: matchedUser,
+      message: `چوونەژوورەوە بە سەرکەوتوویی ئەنجامدرا: ${matchedUser.name}`
     });
 
     const isProd = process.env.NODE_ENV === 'production';

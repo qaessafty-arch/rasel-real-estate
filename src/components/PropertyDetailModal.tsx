@@ -53,6 +53,7 @@ interface PropertyDetailModalProps {
   onDelete: (id: string) => void;
   lang?: Language;
   isAdmin?: boolean;
+  isStaff?: boolean;
 }
 
 export const PropertyDetailModal: React.FC<PropertyDetailModalProps> = ({
@@ -62,6 +63,7 @@ export const PropertyDetailModal: React.FC<PropertyDetailModalProps> = ({
   onDelete,
   lang = 'ckb',
   isAdmin = false,
+  isStaff = false,
 }) => {
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [copied, setCopied] = useState(false);
@@ -450,15 +452,17 @@ export const PropertyDetailModal: React.FC<PropertyDetailModalProps> = ({
             </div>
           )}
 
-          {/* Confidential Admin Owner & Stakeholders Card (Admin Only) */}
-          {isAdmin ? (
+          {/* Confidential Staff & Owner Card (Staff / Admin Only) */}
+          {(isAdmin || isStaff) ? (
             <div className="p-4 rounded-2xl bg-amber-950/20 border border-amber-500/30 space-y-3">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-bold text-amber-400 flex items-center gap-1.5">
                   <User className="w-4 h-4" />
-                  زانیاری لایەنەکان و عەمولە (تایبەت بە نوسینگە)
+                  زانیاری پەیوەندی خاوەن موڵک (تایبەت بە ستاف و نوسینگە)
                 </span>
-                <span className="text-[11px] px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 font-semibold">نهێنی - تایبەت بە ئەدمین</span>
+                <span className="text-[11px] px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 font-semibold">
+                  {isAdmin ? 'دەسەڵاتی ئەدمین' : 'تایبەت بە ستاف'}
+                </span>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
@@ -482,15 +486,22 @@ export const PropertyDetailModal: React.FC<PropertyDetailModalProps> = ({
                   )}
                 </div>
 
-                <div>
-                  <span className="text-slate-400 block mb-0.5">{t.commission}:</span>
-                  <span className="font-mono font-bold text-emerald-400 text-sm">
-                    {formatPrice(property.commission_amount || 0, property.currency, lang)}
-                  </span>
-                  <span className="text-slate-400 block mt-1">
-                    {t.net_to_owner}: <strong className="text-white font-mono">{formatPrice(property.net_to_owner || (property.price - (property.commission_amount || 0)), property.currency, lang)}</strong>
-                  </span>
-                </div>
+                {isAdmin ? (
+                  <div>
+                    <span className="text-slate-400 block mb-0.5">{t.commission}:</span>
+                    <span className="font-mono font-bold text-emerald-400 text-sm">
+                      {formatPrice(property.commission_amount || 0, property.currency, lang)}
+                    </span>
+                    <span className="text-slate-400 block mt-1">
+                      {t.net_to_owner}: <strong className="text-white font-mono">{formatPrice(property.net_to_owner || (property.price - (property.commission_amount || 0)), property.currency, lang)}</strong>
+                    </span>
+                  </div>
+                ) : (
+                  <div>
+                    <span className="text-slate-400 block mb-0.5">بارودۆخی موڵک:</span>
+                    <span className="font-bold text-emerald-400 text-sm">بەردەست بۆ پیشاندان بە کڕیار</span>
+                  </div>
+                )}
               </div>
             </div>
           ) : (
@@ -568,6 +579,19 @@ export const PropertyDetailModal: React.FC<PropertyDetailModalProps> = ({
               >
                 <Trash2 className="w-4 h-4" />
                 <span>{t.delete}</span>
+              </button>
+            </div>
+          ) : isStaff ? (
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => {
+                  onEdit(property);
+                  onClose();
+                }}
+                className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs transition-all"
+              >
+                <Edit3 className="w-4 h-4 stroke-[2.5]" />
+                <span>{t.edit}</span>
               </button>
             </div>
           ) : (

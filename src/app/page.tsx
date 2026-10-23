@@ -24,9 +24,12 @@ import {
   Layers,
   Home,
   FileText,
-  DollarSign
+  DollarSign,
+  Users,
+  LogOut,
+  UserCheck
 } from 'lucide-react';
-import { Property, Contract, FinancialTransaction, PropertyStatus, UITheme, UIBackground, PropertyDivision, ViewMode } from '@/types';
+import { Property, Contract, FinancialTransaction, PropertyStatus, UITheme, UIBackground, PropertyDivision, ViewMode, UserSession } from '@/types';
 import { formatArea, formatPrice, getPropertyStatusLabel, getPropertyTypeLabel, getPropertyPurposeLabel, generateWhatsAppMessage } from '@/lib/utils';
 import { dataService } from '@/lib/storage';
 import { Navbar } from '@/components/Navbar';
@@ -39,9 +42,10 @@ import { PropertyMap } from '@/components/PropertyMap';
 import { ContractsView } from '@/components/ContractsView';
 import { AccountingView } from '@/components/AccountingView';
 import { BackupModal } from '@/components/BackupModal';
+import { EmployeeManagementModal } from '@/components/EmployeeManagementModal';
 import { VoiceSearch } from '@/components/VoiceSearch';
 import { Language, translations } from '@/lib/i18n';
-import { checkServerSession, clearSession } from '@/lib/auth';
+import { checkServerSession, clearSession, getCurrentUser } from '@/lib/auth';
 import { usePropertyFilters } from '@/hooks/usePropertyFilters';
 
 export default function HomePage() {
@@ -56,10 +60,16 @@ export default function HomePage() {
   // Category Division & Grouped Sections state (managed by usePropertyFilters)
   const [isDividedSections, setIsDividedSections] = useState<boolean>(false);
 
-  // Authentication & Security state: Public by default!
-  const [isUnlocked, setIsUnlocked] = useState(false);
+  // Authentication & Multi-Role User state
+  const [currentUser, setCurrentUser] = useState<UserSession | null>(null);
   const [loginModalOpen, setLoginModalOpen] = useState(false);
+  const [employeesModalOpen, setEmployeesModalOpen] = useState(false);
   const [authChecked, setAuthChecked] = useState(false);
+
+  const isAdmin = currentUser?.role === 'admin';
+  const isEmployee = currentUser?.role === 'employee';
+  const isStaff = Boolean(currentUser);
+  const isUnlocked = isStaff;
 
   // Load theme, background and language preference from local storage
   useEffect(() => {
@@ -146,12 +156,16 @@ export default function HomePage() {
   // App Tabs: 'dashboard' | 'properties' | 'map' | 'contracts' | 'accounting'
   const [activeTab, setActiveTab] = useState<'dashboard' | 'properties' | 'map' | 'contracts' | 'accounting'>('properties');
 
-  // Guard admin tabs for unauthenticated visitors
+  // Guard internal tabs
   useEffect(() => {
-    if (!isUnlocked && (activeTab === 'dashboard' || activeTab === 'contracts' || activeTab === 'accounting')) {
+    if (!isStaff && (activeTab === 'dashboard' || activeTab === 'contracts' || activeTab === 'accounting')) {
       setActiveTab('properties');
     }
-  }, [isUnlocked, activeTab]);
+    // Employees cannot access accounting or dashboard (accounting is admin only)
+    if (isEmployee && (activeTab === 'accounting' || activeTab === 'dashboard')) {
+      setActiveTab('properties');
+    }
+  }, [isStaff, isEmployee, activeTab]);
 
   // Core Data State
   const [properties, setProperties] = useState<Property[]>([]);
@@ -203,9 +217,12 @@ export default function HomePage() {
   useEffect(() => {
     async function verifyAuth() {
       if (typeof window !== 'undefined') {
-        const isAuthed = await checkServerSession();
-        if (isAuthed) {
-          setIsUnlocked(true);
+        const sessionRes = await checkServerSession();
+        if (sessionRes.authenticated && sessionRes.user) {
+          setCurrentUser(sessionRes.user);
+        } else {
+          const localUser = getCurrentUser();
+          if (localUser) setCurrentUser(localUser);
         }
       }
       setAuthChecked(true);
@@ -236,9 +253,17 @@ export default function HomePage() {
     loadData();
   }, []);
 
-  // Helper to guard admin-only actions (allows visitors to browse freely)
+  // Helper to guard actions
+  const requireStaff = (action: () => void) => {
+    if (isStaff) {
+      action();
+    } else {
+      setLoginModalOpen(true);
+    }
+  };
+
   const requireAdmin = (action: () => void) => {
-    if (isUnlocked) {
+    if (isAdmin) {
       action();
     } else {
       setLoginModalOpen(true);
@@ -252,7 +277,7 @@ export default function HomePage() {
 
   // Handlers for Properties
   const handleOpenAdd = () => {
-    requireAdmin(() => {
+    requireStaff(() => {
       setEditingProperty(null);
       setFormModalOpen(true);
     });
@@ -281,7 +306,7 @@ export default function HomePage() {
   };
 
   const handleEditProperty = (property: Property) => {
-    requireAdmin(() => {
+    requireStaff(() => {
       setEditingProperty(property);
       setFormModalOpen(true);
     });
@@ -347,9 +372,10 @@ export default function HomePage() {
   };
 
   // Lock system (returns to guest/public mode)
-  const handleLock = () => {
-    clearSession();
-    setIsUnlocked(false);
+  const handleLock = async () => {
+    await clearSession();
+    setCurrentUser(null);
+    setActiveTab('properties');
   };
 
   const resetAllFilters = resetFilters;
@@ -363,9 +389,21 @@ export default function HomePage() {
       <LoginModal
         isOpen={loginModalOpen}
         onClose={() => setLoginModalOpen(false)}
-        onResetData={loadData}
-        onSuccess={() => {
-          setIsUnlocked(true);
+        onSuccess={(user) => {
+          if (user) {
+            setCurrentUser(user);
+          } else {
+            const current = getCurrentUser();
+            if (current) setCurrentUser(current);
+            else {
+              setCurrentUser({
+                id: 'emp-admin',
+                name: 'بەڕێوەبەری گشتی (Admin)',
+                username: 'admin',
+                role: 'admin',
+              });
+            }
+          }
           setLoginModalOpen(false);
         }}
       />
@@ -377,9 +415,11 @@ export default function HomePage() {
         onOpenAddModal={handleOpenAdd}
         onOpenBackupModal={() => requireAdmin(() => handleOpenSettings('supabase'))}
         onOpenSettingsModal={() => requireAdmin(() => handleOpenSettings('security'))}
+        onOpenEmployeesModal={() => requireAdmin(() => setEmployeesModalOpen(true))}
         onOpenLoginModal={() => setLoginModalOpen(true)}
         onLockSystem={handleLock}
-        isAdmin={isUnlocked}
+        isAdmin={isAdmin}
+        currentUser={currentUser}
         propertiesCount={properties.length}
         lang={lang}
         onToggleLang={handleToggleLang}
@@ -395,27 +435,39 @@ export default function HomePage() {
       {/* Main Workspace Body */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
         
-        {/* Admin Quick Control Bar (Visible ONLY when logged in) */}
-        {isUnlocked && (
+        {/* Staff & Admin Suite Quick Bar (Visible ONLY when logged in) */}
+        {isStaff && (
           <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4 p-4 sm:p-5 rounded-2xl bg-slate-900/95 border border-amber-500/30 shadow-xl shadow-amber-500/5">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-400 shrink-0">
-                <ShieldCheck className="w-5 h-5 stroke-[2.2]" />
+              <div className={`w-10 h-10 rounded-xl border flex items-center justify-center shrink-0 ${
+                isAdmin 
+                  ? 'bg-amber-500/15 border-amber-500/30 text-amber-400' 
+                  : 'bg-sky-500/15 border-sky-500/30 text-sky-400'
+              }`}>
+                {isAdmin ? <ShieldCheck className="w-5 h-5 stroke-[2.2]" /> : <UserCheck className="w-5 h-5 stroke-[2.2]" />}
               </div>
               <div>
                 <div className="flex items-center gap-2">
-                  <h3 className="text-sm font-bold text-white">دەسەڵاتی بەڕێوەبەر (Admin Suite)</h3>
-                  <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
-                    Online
+                  <h3 className="text-sm font-bold text-white">
+                    {isAdmin ? 'دەسەڵاتی سەرپەرشتیار (Admin Suite)' : `هەژماری کارمەند: ${currentUser?.name}`}
+                  </h3>
+                  <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold border ${
+                    isAdmin 
+                      ? 'bg-amber-500/20 text-amber-400 border-amber-500/30' 
+                      : 'bg-sky-500/20 text-sky-400 border-sky-500/30'
+                  }`}>
+                    {isAdmin ? 'Admin' : 'Agent'}
                   </span>
                 </div>
                 <p className="text-xs text-slate-400">
-                  بەڕێوەبردنی موڵک، گرێبەست، ژمێریاری، ڕێکخستنەکان و سفرکردنەوە
+                  {isAdmin 
+                    ? 'بەڕێوەبردنی تەواوی موڵکەکان، گرێبەست، ژمێریاری، ستاف و ڕێکخستنەکان' 
+                    : 'بەڕێوەبردنی موڵکەکان، گرێبەستی کڕیاران و بینینی زانیاری خاوەن موڵک'}
                 </p>
               </div>
             </div>
 
-            {/* Quick Admin Navigation Pills */}
+            {/* Quick Navigation Pills */}
             <div className="flex flex-wrap items-center gap-1.5 p-1 rounded-xl bg-slate-950/80 border border-slate-800 text-xs">
               <button
                 onClick={() => setActiveTab('properties')}
@@ -426,15 +478,19 @@ export default function HomePage() {
                 <Building2 className="w-3.5 h-3.5" />
                 <span>{t.properties}</span>
               </button>
-              <button
-                onClick={() => setActiveTab('dashboard')}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-bold transition-all ${
-                  activeTab === 'dashboard' ? 'bg-amber-500 text-slate-950 shadow-sm' : 'text-slate-300 hover:text-white'
-                }`}
-              >
-                <Home className="w-3.5 h-3.5" />
-                <span>{t.dashboard}</span>
-              </button>
+
+              {isAdmin && (
+                <button
+                  onClick={() => setActiveTab('dashboard')}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-bold transition-all ${
+                    activeTab === 'dashboard' ? 'bg-amber-500 text-slate-950 shadow-sm' : 'text-slate-300 hover:text-white'
+                  }`}
+                >
+                  <Home className="w-3.5 h-3.5" />
+                  <span>{t.dashboard}</span>
+                </button>
+              )}
+
               <button
                 onClick={() => setActiveTab('contracts')}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-bold transition-all ${
@@ -444,40 +500,67 @@ export default function HomePage() {
                 <FileText className="w-3.5 h-3.5" />
                 <span>{t.contracts}</span>
               </button>
-              <button
-                onClick={() => setActiveTab('accounting')}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-bold transition-all ${
-                  activeTab === 'accounting' ? 'bg-amber-500 text-slate-950 shadow-sm' : 'text-slate-300 hover:text-white'
-                }`}
-              >
-                <DollarSign className="w-3.5 h-3.5" />
-                <span>{t.accounting}</span>
-              </button>
+
+              {isAdmin && (
+                <button
+                  onClick={() => setActiveTab('accounting')}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-bold transition-all ${
+                    activeTab === 'accounting' ? 'bg-amber-500 text-slate-950 shadow-sm' : 'text-slate-300 hover:text-white'
+                  }`}
+                >
+                  <DollarSign className="w-3.5 h-3.5" />
+                  <span>{t.accounting}</span>
+                </button>
+              )}
             </div>
 
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => handleOpenSettings('security')}
-                className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-850 hover:bg-slate-800 text-amber-400 border border-slate-700/80 hover:border-amber-500/40 font-bold text-xs shadow-sm transition-all active:scale-95"
-              >
-                <Settings className="w-4 h-4" />
-                <span>ڕێکخستنەکان</span>
-              </button>
+            {/* Suite Action Buttons & LOG OUT */}
+            <div className="flex flex-wrap items-center gap-2">
+              {isAdmin && (
+                <>
+                  <button
+                    onClick={() => setEmployeesModalOpen(true)}
+                    className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-850 hover:bg-slate-800 text-sky-400 border border-slate-700/80 hover:border-sky-500/40 font-bold text-xs shadow-sm transition-all active:scale-95"
+                    title="بەڕێوەبردنی ستاف و کارمەندان"
+                  >
+                    <Users className="w-4 h-4" />
+                    <span>کارمەندان</span>
+                  </button>
 
+                  <button
+                    onClick={() => handleOpenSettings('security')}
+                    className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-850 hover:bg-slate-800 text-amber-400 border border-slate-700/80 hover:border-amber-500/40 font-bold text-xs shadow-sm transition-all active:scale-95"
+                  >
+                    <Settings className="w-4 h-4" />
+                    <span>ڕێکخستنەکان</span>
+                  </button>
+
+                  <button
+                    onClick={() => setShowClearConfirm(true)}
+                    className="flex items-center gap-1.5 px-2.5 py-2 rounded-xl bg-rose-950/40 hover:bg-rose-900/60 text-rose-300 hover:text-white border border-rose-900/50 text-xs font-bold transition-all active:scale-95"
+                    title="سڕینەوەی هەموو داتاکان بۆ کڕیار"
+                  >
+                    <Trash2 className="w-3.5 h-3.5 text-rose-400" />
+                    <span className="hidden xl:inline">سفرکردنەوە بۆ کڕیار</span>
+                  </button>
+                </>
+              )}
+
+              {/* DEDICATED PROMINENT LOGOUT BUTTON */}
               <button
-                onClick={() => setShowClearConfirm(true)}
-                className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-rose-950/40 hover:bg-rose-900/60 text-rose-300 hover:text-white border border-rose-900/50 text-xs font-bold transition-all active:scale-95"
-                title="سڕینەوەی هەموو داتاکان بۆ کڕیار"
+                onClick={handleLock}
+                className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-rose-950/50 hover:bg-rose-900/70 text-rose-300 hover:text-white border border-rose-800/60 hover:border-rose-600 font-bold text-xs transition-all active:scale-95 shadow-sm"
+                title="چوونەدەرەوە لە هەژمار (Logout)"
               >
-                <Trash2 className="w-3.5 h-3.5 text-rose-400" />
-                <span>سفرکردنەوە بۆ کڕیار</span>
+                <LogOut className="w-4 h-4 text-rose-400" />
+                <span>دەرچوون (Logout)</span>
               </button>
             </div>
           </div>
         )}
         
         {/* TAB 1: DASHBOARD (ADMIN ONLY) */}
-        {isUnlocked && activeTab === 'dashboard' && (
+        {isAdmin && activeTab === 'dashboard' && (
           <DashboardStats
             stats={stats}
             properties={properties}
@@ -1043,23 +1126,23 @@ export default function HomePage() {
                                 >
                                   <Eye className="w-4 h-4" />
                                 </button>
-                                {isUnlocked && (
-                                  <>
-                                    <button
-                                      onClick={() => handleEditProperty(p)}
-                                      className="p-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-amber-400 hover:text-amber-300"
-                                      title="دەستکاری"
-                                    >
-                                      <Edit3 className="w-4 h-4" />
-                                    </button>
-                                    <button
-                                      onClick={() => handleDeleteProperty(p.id)}
-                                      className="p-1.5 rounded-lg bg-slate-900 hover:bg-rose-950/40 text-slate-400 hover:text-rose-400"
-                                      title="سڕینەوە"
-                                    >
-                                      <Trash2 className="w-4 h-4" />
-                                    </button>
-                                  </>
+                                {isStaff && (
+                                  <button
+                                    onClick={() => handleEditProperty(p)}
+                                    className="p-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-amber-400 hover:text-amber-300"
+                                    title="دەستکاری"
+                                  >
+                                    <Edit3 className="w-4 h-4" />
+                                  </button>
+                                )}
+                                {isAdmin && (
+                                  <button
+                                    onClick={() => handleDeleteProperty(p.id)}
+                                    className="p-1.5 rounded-lg bg-slate-900 hover:bg-rose-950/40 text-slate-400 hover:text-rose-400"
+                                    title="سڕینەوە"
+                                  >
+                                    <Trash2 className="w-4 h-4" />
+                                  </button>
                                 )}
                               </div>
                             </td>
@@ -1086,7 +1169,8 @@ export default function HomePage() {
                       key={property.id}
                       property={property}
                       lang={lang}
-                      isAdmin={isUnlocked}
+                      isAdmin={isStaff}
+                      canDelete={isAdmin}
                       onView={(p) => setDetailProperty(p)}
                       onEdit={handleEditProperty}
                       onDelete={handleDeleteProperty}
@@ -1167,7 +1251,8 @@ export default function HomePage() {
                             key={property.id}
                             property={property}
                             lang={lang}
-                            isAdmin={isUnlocked}
+                            isAdmin={isStaff}
+                            canDelete={isAdmin}
                             onView={(p) => setDetailProperty(p)}
                             onEdit={handleEditProperty}
                             onDelete={handleDeleteProperty}
@@ -1186,7 +1271,8 @@ export default function HomePage() {
                     key={property.id}
                     property={property}
                     lang={lang}
-                    isAdmin={isUnlocked}
+                    isAdmin={isStaff}
+                    canDelete={isAdmin}
                     onView={(p) => setDetailProperty(p)}
                     onEdit={handleEditProperty}
                     onDelete={handleDeleteProperty}
@@ -1207,8 +1293,8 @@ export default function HomePage() {
           />
         )}
 
-        {/* TAB 4: CONTRACTS & LEASING (ADMIN ONLY) */}
-        {isUnlocked && activeTab === 'contracts' && (
+        {/* TAB 4: CONTRACTS & LEASING (STAFF & ADMIN) */}
+        {isStaff && activeTab === 'contracts' && (
           <ContractsView
             contracts={contracts}
             properties={properties}
@@ -1219,7 +1305,7 @@ export default function HomePage() {
         )}
 
         {/* TAB 5: ACCOUNTING & INVESTMENT (ADMIN ONLY) */}
-        {isUnlocked && activeTab === 'accounting' && (
+        {isAdmin && activeTab === 'accounting' && (
           <AccountingView
             transactions={transactions}
             properties={properties}
@@ -1249,7 +1335,8 @@ export default function HomePage() {
         onClose={() => setDetailProperty(null)}
         onEdit={handleEditProperty}
         onDelete={handleDeleteProperty}
-        isAdmin={isUnlocked}
+        isAdmin={isAdmin}
+        isStaff={isStaff}
         lang={lang}
       />
 
@@ -1263,6 +1350,13 @@ export default function HomePage() {
         onChangeTheme={handleThemeChange}
         bgPattern={bgPattern}
         onChangeBgPattern={handleBgPatternChange}
+      />
+
+      {/* Employee Management Modal (Admin Only) */}
+      <EmployeeManagementModal
+        isOpen={employeesModalOpen}
+        onClose={() => setEmployeesModalOpen(false)}
+        lang={lang}
       />
 
       {/* Footer */}

@@ -35,7 +35,7 @@ export function resetRateLimit(ip: string): void {
 /**
  * Sign payload: payload.signature
  */
-export function createSignedToken(data: { role: string; expiresAt: number }): string {
+export function createSignedToken(data: { role: string; expiresAt: number; user?: any }): string {
   const payloadStr = Buffer.from(JSON.stringify(data)).toString('base64url');
   const hmac = crypto.createHmac('sha256', SESSION_SECRET);
   hmac.update(payloadStr);
@@ -46,7 +46,7 @@ export function createSignedToken(data: { role: string; expiresAt: number }): st
 /**
  * Verify signed token
  */
-export function verifyToken(token: string): { valid: boolean; role?: string } {
+export function verifyToken(token: string): { valid: boolean; role?: string; user?: any } {
   if (!token || !token.includes('.')) return { valid: false };
 
   const [payloadStr, signature] = token.split('.');
@@ -66,7 +66,7 @@ export function verifyToken(token: string): { valid: boolean; role?: string } {
     const data = JSON.parse(jsonStr);
 
     if (typeof data.expiresAt === 'number' && data.expiresAt > Date.now()) {
-      return { valid: true, role: data.role || 'admin' };
+      return { valid: true, role: data.role || 'admin', user: data.user };
     }
   } catch {
     return { valid: false };
@@ -112,12 +112,12 @@ export function verifyAdminPassword(input: string, customPinHash?: string | null
 /**
  * Verify request authentication from session cookie or Authorization header
  */
-export function verifySessionRequest(req: NextRequest): { authenticated: boolean; role?: string } {
+export function verifySessionRequest(req: NextRequest): { authenticated: boolean; role?: string; user?: any } {
   // Check cookie
   const cookie = req.cookies.get(SESSION_COOKIE_NAME);
   if (cookie?.value) {
     const result = verifyToken(cookie.value);
-    if (result.valid) return { authenticated: true, role: result.role };
+    if (result.valid) return { authenticated: true, role: result.role, user: result.user };
   }
 
   // Check Bearer header fallback
@@ -125,7 +125,7 @@ export function verifySessionRequest(req: NextRequest): { authenticated: boolean
   if (authHeader && authHeader.startsWith('Bearer ')) {
     const token = authHeader.substring(7).trim();
     const result = verifyToken(token);
-    if (result.valid) return { authenticated: true, role: result.role };
+    if (result.valid) return { authenticated: true, role: result.role, user: result.user };
   }
 
   return { authenticated: false };
