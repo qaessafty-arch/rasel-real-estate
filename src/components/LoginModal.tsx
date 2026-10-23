@@ -182,6 +182,12 @@ export const LoginModal: React.FC<LoginModalProps> = ({
           </button>
         </form>
 
+        {/* Developer Watermark */}
+        <div className="mt-4 pt-3 border-t border-slate-800/60 text-[10px] text-slate-500 font-mono flex items-center justify-center gap-1.5 select-none">
+          <span>developed by</span>
+          <span className="text-amber-400/90 font-bold tracking-wide">null-tech</span>
+        </div>
+
       </div>
     </div>
   );

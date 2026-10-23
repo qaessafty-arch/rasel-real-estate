@@ -559,6 +559,11 @@ export const Navbar: React.FC<NavbarProps> = ({
             </div>
           )}
 
+          {/* Watermark in mobile menu */}
+          <div className="pt-3 text-center text-[10px] text-slate-500 font-mono select-none">
+            developed by <span className="text-amber-400 font-bold">null-tech</span>
+          </div>
+
         </div>
       )}
     </header>

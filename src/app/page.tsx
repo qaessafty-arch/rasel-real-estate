@@ -1360,7 +1360,7 @@ export default function HomePage() {
       />
 
       {/* Footer */}
-      <footer className="mt-auto border-t border-slate-900 bg-slate-950/80 py-6 text-center text-xs text-slate-500">
+      <footer className="mt-auto border-t border-slate-900 bg-slate-950/90 py-6 text-center text-xs text-slate-500">
         <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3">
           <div className="flex items-center gap-2">
             <img src="/logo.png" alt="Nashville House" className="w-5 h-5 rounded-md object-cover" />
@@ -1374,6 +1374,20 @@ export default function HomePage() {
               : lang === 'ar'
               ? 'خاص، آمن، ومتوافق مع الهواتف الذكية وأجهزة الكمبيوتر'
               : 'تایبەت، پارێزراو و پشتگیریکراو لە مۆبایل و کۆمپیوتەر'}
+          </div>
+        </div>
+
+        {/* Developer Watermark */}
+        <div className="mt-4 pt-3 border-t border-slate-900/80 max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2 text-[11px] text-slate-500 font-mono">
+          <div className="text-slate-600">
+            © {new Date().getFullYear()} Nashville House Real Estate. All rights reserved.
+          </div>
+          <div className="flex items-center gap-1.5 select-none text-slate-400">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+            <span>developed by</span>
+            <span className="font-bold text-amber-400 bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 rounded-md hover:bg-amber-500/20 hover:border-amber-500/40 transition-colors">
+              null-tech
+            </span>
           </div>
         </div>
       </footer>
