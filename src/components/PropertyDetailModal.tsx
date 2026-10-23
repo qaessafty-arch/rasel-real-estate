@@ -284,7 +284,7 @@ export const PropertyDetailModal: React.FC<PropertyDetailModalProps> = ({
             </div>
 
             <div className="text-left sm:text-right">
-              <div className="text-2xl sm:text-3xl font-black text-amber-400 font-mono">
+              <div className="text-2xl sm:text-3xl font-black text-amber-400 font-mono" dir="ltr">
                 {formatPrice(property.price, property.currency, lang)}
               </div>
               {property.purpose === 'rent' && (
@@ -471,7 +471,10 @@ export const PropertyDetailModal: React.FC<PropertyDetailModalProps> = ({
                   <span className="font-bold text-white text-sm">{property.owner_contact?.name || 'دیاری نەکراوە'}</span>
                   {property.owner_contact?.phone && (
                     <a href={`tel:${property.owner_contact.phone}`} className="font-mono text-amber-400 block mt-1 hover:underline">
-                      📞 {property.owner_contact.phone}
+                      <span className="flex items-center gap-1">
+                        <span>📞</span>
+                        <span dir="ltr" className="inline-block font-mono">{property.owner_contact.phone}</span>
+                      </span>
                     </a>
                   )}
                 </div>
@@ -533,8 +536,11 @@ export const PropertyDetailModal: React.FC<PropertyDetailModalProps> = ({
                   rel="noopener noreferrer"
                   className="py-2.5 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/20 transition-all active:scale-95"
                 >
-                  <Send className="w-4 h-4" />
-                  <span>واتسئەپ ١: 0750 150 0505</span>
+                  <Send className="w-4 h-4 shrink-0" />
+                  <span className="flex items-center gap-1.5">
+                    <span>واتسئەپ ١:</span>
+                    <span dir="ltr" className="font-mono tracking-wider">0750 150 0505</span>
+                  </span>
                 </a>
 
                 <a
@@ -543,8 +549,11 @@ export const PropertyDetailModal: React.FC<PropertyDetailModalProps> = ({
                   rel="noopener noreferrer"
                   className="py-2.5 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/20 transition-all active:scale-95"
                 >
-                  <Send className="w-4 h-4" />
-                  <span>واتسئەپ ٢: 0750 214 6614</span>
+                  <Send className="w-4 h-4 shrink-0" />
+                  <span className="flex items-center gap-1.5">
+                    <span>واتسئەپ ٢:</span>
+                    <span dir="ltr" className="font-mono tracking-wider">0750 214 6614</span>
+                  </span>
                 </a>
               </div>
 
@@ -552,12 +561,12 @@ export const PropertyDetailModal: React.FC<PropertyDetailModalProps> = ({
                 <div className="flex items-center gap-3">
                   <a href="tel:07501500505" className="text-amber-400 hover:underline flex items-center gap-1 font-mono font-bold">
                     <Phone className="w-3.5 h-3.5" />
-                    <span>0750 150 0505</span>
+                    <span dir="ltr">0750 150 0505</span>
                   </a>
                   <span className="text-slate-600">•</span>
                   <a href="tel:07502146614" className="text-amber-400 hover:underline flex items-center gap-1 font-mono font-bold">
                     <Phone className="w-3.5 h-3.5" />
-                    <span>0750 214 6614</span>
+                    <span dir="ltr">0750 214 6614</span>
                   </a>
                 </div>
 

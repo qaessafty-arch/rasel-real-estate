@@ -618,8 +618,11 @@ export default function HomePage() {
                     rel="noopener noreferrer"
                     className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-lg shadow-emerald-600/20 transition-all active:scale-95"
                   >
-                    <Send className="w-4 h-4" />
-                    <span>پەیوەندی لەگەڵ نەشڤیل هاوس (0750 150 0505)</span>
+                    <Send className="w-4 h-4 shrink-0" />
+                    <span className="flex items-center gap-1.5">
+                      <span>پەیوەندی لەگەڵ نەشڤیل هاوس</span>
+                      <span dir="ltr" className="font-mono">(0750 150 0505)</span>
+                    </span>
                   </a>
                 )}
               </div>
@@ -1031,8 +1034,11 @@ export default function HomePage() {
                       rel="noopener noreferrer"
                       className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-lg shadow-emerald-600/20 active:scale-95"
                     >
-                      <Send className="w-3.5 h-3.5" />
-                      <span>واتسئەپ ١: 0750 150 0505</span>
+                      <Send className="w-3.5 h-3.5 shrink-0" />
+                      <span className="flex items-center gap-1.5">
+                        <span>واتسئەپ ١:</span>
+                        <span dir="ltr" className="font-mono">0750 150 0505</span>
+                      </span>
                     </a>
                     <a
                       href="https://wa.me/9647502146614?text=سڵاو،%20دەمەوێت%20ڕاوێژ%20بکەم%20دەربارەی%20کڕین%20یان%20فرۆشتنی%20موڵک"
@@ -1040,8 +1046,11 @@ export default function HomePage() {
                       rel="noopener noreferrer"
                       className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-lg shadow-emerald-600/20 active:scale-95"
                     >
-                      <Send className="w-3.5 h-3.5" />
-                      <span>واتسئەپ ٢: 0750 214 6614</span>
+                      <Send className="w-3.5 h-3.5 shrink-0" />
+                      <span className="flex items-center gap-1.5">
+                        <span>واتسئەپ ٢:</span>
+                        <span dir="ltr" className="font-mono">0750 214 6614</span>
+                      </span>
                     </a>
                   </div>
                 </div>
@@ -1116,7 +1125,7 @@ export default function HomePage() {
                               )}
                             </td>
                             <td className="p-3.5 font-mono">
-                              <span className="font-bold text-emerald-400 block text-sm">
+                              <span className="font-bold text-emerald-400 block text-sm" dir="ltr">
                                 {formatPrice(p.price, p.currency, lang)}
                               </span>
                               <span className="text-[10px] text-slate-400">
@@ -1402,10 +1411,12 @@ export default function HomePage() {
           <div className="flex flex-wrap items-center gap-3">
             <span className="text-slate-400 font-semibold">پەیوەندی و واتسئەپ:</span>
             <a href="https://wa.me/9647501500505" target="_blank" rel="noopener noreferrer" className="font-mono text-emerald-400 hover:text-emerald-300 font-bold flex items-center gap-1.5 bg-emerald-950/40 border border-emerald-900/60 px-2.5 py-1 rounded-lg transition-colors">
-              <span>📱 0750 150 0505</span>
+              <span>📱</span>
+              <span dir="ltr">0750 150 0505</span>
             </a>
             <a href="https://wa.me/9647502146614" target="_blank" rel="noopener noreferrer" className="font-mono text-emerald-400 hover:text-emerald-300 font-bold flex items-center gap-1.5 bg-emerald-950/40 border border-emerald-900/60 px-2.5 py-1 rounded-lg transition-colors">
-              <span>📱 0750 214 6614</span>
+              <span>📱</span>
+              <span dir="ltr">0750 214 6614</span>
             </a>
           </div>
           <div className="text-[11px] text-slate-500 font-mono">

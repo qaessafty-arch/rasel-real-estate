@@ -98,7 +98,7 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
         {/* Price Tag Overlay */}
         <div className="absolute bottom-3 right-3 left-3 flex items-end justify-between">
           <div>
-            <div className="text-xl sm:text-2xl font-black text-white font-mono drop-shadow-md">
+            <div className="text-xl sm:text-2xl font-black text-white font-mono drop-shadow-md" dir="ltr">
               {formatPrice(property.price, property.currency, lang)}
             </div>
             {property.purpose === 'rent' && (

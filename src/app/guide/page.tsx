@@ -298,10 +298,12 @@ export default function GuidePage() {
           <div className="text-xs font-bold text-white">ژمارە فەرمییەکانی پەیوەندی و واتسئەپی نوسینگە:</div>
           <div className="flex flex-wrap items-center justify-center gap-3 font-mono text-xs">
             <a href="https://wa.me/9647501500505" target="_blank" rel="noopener noreferrer" className="px-3 py-1.5 rounded-lg bg-emerald-950/60 border border-emerald-800 text-emerald-400 font-bold hover:underline flex items-center gap-1.5">
-              <span>📱 0750 150 0505</span>
+              <span>📱</span>
+              <span dir="ltr">0750 150 0505</span>
             </a>
             <a href="https://wa.me/9647502146614" target="_blank" rel="noopener noreferrer" className="px-3 py-1.5 rounded-lg bg-emerald-950/60 border border-emerald-800 text-emerald-400 font-bold hover:underline flex items-center gap-1.5">
-              <span>📱 0750 214 6614</span>
+              <span>📱</span>
+              <span dir="ltr">0750 214 6614</span>
             </a>
           </div>
         </div>

@@ -557,7 +557,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 rel="noopener noreferrer"
                 className="flex items-center justify-center gap-1 p-2 rounded-xl bg-emerald-950/40 border border-emerald-900/60 text-emerald-400 font-bold hover:bg-emerald-900/50"
               >
-                <span>0750 150 0505</span>
+                <span dir="ltr">0750 150 0505</span>
               </a>
               <a
                 href="https://wa.me/9647502146614"
@@ -565,7 +565,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 rel="noopener noreferrer"
                 className="flex items-center justify-center gap-1 p-2 rounded-xl bg-emerald-950/40 border border-emerald-900/60 text-emerald-400 font-bold hover:bg-emerald-900/50"
               >
-                <span>0750 214 6614</span>
+                <span dir="ltr">0750 214 6614</span>
               </a>
             </div>
           </div>
