@@ -158,8 +158,12 @@ export const Navbar: React.FC<NavbarProps> = ({
           
           {/* 1. Logo & Agency Title */}
           <div className="flex items-center gap-2.5 sm:gap-3 shrink-0">
-            <div className="relative flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-gradient-to-br from-amber-500 via-amber-600 to-amber-700 shadow-md shadow-amber-500/20 text-slate-950 shrink-0">
-              <Building2 className="w-6 h-6 stroke-[2.2]" />
+            <div className="relative flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 rounded-2xl overflow-hidden bg-slate-950 border border-slate-700/80 shadow-md shadow-sky-950/50 shrink-0">
+              <img
+                src="/logo.png"
+                alt="Nashville House Logo"
+                className="w-full h-full object-cover scale-105"
+              />
               <span className="absolute -top-1 -right-1 flex h-2.5 w-2.5">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>

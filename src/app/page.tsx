@@ -1016,8 +1016,8 @@ export default function HomePage() {
               ) : (
                 /* Customer View When Portfolio is Updating */
                 <div className="p-12 sm:p-16 text-center rounded-3xl glass-card border border-slate-800 space-y-4 max-w-xl mx-auto my-6">
-                  <div className="w-16 h-16 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center mx-auto text-amber-400">
-                    <Building2 className="w-8 h-8" />
+                  <div className="w-20 h-20 rounded-3xl overflow-hidden border border-slate-700/80 mx-auto shadow-2xl shadow-sky-950/60 bg-slate-950 flex items-center justify-center">
+                    <img src="/logo.png" alt="Nashville House" className="w-full h-full object-cover scale-105" />
                   </div>
                   <h3 className="text-xl font-black text-white">کۆمپانیای نەشڤیل هاوس (Nashville House)</h3>
                   <p className="text-sm text-slate-300 leading-relaxed max-w-md mx-auto">
@@ -1363,7 +1363,7 @@ export default function HomePage() {
       <footer className="mt-auto border-t border-slate-900 bg-slate-950/80 py-6 text-center text-xs text-slate-500">
         <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3">
           <div className="flex items-center gap-2">
-            <Building2 className="w-4 h-4 text-amber-500" />
+            <img src="/logo.png" alt="Nashville House" className="w-5 h-5 rounded-md object-cover" />
             <span className="font-bold text-slate-400">{t.agency_title}</span>
             <span>—</span>
             <span>{t.agency_subtitle}</span>

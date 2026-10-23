@@ -97,8 +97,8 @@ export const LoginModal: React.FC<LoginModalProps> = ({
         )}
 
         {/* Agency Emblem */}
-        <div className="mx-auto w-14 h-14 rounded-2xl bg-gradient-to-tr from-amber-500 to-amber-600 flex items-center justify-center text-slate-950 shadow-xl shadow-amber-500/25 mb-3">
-          <Building2 className="w-7 h-7 stroke-[2.2]" />
+        <div className="mx-auto w-16 h-16 rounded-2xl overflow-hidden shadow-xl shadow-sky-950/60 mb-3 border border-slate-700/80 bg-slate-950 flex items-center justify-center">
+          <img src="/logo.png" alt="Nashville House" className="w-full h-full object-cover scale-105" />
         </div>
 
         <h2 id="login-modal-title" className="text-xl sm:text-2xl font-black text-white tracking-wide mb-1">
