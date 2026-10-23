@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
+import Link from 'next/link';
 import { 
   Building2, 
   Search, 
@@ -1368,12 +1369,21 @@ export default function HomePage() {
             <span>—</span>
             <span>{t.agency_subtitle}</span>
           </div>
-          <div className="text-[11px] text-slate-500">
-            {lang === 'en' 
-              ? 'Private, secure, optimized for mobile, tablet and desktop'
-              : lang === 'ar'
-              ? 'خاص، آمن، ومتوافق مع الهواتف الذكية وأجهزة الكمبيوتر'
-              : 'تایبەت، پارێزراو و پشتگیریکراو لە مۆبایل و کۆمپیوتەر'}
+          <div className="flex flex-wrap items-center gap-2.5 text-[11px] text-slate-500">
+            <Link 
+              href="/guide" 
+              className="text-amber-400 hover:text-amber-300 font-bold underline underline-offset-4 flex items-center gap-1"
+            >
+              📖 ڕێبەری بەکارهێنان
+            </Link>
+            <span className="hidden sm:inline">•</span>
+            <span>
+              {lang === 'en' 
+                ? 'Private, secure, optimized for mobile, tablet and desktop'
+                : lang === 'ar'
+                ? 'خاص، آمن، ومتوافق مع الهواتف الذكية وأجهزة الكمبيوتر'
+                : 'تایبەت، پارێزراو و پشتگیریکراو لە مۆبایل و کۆمپیوتەر'}
+            </span>
           </div>
         </div>
 

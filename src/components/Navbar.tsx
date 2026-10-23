@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import Link from 'next/link';
 import { 
   Building2, 
   Home, 
@@ -24,7 +25,8 @@ import {
   LayoutGrid,
   Users,
   ShieldCheck,
-  UserCheck
+  UserCheck,
+  BookOpen
 } from 'lucide-react';
 import { isSupabaseConfigured } from '@/lib/supabase';
 import { Language, translations } from '@/lib/i18n';
@@ -543,9 +545,21 @@ export const Navbar: React.FC<NavbarProps> = ({
             </div>
           </div>
 
+          {/* Quick Guide Link on Mobile */}
+          <div className="pt-2 border-t border-slate-800">
+            <Link
+              href="/guide"
+              onClick={() => setMobileMenuOpen(false)}
+              className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-xl bg-slate-900 text-slate-300 hover:text-white text-xs font-semibold border border-slate-800"
+            >
+              <BookOpen className="w-3.5 h-3.5 text-amber-400" />
+              <span>ڕێبەری بەکارهێنانی ماڵپەڕ (Guide)</span>
+            </Link>
+          </div>
+
           {/* If NOT staff, show Staff Login in mobile menu */}
           {!isStaff && (
-            <div className="pt-2 border-t border-slate-800">
+            <div className="pt-1">
               <button
                 onClick={() => {
                   onOpenLoginModal();
@@ -560,7 +574,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           )}
 
           {/* Watermark in mobile menu */}
-          <div className="pt-3 text-center text-[10px] text-slate-500 font-mono select-none">
+          <div className="pt-2 text-center text-[10px] text-slate-500 font-mono select-none">
             developed by <span className="text-amber-400 font-bold">null-tech</span>
           </div>
 
