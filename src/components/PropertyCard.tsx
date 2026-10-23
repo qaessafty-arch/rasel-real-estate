@@ -45,7 +45,7 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
   const handleWhatsApp = (e: React.MouseEvent) => {
     e.stopPropagation();
     const text = generateWhatsAppMessage(property, lang);
-    window.open(`https://wa.me/?text=${text}`, '_blank');
+    window.open(`https://wa.me/9647501500505?text=${text}`, '_blank');
   };
 
   return (

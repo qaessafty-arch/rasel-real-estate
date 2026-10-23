@@ -613,13 +613,13 @@ export default function HomePage() {
                   </button>
                 ) : (
                   <a
-                    href="https://wa.me/?text=سڵاو،%20دەمەوێت%20ڕاوێژ%20بکەم%20دەربارەی%20کڕین%20یان%20فرۆشتنی%20موڵک%20لە%20نەشڤیل%20هاوس"
+                    href="https://wa.me/9647501500505?text=سڵاو،%20دەمەوێت%20ڕاوێژ%20بکەم%20دەربارەی%20کڕین%20یان%20فرۆشتنی%20موڵک%20لە%20نەشڤیل%20هاوس"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-lg shadow-emerald-600/20 transition-all"
+                    className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-lg shadow-emerald-600/20 transition-all active:scale-95"
                   >
                     <Send className="w-4 h-4" />
-                    <span>پەیوەندی لەگەڵ نەشڤیل هاوس</span>
+                    <span>پەیوەندی لەگەڵ نەشڤیل هاوس (0750 150 0505)</span>
                   </a>
                 )}
               </div>
@@ -1024,14 +1024,24 @@ export default function HomePage() {
                   <p className="text-sm text-slate-300 leading-relaxed max-w-md mx-auto">
                     لیستی موڵکەکان لە ئێستادا نوێ دەکرێتەوە. بۆ دۆزینەوەی باشترین خانوو، ڤێلا، شوقە یان زەوی، پەیوەندی بە ڕاوێژکارانی نەشڤیل هاوس بکەن.
                   </p>
-                  <div className="pt-2">
+                  <div className="flex flex-wrap items-center justify-center gap-2.5 pt-2">
                     <a
-                      href="https://wa.me/?text=سڵاو،%20دەمەوێت%20ڕاوێژ%20بکەم%20دەربارەی%20کڕین%20یان%20فرۆشتنی%20موڵک"
+                      href="https://wa.me/9647501500505?text=سڵاو،%20دەمەوێت%20ڕاوێژ%20بکەم%20دەربارەی%20کڕین%20یان%20فرۆشتنی%20موڵک"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-lg shadow-emerald-600/20"
+                      className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-lg shadow-emerald-600/20 active:scale-95"
                     >
-                      <span>پەیوەندی لەگەڵ نوسینگە لە واتسئەپ</span>
+                      <Send className="w-3.5 h-3.5" />
+                      <span>واتسئەپ ١: 0750 150 0505</span>
+                    </a>
+                    <a
+                      href="https://wa.me/9647502146614?text=سڵاو،%20دەمەوێت%20ڕاوێژ%20بکەم%20دەربارەی%20کڕین%20یان%20فرۆشتنی%20موڵک"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-lg shadow-emerald-600/20 active:scale-95"
+                    >
+                      <Send className="w-3.5 h-3.5" />
+                      <span>واتسئەپ ٢: 0750 214 6614</span>
                     </a>
                   </div>
                 </div>
@@ -1384,6 +1394,22 @@ export default function HomePage() {
                 ? 'خاص، آمن، ومتوافق مع الهواتف الذكية وأجهزة الكمبيوتر'
                 : 'تایبەت، پارێزراو و پشتگیریکراو لە مۆبایل و کۆمپیوتەر'}
             </span>
+          </div>
+        </div>
+
+        {/* Contact Numbers Strip */}
+        <div className="mt-4 pt-3 border-t border-slate-900/80 max-w-7xl mx-auto px-4 flex flex-wrap items-center justify-between gap-3 text-xs">
+          <div className="flex flex-wrap items-center gap-3">
+            <span className="text-slate-400 font-semibold">پەیوەندی و واتسئەپ:</span>
+            <a href="https://wa.me/9647501500505" target="_blank" rel="noopener noreferrer" className="font-mono text-emerald-400 hover:text-emerald-300 font-bold flex items-center gap-1.5 bg-emerald-950/40 border border-emerald-900/60 px-2.5 py-1 rounded-lg transition-colors">
+              <span>📱 0750 150 0505</span>
+            </a>
+            <a href="https://wa.me/9647502146614" target="_blank" rel="noopener noreferrer" className="font-mono text-emerald-400 hover:text-emerald-300 font-bold flex items-center gap-1.5 bg-emerald-950/40 border border-emerald-900/60 px-2.5 py-1 rounded-lg transition-colors">
+              <span>📱 0750 214 6614</span>
+            </a>
+          </div>
+          <div className="text-[11px] text-slate-500 font-mono">
+            Erbil, Kurdistan Region, Iraq
           </div>
         </div>
 

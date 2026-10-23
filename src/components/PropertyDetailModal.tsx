@@ -100,7 +100,7 @@ export const PropertyDetailModal: React.FC<PropertyDetailModalProps> = ({
 
   const handleWhatsAppShare = () => {
     const text = generateWhatsAppMessage(property, lang);
-    const url = `https://wa.me/?text=${text}`;
+    const url = `https://wa.me/9647501500505?text=${text}`;
     window.open(url, '_blank');
   };
 
@@ -526,26 +526,50 @@ export const PropertyDetailModal: React.FC<PropertyDetailModalProps> = ({
                 بۆ ڕێکخستنی کاتی سەردانیکردنی ئەم موڵکە، وەرگرتنی زانیاری زیاتر یان دەستپێکردنی گفتوگۆی کڕین و مامەڵە، ڕاستەوخۆ پەیوەندی بە نوسینگەی نەشڤیل هاوس بکەن.
               </p>
 
-              <div className="flex flex-wrap items-center gap-2.5 pt-1">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
                 <a
-                  href={`https://wa.me/?text=${encodeURIComponent('سڵاو، دەمەوێت پەیوەندی بکەم لەسەر موڵکی: ' + property.title + ' بە کۆدی: ' + property.property_code + ' لەسەر ماڵپەڕی نەشڤیل هاوس')}`}
+                  href={`https://wa.me/9647501500505?text=${encodeURIComponent('سڵاو، دەمەوێت پەیوەندی بکەم لەسەر موڵکی: ' + property.title + ' بە کۆدی: ' + property.property_code + ' لەسەر ماڵپەڕی نەشڤیل هاوس')}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex-1 py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/20 transition-all"
+                  className="py-2.5 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/20 transition-all active:scale-95"
                 >
                   <Send className="w-4 h-4" />
-                  <span>پەیوەندی لە واتسئەپ (WhatsApp)</span>
+                  <span>واتسئەپ ١: 0750 150 0505</span>
                 </a>
+
+                <a
+                  href={`https://wa.me/9647502146614?text=${encodeURIComponent('سڵاو، دەمەوێت پەیوەندی بکەم لەسەر موڵکی: ' + property.title + ' بە کۆدی: ' + property.property_code + ' لەسەر ماڵپەڕی نەشڤیل هاوس')}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="py-2.5 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/20 transition-all active:scale-95"
+                >
+                  <Send className="w-4 h-4" />
+                  <span>واتسئەپ ٢: 0750 214 6614</span>
+                </a>
+              </div>
+
+              <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-800/80 text-xs">
+                <div className="flex items-center gap-3">
+                  <a href="tel:07501500505" className="text-amber-400 hover:underline flex items-center gap-1 font-mono font-bold">
+                    <Phone className="w-3.5 h-3.5" />
+                    <span>0750 150 0505</span>
+                  </a>
+                  <span className="text-slate-600">•</span>
+                  <a href="tel:07502146614" className="text-amber-400 hover:underline flex items-center gap-1 font-mono font-bold">
+                    <Phone className="w-3.5 h-3.5" />
+                    <span>0750 214 6614</span>
+                  </a>
+                </div>
 
                 {property.lat && property.lng && (
                   <a
                     href={`https://www.google.com/maps/dir/?api=1&destination=${property.lat},${property.lng}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="py-3 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-sky-400 hover:text-white font-bold text-xs flex items-center gap-1.5 border border-slate-700 transition-all"
+                    className="py-1.5 px-3 rounded-lg bg-slate-800 hover:bg-slate-700 text-sky-400 hover:text-white font-semibold text-xs flex items-center gap-1 border border-slate-700 transition-all"
                   >
-                    <Navigation className="w-4 h-4" />
-                    <span>ڕێگای Google Maps</span>
+                    <Navigation className="w-3.5 h-3.5" />
+                    <span>Google Maps</span>
                   </a>
                 )}
               </div>

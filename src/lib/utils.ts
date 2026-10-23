@@ -143,6 +143,19 @@ export function sqmToDonum(sqm: number): { donum: number; olk: number; remainder
   return { donum, olk, remainderSqm };
 }
 
+export const AGENCY_CONTACTS = {
+  phone1: '0750 150 0505',
+  phone2: '0750 214 6614',
+  whatsapp1: '9647501500505',
+  whatsapp2: '9647502146614',
+  website: 'https://www.nashvillehouse.site',
+};
+
+export function getWhatsAppUrl(phone: string = AGENCY_CONTACTS.whatsapp1, messageText: string = ''): string {
+  const cleanPhone = phone.replace(/\D/g, '');
+  return `https://wa.me/${cleanPhone}${messageText ? `?text=${encodeURIComponent(messageText)}` : ''}`;
+}
+
 export function generateWhatsAppMessage(property: Property, lang: Language = 'ckb'): string {
   const t = translations[lang] as any;
   const price = formatPrice(property.price, property.currency, lang);
@@ -162,8 +175,10 @@ ${property.project_name ? `🏢 ${t.project}: *${property.project_name}* (نهۆ
 ${property.payment_method === 'installments' ? `💳 پێشەکی: ${formatPrice(property.down_payment || 0, property.currency, lang)} - قیست: ${property.installment_cycle || 'مانگانە'}` : ''}
 ${property.land_details?.frontage_meter ? `📐 بەرەی شەقام: ${property.land_details.frontage_meter}م ${property.land_details.depth_meter ? `× ${property.land_details.depth_meter}م قووڵی` : ''} | پانی شەقام: ${property.land_details.street_width || '—'}م` : ''}
 ${property.video_url ? `🎥 ڤیدیۆ: ${property.video_url}` : ''}
-🌐 ماڵپەڕ: https://nashvillehouse.site
-📞 پەیوەندی بە نوسینگەی نەشڤیل هاوس (Nashville House): 0750 000 0000`;
+🌐 ماڵپەڕ: https://www.nashvillehouse.site
+📞 پەیوەندی بە نوسینگەی نەشڤیل هاوس (Nashville House):
+📱 0750 150 0505
+📱 0750 214 6614`;
 
   return encodeURIComponent(text);
 }

@@ -335,8 +335,8 @@ export default function MapInner({ properties, onSelectProperty, lang = 'ckb' }:
   // WhatsApp Share with Location
   const handleShareWhatsApp = (property: Property) => {
     const mapsUrl = `https://www.google.com/maps?q=${property.lat},${property.lng}`;
-    const text = `🏡 *Nashville House Real Estate*\n📍 *${property.title}* (${property.property_code})\n💰 نرخ: ${property.price} ${property.currency}\n🗺️ شوێن لەسەر نەخشە:\n${mapsUrl}`;
-    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+    const text = `🏡 *Nashville House Real Estate*\n📍 *${property.title}* (${property.property_code})\n💰 نرخ: ${property.price} ${property.currency}\n🗺️ شوێن لەسەر نەخشە:\n${mapsUrl}\n📞 0750 150 0505 | 0750 214 6614`;
+    window.open(`https://wa.me/9647501500505?text=${encodeURIComponent(text)}`, '_blank');
   };
 
   return (
