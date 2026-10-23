@@ -46,8 +46,8 @@ export default function HomePage() {
   const [lang, setLang] = useState<Language>('ckb');
 
   // Chooseable UI Theme, Background & Layout Modes
-  const [theme, setTheme] = useState<UITheme>('gold');
-  const [bgPattern, setBgPattern] = useState<UIBackground>('obsidian');
+  const [theme, setTheme] = useState<UITheme>('minimalism');
+  const [bgPattern, setBgPattern] = useState<UIBackground>('minimalism');
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
 
   // Category Division & Grouped Sections state (managed by usePropertyFilters)
@@ -71,12 +71,15 @@ export default function HomePage() {
         setTheme(savedTheme);
         document.documentElement.setAttribute('data-theme', savedTheme);
       } else {
-        document.documentElement.setAttribute('data-theme', 'gold');
+        setTheme('minimalism');
+        document.documentElement.setAttribute('data-theme', 'minimalism');
       }
 
       const savedBg = localStorage.getItem('rasel_ui_bg') as UIBackground;
-      if (savedBg && ['obsidian', 'blueprint', 'topographic', 'dots', 'carbon', 'aurora', 'pearl'].includes(savedBg)) {
+      if (savedBg && ['obsidian', 'blueprint', 'topographic', 'dots', 'carbon', 'aurora', 'pearl', 'minimalism'].includes(savedBg)) {
         setBgPattern(savedBg);
+      } else {
+        setBgPattern('minimalism');
       }
 
       const savedView = localStorage.getItem('rasel_view_mode') as ViewMode;
@@ -103,13 +106,15 @@ export default function HomePage() {
 
   const getBgClass = (bg: UIBackground) => {
     switch (bg) {
+      case 'minimalism': return 'bg-pattern-minimalism';
       case 'blueprint': return 'bg-pattern-blueprint';
       case 'topographic': return 'bg-pattern-topographic';
       case 'dots': return 'bg-pattern-dots';
       case 'carbon': return 'bg-pattern-carbon';
       case 'aurora': return 'bg-pattern-aurora';
       case 'pearl': return 'bg-pattern-pearl';
-      default: return 'bg-pattern-obsidian';
+      case 'obsidian': return 'bg-pattern-obsidian';
+      default: return 'bg-pattern-minimalism';
     }
   };
 

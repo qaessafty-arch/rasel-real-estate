@@ -20,7 +20,7 @@ export type Currency = 'USD' | 'IQD';
 
 export type UITheme = 'gold' | 'sapphire' | 'emerald' | 'pearl' | 'solid' | 'minimalism' | 'brutalism';
 
-export type UIBackground = 'obsidian' | 'blueprint' | 'topographic' | 'dots' | 'carbon' | 'aurora' | 'pearl';
+export type UIBackground = 'obsidian' | 'blueprint' | 'topographic' | 'dots' | 'carbon' | 'aurora' | 'pearl' | 'minimalism';
 
 export type PropertyDivision = 'all' | 'residential' | 'land' | 'commercial' | 'projects';
 

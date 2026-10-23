@@ -598,6 +598,15 @@ html[lang="ar"],
   background-size: auto, 24px 24px;
 }
 
+/* 8. Minimalism Studio Dark (Clean Scandinavian Charcoal) */
+.bg-pattern-minimalism {
+  background-color: #0b0d10;
+  background-image: 
+    radial-gradient(circle at 50% 0%, rgba(148, 163, 184, 0.05) 0%, transparent 65%),
+    radial-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+  background-size: auto, 28px 28px;
+}
+
 /* ==========================================================================
    PRINT FLYER STYLES (Professional Real Estate PDF / Print Export)
    ========================================================================== */
