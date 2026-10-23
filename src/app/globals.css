@@ -468,6 +468,11 @@ html[lang="ar"],
   border: none !important;
 }
 
+/* 100% Free, No-API-Key Dark Mode Map Tiles via OpenStreetMap CSS inversion */
+.dark-map-tiles .leaflet-tile {
+  filter: invert(100%) hue-rotate(180deg) brightness(85%) contrast(90%) saturate(80%);
+}
+
 @keyframes beacon-pulse {
   0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.7); }
   70% { transform: scale(1); box-shadow: 0 0 0 12px rgba(245, 158, 11, 0); }

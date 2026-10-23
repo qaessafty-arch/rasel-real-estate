@@ -65,9 +65,8 @@ export const dataService = {
     }
 
     // Local fallback
-    const isInit = isStorageInitialized();
     let list = getLocal<Property[]>(STORAGE_KEYS.PROPERTIES, []);
-    if (!isInit && (!list || list.length === 0)) {
+    if (!list || list.length === 0) {
       list = INITIAL_PROPERTIES;
       setLocal(STORAGE_KEYS.PROPERTIES, list);
       markStorageInitialized();
@@ -147,9 +146,8 @@ export const dataService = {
       }
     }
 
-    const isInit = isStorageInitialized();
     let list = getLocal<Contract[]>(STORAGE_KEYS.CONTRACTS, []);
-    if (!isInit && (!list || list.length === 0)) {
+    if (!list || list.length === 0) {
       list = INITIAL_CONTRACTS;
       setLocal(STORAGE_KEYS.CONTRACTS, list);
       markStorageInitialized();
@@ -216,9 +214,8 @@ export const dataService = {
       }
     }
 
-    const isInit = isStorageInitialized();
     let list = getLocal<FinancialTransaction[]>(STORAGE_KEYS.TRANSACTIONS, []);
-    if (!isInit && (!list || list.length === 0)) {
+    if (!list || list.length === 0) {
       list = INITIAL_TRANSACTIONS;
       setLocal(STORAGE_KEYS.TRANSACTIONS, list);
       markStorageInitialized();
