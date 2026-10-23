@@ -45,6 +45,24 @@ CREATE INDEX IF NOT EXISTS idx_properties_type ON public.properties(property_typ
 CREATE INDEX IF NOT EXISTS idx_properties_purpose ON public.properties(purpose);
 CREATE INDEX IF NOT EXISTS idx_properties_city ON public.properties(city);
 
+-- Safely add any new columns to existing properties table
+ALTER TABLE public.properties ADD COLUMN IF NOT EXISTS agency_name VARCHAR(150) DEFAULT 'Rasel Real Estate';
+ALTER TABLE public.properties ADD COLUMN IF NOT EXISTS freelancer_name VARCHAR(150);
+ALTER TABLE public.properties ADD COLUMN IF NOT EXISTS commission_amount NUMERIC(15, 2) DEFAULT 0;
+ALTER TABLE public.properties ADD COLUMN IF NOT EXISTS net_to_owner NUMERIC(15, 2) DEFAULT 0;
+ALTER TABLE public.properties ADD COLUMN IF NOT EXISTS land_details JSONB DEFAULT '{}'::JSONB;
+ALTER TABLE public.properties ADD COLUMN IF NOT EXISTS payment_method VARCHAR(50) DEFAULT 'cash';
+ALTER TABLE public.properties ADD COLUMN IF NOT EXISTS down_payment NUMERIC(15, 2) DEFAULT 0;
+ALTER TABLE public.properties ADD COLUMN IF NOT EXISTS installment_amount NUMERIC(15, 2) DEFAULT 0;
+ALTER TABLE public.properties ADD COLUMN IF NOT EXISTS installment_cycle VARCHAR(50) DEFAULT 'monthly';
+ALTER TABLE public.properties ADD COLUMN IF NOT EXISTS installment_count INTEGER DEFAULT 12;
+ALTER TABLE public.properties ADD COLUMN IF NOT EXISTS project_name VARCHAR(150);
+ALTER TABLE public.properties ADD COLUMN IF NOT EXISTS floor_number VARCHAR(50);
+ALTER TABLE public.properties ADD COLUMN IF NOT EXISTS condition VARCHAR(50) DEFAULT 'brand_new';
+ALTER TABLE public.properties ADD COLUMN IF NOT EXISTS construction_start_date VARCHAR(50);
+ALTER TABLE public.properties ADD COLUMN IF NOT EXISTS completion_date VARCHAR(50);
+ALTER TABLE public.properties ADD COLUMN IF NOT EXISTS video_url TEXT;
+
 -- 2. CONTRACTS (RENTAL & SALE AGREEMENTS)
 CREATE TABLE IF NOT EXISTS public.contracts (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -174,3 +192,6 @@ CREATE POLICY "Allow delete of property-images"
     ON storage.objects FOR DELETE 
     TO anon, authenticated 
     USING (bucket_id = 'property-images');
+
+-- Reload PostgREST API schema cache immediately
+NOTIFY pgrst, 'reload schema';
