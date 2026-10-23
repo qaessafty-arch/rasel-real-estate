@@ -21,6 +21,23 @@ function markStorageInitialized(): void {
   localStorage.setItem('rasel_storage_initialized_v2', 'true');
 }
 
+function ensureStorageInitialized(): void {
+  if (typeof window === 'undefined') return;
+  if (!isStorageInitialized()) {
+    // Only seed demo data if this browser session has NEVER been initialized before
+    if (localStorage.getItem(STORAGE_KEYS.PROPERTIES) === null) {
+      setLocal(STORAGE_KEYS.PROPERTIES, INITIAL_PROPERTIES);
+    }
+    if (localStorage.getItem(STORAGE_KEYS.CONTRACTS) === null) {
+      setLocal(STORAGE_KEYS.CONTRACTS, INITIAL_CONTRACTS);
+    }
+    if (localStorage.getItem(STORAGE_KEYS.TRANSACTIONS) === null) {
+      setLocal(STORAGE_KEYS.TRANSACTIONS, INITIAL_TRANSACTIONS);
+    }
+    markStorageInitialized();
+  }
+}
+
 function getLocal<T>(key: string, fallback: T): T {
   if (typeof window === 'undefined') return fallback;
   try {
@@ -54,7 +71,7 @@ export const dataService = {
           .select('*')
           .order('created_at', { ascending: false });
 
-        if (!error && data && data.length > 0) {
+        if (!error && data) {
           // Keep local cache synced
           setLocal(STORAGE_KEYS.PROPERTIES, data);
           return data as Property[];
@@ -65,12 +82,8 @@ export const dataService = {
     }
 
     // Local fallback
-    let list = getLocal<Property[]>(STORAGE_KEYS.PROPERTIES, []);
-    if (!list || list.length === 0) {
-      list = INITIAL_PROPERTIES;
-      setLocal(STORAGE_KEYS.PROPERTIES, list);
-      markStorageInitialized();
-    }
+    ensureStorageInitialized();
+    const list = getLocal<Property[]>(STORAGE_KEYS.PROPERTIES, []);
     return list || [];
   },
 
@@ -98,7 +111,7 @@ export const dataService = {
     }
 
     // Local storage save
-    const list = getLocal<Property[]>(STORAGE_KEYS.PROPERTIES, INITIAL_PROPERTIES);
+    const list = getLocal<Property[]>(STORAGE_KEYS.PROPERTIES, []);
     const existingIndex = list.findIndex((p) => p.id === property.id);
     if (existingIndex >= 0) {
       list[existingIndex] = { ...property, updated_at: new Date().toISOString() };
@@ -119,7 +132,7 @@ export const dataService = {
       }
     }
 
-    const list = getLocal<Property[]>(STORAGE_KEYS.PROPERTIES, INITIAL_PROPERTIES);
+    const list = getLocal<Property[]>(STORAGE_KEYS.PROPERTIES, []);
     const filtered = list.filter((p) => p.id !== id);
     setLocal(STORAGE_KEYS.PROPERTIES, filtered);
     return true;
@@ -137,7 +150,7 @@ export const dataService = {
           .select('*')
           .order('created_at', { ascending: false });
 
-        if (!error && data && data.length > 0) {
+        if (!error && data) {
           setLocal(STORAGE_KEYS.CONTRACTS, data);
           return data as Contract[];
         }
@@ -146,12 +159,8 @@ export const dataService = {
       }
     }
 
-    let list = getLocal<Contract[]>(STORAGE_KEYS.CONTRACTS, []);
-    if (!list || list.length === 0) {
-      list = INITIAL_CONTRACTS;
-      setLocal(STORAGE_KEYS.CONTRACTS, list);
-      markStorageInitialized();
-    }
+    ensureStorageInitialized();
+    const list = getLocal<Contract[]>(STORAGE_KEYS.CONTRACTS, []);
     return list || [];
   },
 
@@ -173,7 +182,7 @@ export const dataService = {
       }
     }
 
-    const list = getLocal<Contract[]>(STORAGE_KEYS.CONTRACTS, INITIAL_CONTRACTS);
+    const list = getLocal<Contract[]>(STORAGE_KEYS.CONTRACTS, []);
     const idx = list.findIndex((c) => c.id === contract.id);
     if (idx >= 0) list[idx] = contract;
     else list.unshift(contract);
@@ -188,7 +197,7 @@ export const dataService = {
         await sb.from('contracts').delete().eq('id', id);
       } catch (err) {}
     }
-    const list = getLocal<Contract[]>(STORAGE_KEYS.CONTRACTS, INITIAL_CONTRACTS);
+    const list = getLocal<Contract[]>(STORAGE_KEYS.CONTRACTS, []);
     setLocal(STORAGE_KEYS.CONTRACTS, list.filter((c) => c.id !== id));
     return true;
   },
@@ -205,7 +214,7 @@ export const dataService = {
           .select('*')
           .order('date', { ascending: false });
 
-        if (!error && data && data.length > 0) {
+        if (!error && data) {
           setLocal(STORAGE_KEYS.TRANSACTIONS, data);
           return data as FinancialTransaction[];
         }
@@ -214,12 +223,8 @@ export const dataService = {
       }
     }
 
-    let list = getLocal<FinancialTransaction[]>(STORAGE_KEYS.TRANSACTIONS, []);
-    if (!list || list.length === 0) {
-      list = INITIAL_TRANSACTIONS;
-      setLocal(STORAGE_KEYS.TRANSACTIONS, list);
-      markStorageInitialized();
-    }
+    ensureStorageInitialized();
+    const list = getLocal<FinancialTransaction[]>(STORAGE_KEYS.TRANSACTIONS, []);
     return list || [];
   },
 
@@ -243,7 +248,7 @@ export const dataService = {
       } catch (err) {}
     }
 
-    const list = getLocal<FinancialTransaction[]>(STORAGE_KEYS.TRANSACTIONS, INITIAL_TRANSACTIONS);
+    const list = getLocal<FinancialTransaction[]>(STORAGE_KEYS.TRANSACTIONS, []);
     const idx = list.findIndex((t) => t.id === tx.id);
     if (idx >= 0) list[idx] = tx;
     else list.unshift(tx);
@@ -258,7 +263,7 @@ export const dataService = {
         await sb.from('financial_transactions').delete().eq('id', id);
       } catch (err) {}
     }
-    const list = getLocal<FinancialTransaction[]>(STORAGE_KEYS.TRANSACTIONS, INITIAL_TRANSACTIONS);
+    const list = getLocal<FinancialTransaction[]>(STORAGE_KEYS.TRANSACTIONS, []);
     setLocal(STORAGE_KEYS.TRANSACTIONS, list.filter((t) => t.id !== id));
     return true;
   },
@@ -273,9 +278,9 @@ export const dataService = {
     }
 
     try {
-      const localProperties = getLocal<Property[]>(STORAGE_KEYS.PROPERTIES, INITIAL_PROPERTIES);
-      const localContracts = getLocal<Contract[]>(STORAGE_KEYS.CONTRACTS, INITIAL_CONTRACTS);
-      const localTransactions = getLocal<FinancialTransaction[]>(STORAGE_KEYS.TRANSACTIONS, INITIAL_TRANSACTIONS);
+      const localProperties = getLocal<Property[]>(STORAGE_KEYS.PROPERTIES, []);
+      const localContracts = getLocal<Contract[]>(STORAGE_KEYS.CONTRACTS, []);
+      const localTransactions = getLocal<FinancialTransaction[]>(STORAGE_KEYS.TRANSACTIONS, []);
 
       // Call backend route which handles UUID validation, formatting, and bypasses browser adblockers
       const res = await fetch('/api/sync-data', {
@@ -378,9 +383,9 @@ export const dataService = {
   // BACKUP & RESTORE
   // -------------------------------------------------------------
   exportBackup(): string {
-    const properties = getLocal(STORAGE_KEYS.PROPERTIES, INITIAL_PROPERTIES);
-    const contracts = getLocal(STORAGE_KEYS.CONTRACTS, INITIAL_CONTRACTS);
-    const transactions = getLocal(STORAGE_KEYS.TRANSACTIONS, INITIAL_TRANSACTIONS);
+    const properties = getLocal(STORAGE_KEYS.PROPERTIES, []);
+    const contracts = getLocal(STORAGE_KEYS.CONTRACTS, []);
+    const transactions = getLocal(STORAGE_KEYS.TRANSACTIONS, []);
 
     const backup = {
       system: 'Rasel Real Estate Management',
@@ -413,7 +418,7 @@ export const dataService = {
     }
   },
 
-  async clearAllData(clearSupabase: boolean = false): Promise<void> {
+  async clearAllData(clearSupabase: boolean = true): Promise<void> {
     setLocal(STORAGE_KEYS.PROPERTIES, []);
     setLocal(STORAGE_KEYS.CONTRACTS, []);
     setLocal(STORAGE_KEYS.TRANSACTIONS, []);
@@ -423,9 +428,10 @@ export const dataService = {
       const sb = getSupabase();
       if (sb) {
         try {
-          await sb.from('properties').delete().neq('id', '00000000-0000-0000-0000-000000000000');
-          await sb.from('contracts').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+          // Delete child records first to satisfy foreign key constraints
           await sb.from('financial_transactions').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+          await sb.from('contracts').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+          await sb.from('properties').delete().neq('id', '00000000-0000-0000-0000-000000000000');
         } catch (e) {
           console.warn('Could not clear Supabase tables completely:', e);
         }

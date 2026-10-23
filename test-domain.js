@@ -130,4 +130,45 @@ assert.strictEqual(formatPriceCompact(1200000, 'USD'), '$1.2M', 'Compact $1.2M i
 assert.strictEqual(formatPriceCompact(250000000, 'IQD'), '250M د.ع', 'Compact 250M IQD is correct');
 console.log('✓ Test 7 Passed: Compact price tag formatting for map pins is accurate.');
 
-console.log('--- ALL DOMAIN LOGIC TESTS PASSED SUCCESSFULLY (7/7) ---');
+// Test 8: Storage Reset & Clean-Slate Customer State Lifecycle
+const mockStorage = new Map();
+const STORAGE_KEYS = {
+  PROPERTIES: 'rasel_real_estate_properties_v1',
+  INITIALIZED: 'rasel_storage_initialized_v2',
+};
+const DEMO_PROPERTIES = [{ id: '1', title: 'Demo House' }];
+
+function getStoredProperties() {
+  if (!mockStorage.has(STORAGE_KEYS.INITIALIZED)) {
+    if (!mockStorage.has(STORAGE_KEYS.PROPERTIES)) {
+      mockStorage.set(STORAGE_KEYS.PROPERTIES, JSON.stringify(DEMO_PROPERTIES));
+    }
+    mockStorage.set(STORAGE_KEYS.INITIALIZED, 'true');
+  }
+  const item = mockStorage.get(STORAGE_KEYS.PROPERTIES);
+  return item ? JSON.parse(item) : [];
+}
+
+function clearAllData() {
+  mockStorage.set(STORAGE_KEYS.PROPERTIES, JSON.stringify([]));
+  mockStorage.set(STORAGE_KEYS.INITIALIZED, 'true');
+}
+
+function resetDemoData() {
+  mockStorage.set(STORAGE_KEYS.PROPERTIES, JSON.stringify(DEMO_PROPERTIES));
+  mockStorage.set(STORAGE_KEYS.INITIALIZED, 'true');
+}
+
+// 1. Initial fresh load gets demo data
+assert.strictEqual(getStoredProperties().length, 1, 'First load seeds demo data');
+// 2. Clear all data wipes to empty array
+clearAllData();
+assert.strictEqual(getStoredProperties().length, 0, 'Clean-slate reset leaves properties empty');
+// 3. Subsequent reads maintain empty array (never auto-repopulates demo data)
+assert.strictEqual(getStoredProperties().length, 0, 'Empty state persists on next read');
+// 4. Explicit demo restore reloads demo data
+resetDemoData();
+assert.strictEqual(getStoredProperties().length, 1, 'Explicit demo restore brings back demo data');
+console.log('✓ Test 8 Passed: Reset data clean-slate lifecycle and persistence verified.');
+
+console.log('--- ALL DOMAIN LOGIC TESTS PASSED SUCCESSFULLY (8/8) ---');

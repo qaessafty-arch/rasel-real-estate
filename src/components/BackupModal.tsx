@@ -234,7 +234,7 @@ export const BackupModal: React.FC<BackupModalProps> = ({
 
   const handleClearAllData = async () => {
     setClearingData(true);
-    await dataService.clearAllData(false);
+    await dataService.clearAllData(true);
     onDataRestored();
     setClearingData(false);
     setShowClearConfirm(false);

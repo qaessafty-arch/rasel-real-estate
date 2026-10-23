@@ -315,8 +315,10 @@ export default function HomePage() {
 
   // Clear All Data Handler (Clean Slate for Customer)
   const handleClearAllData = async () => {
-    await dataService.clearAllData(false);
-    await loadData();
+    await dataService.clearAllData(true);
+    setProperties([]);
+    setContracts([]);
+    setTransactions([]);
     setShowClearConfirm(false);
   };
 
