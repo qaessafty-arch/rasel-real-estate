@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import dynamic from 'next/dynamic';
 import { 
   X, 
   Upload, 
@@ -18,12 +19,23 @@ import {
   FileCheck2,
   Calendar,
   Ruler,
-  Calculator
+  Calculator,
+  Loader2
 } from 'lucide-react';
 import { Property, PropertyType, PropertyPurpose, PropertyStatus, Currency, PaymentMethod, PropertyCondition } from '@/types';
 import { Language, translations } from '@/lib/i18n';
 import { formatArea, donumToSqm, sqmToDonum } from '@/lib/utils';
 import { compressImageFile } from '@/lib/imageCompressor';
+
+const DynamicLocationPicker = dynamic(() => import('./PropertyLocationPicker'), {
+  ssr: false,
+  loading: () => (
+    <div className="w-full h-48 rounded-2xl bg-slate-900 border border-slate-800 flex flex-col items-center justify-center gap-2 text-slate-400 text-xs">
+      <Loader2 className="w-6 h-6 animate-spin text-amber-500" />
+      <span>Loading Interactive Map Location Picker...</span>
+    </div>
+  ),
+});
 
 interface PropertyFormModalProps {
   isOpen: boolean;
@@ -780,28 +792,48 @@ export const PropertyFormModal: React.FC<PropertyFormModalProps> = ({
               />
             </div>
 
-            {/* GPS coordinates */}
-            <div className="grid grid-cols-2 gap-3 p-3 rounded-xl bg-slate-950/60 border border-slate-800 text-xs">
+            {/* Interactive Map Location Picker (Visual, Presets, GPS & Pin Placement) */}
+            <div className="pt-2">
+              <DynamicLocationPicker
+                lat={formData.lat}
+                lng={formData.lng}
+                city={formData.city}
+                neighborhood={formData.neighborhood}
+                onChangeLocation={(coords) => {
+                  setFormData((prev) => ({
+                    ...prev,
+                    lat: coords.lat,
+                    lng: coords.lng,
+                    ...(coords.city ? { city: coords.city } : {}),
+                    ...(coords.neighborhood ? { neighborhood: coords.neighborhood } : {}),
+                  }));
+                }}
+                lang={lang}
+              />
+            </div>
+
+            {/* Manual Lat/Lng Fine Tuning */}
+            <div className="grid grid-cols-2 gap-3 p-2.5 rounded-xl bg-slate-950/60 border border-slate-800 text-xs">
               <div>
-                <label className="block text-slate-400 mb-1 font-mono">هێڵی پانی (Latitude / Lat)</label>
+                <label className="block text-slate-400 mb-1 font-mono text-[11px]">هێڵی پانی (Latitude / Lat)</label>
                 <input
                   type="number"
                   step="any"
-                  value={formData.lat || ''}
-                  onChange={(e) => setFormData({ ...formData, lat: parseFloat(e.target.value) })}
+                  value={formData.lat ?? ''}
+                  onChange={(e) => setFormData({ ...formData, lat: parseFloat(e.target.value) || null })}
                   placeholder="36.19"
-                  className="w-full px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-800 text-white font-mono outline-none"
+                  className="w-full px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-800 text-white font-mono text-xs outline-none"
                 />
               </div>
               <div>
-                <label className="block text-slate-400 mb-1 font-mono">هێڵی درێژی (Longitude / Lng)</label>
+                <label className="block text-slate-400 mb-1 font-mono text-[11px]">هێڵی درێژی (Longitude / Lng)</label>
                 <input
                   type="number"
                   step="any"
-                  value={formData.lng || ''}
-                  onChange={(e) => setFormData({ ...formData, lng: parseFloat(e.target.value) })}
+                  value={formData.lng ?? ''}
+                  onChange={(e) => setFormData({ ...formData, lng: parseFloat(e.target.value) || null })}
                   placeholder="44.01"
-                  className="w-full px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-800 text-white font-mono outline-none"
+                  className="w-full px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-800 text-white font-mono text-xs outline-none"
                 />
               </div>
             </div>

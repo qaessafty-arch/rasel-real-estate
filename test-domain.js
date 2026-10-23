@@ -84,4 +84,50 @@ assert.ok(!encoded.includes(' '), 'Encoded WhatsApp message must have no raw spa
 assert.ok(decodeURIComponent(encoded) === rawText, 'Decoded message must match original');
 console.log('✓ Test 5 Passed: WhatsApp message encoding is safe and reversible.');
 
-console.log('--- ALL DOMAIN LOGIC TESTS PASSED SUCCESSFULLY (5/5) ---');
+// Test 6: Intelligent Coordinate Parsing
+function parseCoordinatesInput(input) {
+  if (!input || typeof input !== 'string') return null;
+  const clean = input.trim();
+  const atMatch = clean.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
+  if (atMatch) return { lat: parseFloat(atMatch[1]), lng: parseFloat(atMatch[2]) };
+  const qMatch = clean.match(/[?&](?:q|ll)=(-?\d+\.\d+)[,\s]+(-?\d+\.\d+)/);
+  if (qMatch) return { lat: parseFloat(qMatch[1]), lng: parseFloat(qMatch[2]) };
+  const rawMatch = clean.match(/^(-?\d+\.\d+)[,\s]+(-?\d+\.\d+)$/);
+  if (rawMatch) return { lat: parseFloat(rawMatch[1]), lng: parseFloat(rawMatch[2]) };
+  const floats = clean.match(/-?\d+\.\d+/g);
+  if (floats && floats.length >= 2) return { lat: parseFloat(floats[0]), lng: parseFloat(floats[1]) };
+  return null;
+}
+
+const parsed1 = parseCoordinatesInput('36.2085, 43.9852');
+assert.strictEqual(parsed1.lat, 36.2085, 'Direct comma-separated latitude matches');
+assert.strictEqual(parsed1.lng, 43.9852, 'Direct comma-separated longitude matches');
+
+const parsed2 = parseCoordinatesInput('https://www.google.com/maps/@36.2162,43.9981,17z');
+assert.strictEqual(parsed2.lat, 36.2162, 'Google Maps @lat,lng parsed correctly');
+assert.strictEqual(parsed2.lng, 43.9981, 'Google Maps @lat,lng parsed correctly');
+
+const parsed3 = parseCoordinatesInput('https://maps.google.com/?q=36.1911,44.0092');
+assert.strictEqual(parsed3.lat, 36.1911, 'Google Maps query URL parsed correctly');
+console.log('✓ Test 6 Passed: Intelligent coordinate & Google Maps URL parsing is accurate.');
+
+// Test 7: Compact Price Formatting for Map Badges
+function formatPriceCompact(price, currency = 'USD') {
+  if (!price || isNaN(price)) return 'N/A';
+  if (currency === 'USD') {
+    if (price >= 1_000_000) return `$${(price / 1_000_000).toFixed(1).replace(/\.0$/, '')}M`;
+    if (price >= 1_000) return `$${Math.round(price / 1_000)}k`;
+    return `$${price}`;
+  } else {
+    if (price >= 1_000_000) return `${(price / 1_000_000).toFixed(1).replace(/\.0$/, '')}M د.ع`;
+    if (price >= 1_000) return `${Math.round(price / 1_000)}k د.ع`;
+    return `${price} د.ع`;
+  }
+}
+
+assert.strictEqual(formatPriceCompact(180000, 'USD'), '$180k', 'Compact $180k is correct');
+assert.strictEqual(formatPriceCompact(1200000, 'USD'), '$1.2M', 'Compact $1.2M is correct');
+assert.strictEqual(formatPriceCompact(250000000, 'IQD'), '250M د.ع', 'Compact 250M IQD is correct');
+console.log('✓ Test 7 Passed: Compact price tag formatting for map pins is accurate.');
+
+console.log('--- ALL DOMAIN LOGIC TESTS PASSED SUCCESSFULLY (7/7) ---');
