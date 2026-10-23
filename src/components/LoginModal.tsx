@@ -8,12 +8,10 @@ import {
   EyeOff, 
   ShieldCheck, 
   X,
-  KeyRound,
-  Users,
-  UserCheck
+  KeyRound
 } from 'lucide-react';
-import { loginWithServer, getEmployees } from '@/lib/auth';
-import { Employee, UserSession } from '@/types';
+import { loginWithServer } from '@/lib/auth';
+import { UserSession } from '@/types';
 
 interface LoginModalProps {
   isOpen: boolean;
@@ -27,18 +25,17 @@ export const LoginModal: React.FC<LoginModalProps> = ({
   onClose,
 }) => {
   const [password, setPassword] = useState('');
-  const [username, setUsername] = useState('');
-  const [selectedEmp, setSelectedEmp] = useState<Employee | null>(null);
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [remember, setRemember] = useState(true);
   const [loading, setLoading] = useState(false);
-  const [employees, setEmployees] = useState<Employee[]>([]);
 
-  // Load available staff list on open
+  // Reset form when modal opens
   useEffect(() => {
     if (isOpen) {
-      setEmployees(getEmployees());
+      setPassword('');
+      setError('');
+      setShowPassword(false);
     }
   }, [isOpen]);
 
@@ -56,15 +53,18 @@ export const LoginModal: React.FC<LoginModalProps> = ({
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!password.trim()) {
+      setError('تکایە وشەی نهێنی یان PIN بنووسە');
+      return;
+    }
+
     setError('');
     setLoading(true);
 
     try {
-      const res = await loginWithServer(password, remember, selectedEmp ? selectedEmp.username : username);
+      const res = await loginWithServer(password, remember);
       if (res.success && res.user) {
         setPassword('');
-        setUsername('');
-        setSelectedEmp(null);
         onSuccess(res.user);
       } else {
         setError(res.message || 'وشەی نهێنی یان PIN هەڵەیە!');
@@ -74,13 +74,6 @@ export const LoginModal: React.FC<LoginModalProps> = ({
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleSelectStaff = (emp: Employee) => {
-    setSelectedEmp(emp);
-    setUsername(emp.username);
-    setPassword('');
-    setError('');
   };
 
   return (
@@ -111,66 +104,21 @@ export const LoginModal: React.FC<LoginModalProps> = ({
         <h2 id="login-modal-title" className="text-xl sm:text-2xl font-black text-white tracking-wide mb-1">
           NASHVILLE HOUSE
         </h2>
-        <p className="text-xs text-amber-400/90 font-medium mb-4">
+        <p className="text-xs text-amber-400/90 font-medium mb-5">
           چوونەژوورەوەی ستاف و بەڕێوەبەر (Staff Portal)
         </p>
-
-        {/* Quick Staff Account Switcher Chips */}
-        <div className="mb-4">
-          <div className="text-[11px] text-slate-400 font-semibold mb-2 text-right">
-            هەڵبژاردنی هەژمار (یان ڕاستەوخۆ PIN بنووسە):
-          </div>
-          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
-            <button
-              type="button"
-              onClick={() => {
-                setSelectedEmp(null);
-                setUsername('admin');
-                setError('');
-              }}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1 shrink-0 ${
-                !selectedEmp || selectedEmp.role === 'admin'
-                  ? 'bg-amber-500 text-slate-950 shadow-sm'
-                  : 'bg-slate-950 text-slate-400 border border-slate-800 hover:text-white'
-              }`}
-            >
-              <span>👑</span>
-              <span>بەڕێوەبەر</span>
-            </button>
-
-            {employees.filter(e => e.role === 'employee').map((emp) => (
-              <button
-                key={emp.id}
-                type="button"
-                onClick={() => handleSelectStaff(emp)}
-                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1 shrink-0 ${
-                  selectedEmp?.id === emp.id
-                    ? 'bg-sky-500 text-slate-950 shadow-sm'
-                    : 'bg-slate-950 text-slate-400 border border-slate-800 hover:text-white'
-                }`}
-              >
-                <span>👤</span>
-                <span>{emp.name.split(' ')[0]}</span>
-              </button>
-            ))}
-          </div>
-        </div>
 
         {/* SECURE LOGIN FORM */}
         <form onSubmit={handleLogin} className="space-y-4">
           
-          <div className="p-2.5 rounded-xl bg-slate-950/70 border border-slate-800 text-right text-[11px] text-slate-300 flex items-center gap-2">
+          <div className="p-3 rounded-xl bg-slate-950/70 border border-slate-800 text-right text-xs text-slate-300 flex items-center gap-2.5">
             <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
-            <span>
-              {selectedEmp 
-                ? `چوونەژوورەوە وەک کارمەند: ${selectedEmp.name}` 
-                : 'وشەی نهێنی سەرپەرشتیار (Ibo0909) یان PINی کارمەندان بنووسە.'}
-            </span>
+            <span>سیستەمی داخراو — تەنها ستاف و بەڕێوەبەر مافی چوونەژوورەوەیان هەیە</span>
           </div>
 
           <div className="text-right">
             <label className="block text-xs font-semibold text-slate-300 mb-1.5">
-              {selectedEmp ? `PINی تایبەت بە ${selectedEmp.name}` : 'وشەی نهێنی یان PIN'}
+              وشەی نهێنی یان PIN
             </label>
             
             <div className="relative flex items-center">
@@ -181,9 +129,13 @@ export const LoginModal: React.FC<LoginModalProps> = ({
                   setPassword(e.target.value);
                   setError('');
                 }}
-                placeholder={selectedEmp ? `PINی ${selectedEmp.name} بنووسە...` : "Ibo0909 یان PIN بنووسە..."}
+                placeholder="••••••••"
+                autoComplete="off"
+                autoCorrect="off"
+                spellCheck="false"
+                data-lpignore="true"
                 autoFocus
-                className="w-full px-12 py-3 rounded-xl bg-slate-950 border border-slate-700/80 focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 text-white placeholder-slate-500 outline-none text-center font-mono text-base transition-all"
+                className="w-full px-12 py-3 rounded-xl bg-slate-950 border border-slate-700/80 focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 text-white placeholder-slate-600 outline-none text-center font-mono text-base tracking-widest transition-all"
               />
               
               <KeyRound className="w-5 h-5 text-slate-500 absolute right-3.5 pointer-events-none" />
@@ -215,7 +167,10 @@ export const LoginModal: React.FC<LoginModalProps> = ({
               />
               <span>لەبیرم مەبە لەسەر ئەم ئامێرە</span>
             </label>
-            <span className="text-[11px] text-slate-500">SHA-256 Secure</span>
+            <span className="text-[11px] text-slate-500 flex items-center gap-1">
+              <Lock className="w-3 h-3 text-emerald-400" />
+              <span>پارێزراوە بە تەواوی</span>
+            </span>
           </div>
 
           <button
@@ -223,15 +178,9 @@ export const LoginModal: React.FC<LoginModalProps> = ({
             disabled={loading}
             className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-bold text-sm shadow-lg shadow-amber-500/25 transition-all active:scale-95 disabled:opacity-50"
           >
-            {loading ? 'خەریکی چوونەژوورەوەیە...' : selectedEmp ? `چوونەژوورەوە وەک ${selectedEmp.name}` : 'چوونەژوورەوە'}
+            {loading ? 'خەریکی چوونەژوورەوەیە...' : 'چوونەژوورەوە (Login)'}
           </button>
         </form>
-
-        {/* Demo Credentials Hint */}
-        <div className="mt-4 pt-3 border-t border-slate-800 text-[11px] text-slate-500 text-right space-y-1 font-mono">
-          <div>👑 ئەدمین: <span className="text-amber-400">Ibo0909</span></div>
-          <div>👤 کارمەند ١: <span className="text-sky-400">1122</span> (ئاراس) | کارمەند ٢: <span className="text-sky-400">3344</span> (سارا)</div>
-        </div>
 
       </div>
     </div>

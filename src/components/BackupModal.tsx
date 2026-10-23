@@ -651,7 +651,7 @@ export const BackupModal: React.FC<BackupModalProps> = ({
                   <span>گۆڕینی وشەی نهێنی بەڕێوەبەر (Master Password)</span>
                 </h3>
                 <p className="text-xs text-slate-400 leading-relaxed">
-                  وشەی نهێنی بنەڕەتی ئێستا: <span className="font-mono text-amber-400 font-bold">Ibo0909</span>. دەتوانیت لەم بەشەدا بیگۆڕیت بۆ هەر وشەیەکی تر.
+                  وشەی نهێنی بەڕێوەبەر بۆ پاراستنی داتاکان و دەسەڵاتەکانە. دەتوانیت لەم بەشەدا وشەی نهێنی نوێ دابنێیت.
                 </p>
               </div>
 
