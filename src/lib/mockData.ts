@@ -45,7 +45,7 @@ export const INITIAL_PROPERTIES: Property[] = [
       notes: 'خاوەنی ڕاستەقینەی موڵکەکەیە، قیستی مانگانەش قبوڵ دەکات.'
     },
     freelancer_name: 'کاک ئاسۆ بیلال',
-    agency_name: 'کۆمپانیای ڕاسێل بۆ خانووبەرە',
+    agency_name: 'کۆمپانیای نەشڤیل هاوس',
     commission_amount: 7200,
     net_to_owner: 352800,
     is_featured: true,
@@ -88,7 +88,7 @@ export const INITIAL_PROPERTIES: Property[] = [
       phone: '07709876543'
     },
     freelancer_name: 'ڕەوەند ساڵح',
-    agency_name: 'کۆمپانیای ڕاسێل',
+    agency_name: 'نەشڤیل هاوس',
     commission_amount: 900,
     net_to_owner: 20700,
     is_featured: true,
@@ -137,7 +137,7 @@ export const INITIAL_PROPERTIES: Property[] = [
       phone: '07701122334'
     },
     freelancer_name: 'دەشتی حەمە',
-    agency_name: 'کۆمپانیای ڕاسێل',
+    agency_name: 'نەشڤیل هاوس',
     commission_amount: 17000,
     net_to_owner: 833000,
     is_featured: true,
@@ -177,7 +177,7 @@ export const INITIAL_PROPERTIES: Property[] = [
       phone: '07504455667'
     },
     freelancer_name: '',
-    agency_name: 'ڕاسێل - لقی دهۆک',
+    agency_name: 'نەشڤیل هاوس - لقی دهۆک',
     commission_amount: 1250000,
     net_to_owner: 28750000,
     is_featured: false,
@@ -221,7 +221,7 @@ export const INITIAL_PROPERTIES: Property[] = [
       notes: 'ئامادەیە بۆ ڕێککەوتن لەسەر جیاوازی پارە'
     },
     freelancer_name: 'سیروان فەتاح',
-    agency_name: 'کۆمپانیای ڕاسێل',
+    agency_name: 'نەشڤیل هاوس',
     commission_amount: 5000,
     net_to_owner: 275000,
     is_featured: true,
@@ -264,7 +264,7 @@ export const INITIAL_PROPERTIES: Property[] = [
       phone: '07507788990'
     },
     freelancer_name: 'ئاریان کاروان',
-    agency_name: 'کۆمپانیای ڕاسێل بۆ وەبەرهێنان',
+    agency_name: 'نەشڤیل هاوس بۆ وەبەرهێنان',
     commission_amount: 33000,
     net_to_owner: 1617000,
     is_featured: true,

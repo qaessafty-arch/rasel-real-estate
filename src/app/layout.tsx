@@ -2,8 +2,8 @@ import type { Metadata } from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'RASEL Real Estate | کۆمپانیای ڕاسێل بۆ خانووبەرە و وەبەرهێنان',
-  description: 'سیستەمی پیشەیی بەڕێوەبردن و تۆمارکردنی ڕۆژانەی موڵک، خانوو، شوقە، ڤیلا، زەوی و وەبەرهێنان لە هەرێمی کوردستان',
+  title: 'Nashville House | کۆمپانیای نەشڤیل هاوس بۆ خانووبەرە و وەبەرهێنان',
+  description: 'سیستەمی پیشەیی نەشڤیل هاوس بۆ بەڕێوەبردن و تۆمارکردنی ڕۆژانەی موڵک، خانوو، شوقە، ڤیلا، زەوی و وەبەرهێنان لە هەرێمی کوردستان',
   icons: {
     icon: '/favicon.ico',
   },

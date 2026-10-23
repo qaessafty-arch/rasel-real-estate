@@ -78,7 +78,7 @@ const dummyProperty = {
   code: 'RSL-101',
   price: '$180,000'
 };
-const rawText = `🏡 RASEL: ${dummyProperty.title} (${dummyProperty.code}) - ${dummyProperty.price}`;
+const rawText = `🏡 NASHVILLE HOUSE: ${dummyProperty.title} (${dummyProperty.code}) - ${dummyProperty.price}`;
 const encoded = encodeURIComponent(rawText);
 assert.ok(!encoded.includes(' '), 'Encoded WhatsApp message must have no raw spaces');
 assert.ok(decodeURIComponent(encoded) === rawText, 'Decoded message must match original');

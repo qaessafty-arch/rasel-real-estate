@@ -2,8 +2,8 @@ export type Language = 'ckb' | 'ar' | 'en';
 
 export const translations = {
   ckb: {
-    agency_title: 'RASEL REAL ESTATE',
-    agency_subtitle: 'سیستەمی پیشەیی بەڕێوەبردنی موڵک و وەبەرهێنان',
+    agency_title: 'NASHVILLE HOUSE',
+    agency_subtitle: 'نەشڤیل هاوس بۆ خانووبەرە و وەبەرهێنان',
     dashboard: 'داشبۆرد',
     properties: 'موڵکەکانم',
     map: 'نەخشەی موڵکەکان',
@@ -155,8 +155,8 @@ export const translations = {
   },
 
   ar: {
-    agency_title: 'راسل للعقارات',
-    agency_subtitle: 'نظام إدارة العقارات والاستثمار الاحترافي',
+    agency_title: 'ناشفيل هاوس للعقارات',
+    agency_subtitle: 'ناشفيل هاوس - إدارة العقارات والاستثمار الاحترافي',
     dashboard: 'لوحة التحكم',
     properties: 'عقاراتي',
     map: 'خريطة العقارات',
@@ -308,8 +308,8 @@ export const translations = {
   },
 
   en: {
-    agency_title: 'RASEL REAL ESTATE',
-    agency_subtitle: 'Professional Property & Investment Management',
+    agency_title: 'NASHVILLE HOUSE',
+    agency_subtitle: 'Nashville House - Professional Property & Investment Management',
     dashboard: 'Dashboard',
     properties: 'My Properties',
     map: 'Interactive Map',
@@ -320,7 +320,7 @@ export const translations = {
     lock: 'Lock System',
     connected_supabase: 'Connected to Supabase',
     local_storage: 'Local Offline Storage',
-    welcome_title: 'Welcome to Rasel Real Estate Management',
+    welcome_title: 'Welcome to Nashville House',
     welcome_desc: 'Daily property records, lease tracking, payment plans, and financial analytics.',
     total_properties: 'Total Properties',
     available_properties: 'Available Properties',

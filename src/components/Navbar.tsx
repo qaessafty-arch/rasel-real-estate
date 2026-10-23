@@ -158,7 +158,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             <div>
               <div className="flex items-center gap-2">
                 <h1 className="text-xl sm:text-2xl font-black tracking-wider text-white">
-                  RASEL <span className="text-amber-400 font-extrabold text-sm sm:text-base tracking-normal">REAL ESTATE</span>
+                  NASHVILLE <span className="text-amber-400 font-extrabold text-sm sm:text-base tracking-normal">HOUSE</span>
                 </h1>
               </div>
               <p className="text-xs text-slate-400 font-medium">{t.agency_subtitle}</p>
@@ -222,7 +222,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                       <Layers className="w-3 h-3 text-amber-400" />
                       <span>{t.divide_menu || 'دابەشکردنی بەشەکان'}</span>
                     </span>
-                    <span className="text-[9px] text-amber-400 font-mono">RASEL</span>
+                    <span className="text-[9px] text-amber-400 font-mono">NASHVILLE</span>
                   </div>
                   <div className="p-1 space-y-0.5">
                     {divisionOptions.map((div) => (

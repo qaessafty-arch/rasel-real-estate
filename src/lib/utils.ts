@@ -134,7 +134,7 @@ export function generateWhatsAppMessage(property: Property, lang: Language = 'ck
   const type = getPropertyTypeLabel(property.property_type, lang);
   const areaInfo = formatArea(property.area_sqm, property.land_details, lang);
 
-  const text = `🏡 *RASEL REAL ESTATE*
+  const text = `🏡 *NASHVILLE HOUSE*
 ━━━━━━━━━━━━━━━━━
 📌 *${property.title}*
 🆔 ${t.code || 'کۆد'}: *${property.property_code}*

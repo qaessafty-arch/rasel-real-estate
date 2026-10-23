@@ -126,7 +126,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
         </div>
 
         <h2 className="text-xl sm:text-2xl font-black text-white tracking-wide mb-1">
-          RASEL REAL ESTATE
+          NASHVILLE HOUSE
         </h2>
         <p className="text-xs text-amber-400/90 font-medium mb-5">
           سیستەمی بەڕێوەبردنی موڵک و وەبەرهێنان

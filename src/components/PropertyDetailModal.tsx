@@ -86,7 +86,7 @@ export const PropertyDetailModal: React.FC<PropertyDetailModalProps> = ({
   const handleShare = () => {
     if (navigator.clipboard) {
       navigator.clipboard.writeText(
-        `RASEL REAL ESTATE: ${property.title} | ${t.code || 'کۆد'}: ${property.property_code} | ${formatPrice(property.price, property.currency, lang)}`
+        `NASHVILLE HOUSE: ${property.title} | ${t.code || 'کۆد'}: ${property.property_code} | ${formatPrice(property.price, property.currency, lang)}`
       );
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
