@@ -21,7 +21,10 @@ import {
   Send,
   ExternalLink,
   Ruler,
-  Layers
+  Layers,
+  Home,
+  FileText,
+  DollarSign
 } from 'lucide-react';
 import { Property, Contract, FinancialTransaction, PropertyStatus, UITheme, UIBackground, PropertyDivision, ViewMode } from '@/types';
 import { formatArea, formatPrice, getPropertyStatusLabel, getPropertyTypeLabel, getPropertyPurposeLabel, generateWhatsAppMessage } from '@/lib/utils';
@@ -141,7 +144,14 @@ export default function HomePage() {
   const t = translations[lang];
 
   // App Tabs: 'dashboard' | 'properties' | 'map' | 'contracts' | 'accounting'
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'properties' | 'map' | 'contracts' | 'accounting'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'properties' | 'map' | 'contracts' | 'accounting'>('properties');
+
+  // Guard admin tabs for unauthenticated visitors
+  useEffect(() => {
+    if (!isUnlocked && (activeTab === 'dashboard' || activeTab === 'contracts' || activeTab === 'accounting')) {
+      setActiveTab('properties');
+    }
+  }, [isUnlocked, activeTab]);
 
   // Core Data State
   const [properties, setProperties] = useState<Property[]>([]);
@@ -385,49 +395,89 @@ export default function HomePage() {
       {/* Main Workspace Body */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
         
-        {/* Admin Quick Control Bar (Visible when logged in) */}
+        {/* Admin Quick Control Bar (Visible ONLY when logged in) */}
         {isUnlocked && (
-          <div className="flex flex-wrap items-center justify-between gap-4 p-4 sm:p-5 rounded-2xl bg-slate-900/90 border border-amber-500/30 shadow-xl shadow-amber-500/5">
+          <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4 p-4 sm:p-5 rounded-2xl bg-slate-900/95 border border-amber-500/30 shadow-xl shadow-amber-500/5">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-400">
+              <div className="w-10 h-10 rounded-xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-400 shrink-0">
                 <ShieldCheck className="w-5 h-5 stroke-[2.2]" />
               </div>
               <div>
                 <div className="flex items-center gap-2">
-                  <h3 className="text-sm font-bold text-white">دەسەڵاتی بەڕێوەبەر (Admin Mode) چالاکە</h3>
+                  <h3 className="text-sm font-bold text-white">دەسەڵاتی بەڕێوەبەر (Admin Suite)</h3>
                   <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
                     Online
                   </span>
                 </div>
                 <p className="text-xs text-slate-400">
-                  دەتوانیت ڕێکخستنەکان بگۆڕیت، وشەی نهێنی نوێ بکەیتەوە، یان هەموو داتاکان سفر بکەیتەوە بۆ کڕیار.
+                  بەڕێوەبردنی موڵک، گرێبەست، ژمێریاری، ڕێکخستنەکان و سفرکردنەوە
                 </p>
               </div>
             </div>
 
-            <div className="flex items-center gap-2.5">
+            {/* Quick Admin Navigation Pills */}
+            <div className="flex flex-wrap items-center gap-1.5 p-1 rounded-xl bg-slate-950/80 border border-slate-800 text-xs">
+              <button
+                onClick={() => setActiveTab('properties')}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-bold transition-all ${
+                  activeTab === 'properties' ? 'bg-amber-500 text-slate-950 shadow-sm' : 'text-slate-300 hover:text-white'
+                }`}
+              >
+                <Building2 className="w-3.5 h-3.5" />
+                <span>{t.properties}</span>
+              </button>
+              <button
+                onClick={() => setActiveTab('dashboard')}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-bold transition-all ${
+                  activeTab === 'dashboard' ? 'bg-amber-500 text-slate-950 shadow-sm' : 'text-slate-300 hover:text-white'
+                }`}
+              >
+                <Home className="w-3.5 h-3.5" />
+                <span>{t.dashboard}</span>
+              </button>
+              <button
+                onClick={() => setActiveTab('contracts')}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-bold transition-all ${
+                  activeTab === 'contracts' ? 'bg-amber-500 text-slate-950 shadow-sm' : 'text-slate-300 hover:text-white'
+                }`}
+              >
+                <FileText className="w-3.5 h-3.5" />
+                <span>{t.contracts}</span>
+              </button>
+              <button
+                onClick={() => setActiveTab('accounting')}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-bold transition-all ${
+                  activeTab === 'accounting' ? 'bg-amber-500 text-slate-950 shadow-sm' : 'text-slate-300 hover:text-white'
+                }`}
+              >
+                <DollarSign className="w-3.5 h-3.5" />
+                <span>{t.accounting}</span>
+              </button>
+            </div>
+
+            <div className="flex items-center gap-2">
               <button
                 onClick={() => handleOpenSettings('security')}
-                className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs shadow-md shadow-amber-500/20 transition-all active:scale-95"
+                className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-850 hover:bg-slate-800 text-amber-400 border border-slate-700/80 hover:border-amber-500/40 font-bold text-xs shadow-sm transition-all active:scale-95"
               >
                 <Settings className="w-4 h-4" />
-                <span>ڕێکخستنەکان (Settings)</span>
+                <span>ڕێکخستنەکان</span>
               </button>
 
               <button
-                onClick={() => handleOpenSettings('security')}
-                className="flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-rose-950/40 hover:bg-rose-900/60 text-rose-300 hover:text-white border border-rose-900/50 text-xs font-bold transition-all active:scale-95"
-                title="سفرکردنەوەی هەموو داتاکان بۆ کڕیار"
+                onClick={() => setShowClearConfirm(true)}
+                className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-rose-950/40 hover:bg-rose-900/60 text-rose-300 hover:text-white border border-rose-900/50 text-xs font-bold transition-all active:scale-95"
+                title="سڕینەوەی هەموو داتاکان بۆ کڕیار"
               >
-                <Trash2 className="w-4 h-4 text-rose-400" />
+                <Trash2 className="w-3.5 h-3.5 text-rose-400" />
                 <span>سفرکردنەوە بۆ کڕیار</span>
               </button>
             </div>
           </div>
         )}
         
-        {/* TAB 1: DASHBOARD */}
-        {activeTab === 'dashboard' && (
+        {/* TAB 1: DASHBOARD (ADMIN ONLY) */}
+        {isUnlocked && activeTab === 'dashboard' && (
           <DashboardStats
             stats={stats}
             properties={properties}
@@ -469,26 +519,25 @@ export default function HomePage() {
               </div>
 
               <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
-                
-                {/* Clear All Data Button (Visible in Admin Mode to wipe data for customer) */}
-                {isUnlocked && properties.length > 0 && (
+                {isUnlocked ? (
                   <button
-                    onClick={() => setShowClearConfirm(true)}
-                    className="flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-rose-950/40 hover:bg-rose-900/50 text-rose-300 hover:text-white border border-rose-900/50 text-xs font-bold transition-all"
-                    title="سڕینەوەی هەموو داتاکان بۆ کڕیار"
+                    onClick={handleOpenAdd}
+                    className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-bold text-sm shadow-lg shadow-amber-500/20 transition-all active:scale-95"
                   >
-                    <Trash2 className="w-3.5 h-3.5 text-rose-400" />
-                    <span>سفرکردنەوە بۆ کڕیار</span>
+                    <PlusCircle className="w-4 h-4 stroke-[2.5]" />
+                    <span>{t.new_property}</span>
                   </button>
+                ) : (
+                  <a
+                    href="https://wa.me/?text=سڵاو،%20دەمەوێت%20ڕاوێژ%20بکەم%20دەربارەی%20کڕین%20یان%20فرۆشتنی%20موڵک%20لە%20نەشڤیل%20هاوس"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-lg shadow-emerald-600/20 transition-all"
+                  >
+                    <Send className="w-4 h-4" />
+                    <span>پەیوەندی لەگەڵ نەشڤیل هاوس</span>
+                  </a>
                 )}
-
-                <button
-                  onClick={handleOpenAdd}
-                  className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-bold text-sm shadow-lg shadow-amber-500/20 transition-all active:scale-95"
-                >
-                  <PlusCircle className="w-4 h-4 stroke-[2.5]" />
-                  <span>{t.new_property}</span>
-                </button>
               </div>
             </div>
 
@@ -853,34 +902,56 @@ export default function HomePage() {
 
             {/* Properties Grid or Empty State */}
             {properties.length === 0 ? (
-              /* CLEAN SLATE FOR CUSTOMER */
-              <div className="p-12 sm:p-16 text-center rounded-3xl glass-card border border-emerald-500/30 space-y-4 max-w-2xl mx-auto my-6">
-                <div className="w-16 h-16 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center mx-auto text-emerald-400">
-                  <Sparkles className="w-8 h-8" />
-                </div>
-                <h3 className="text-xl sm:text-2xl font-black text-white">سیستەمەکە تەواو بەتاڵ و خاوێنە!</h3>
-                <p className="text-sm text-slate-300 leading-relaxed max-w-lg mx-auto">
-                  هەموو داتا و موڵکە نموونەییەکان بە سەرکەوتوویی سڕانەوە. ئێستا کڕیار دەتوانێت دەستبکات بە زیادکردنی موڵک و زانیارییەکانی خۆی بە خاوێنی.
-                </p>
-                <div className="flex flex-wrap items-center justify-center gap-3 pt-3">
-                  <button
-                    onClick={handleOpenAdd}
-                    className="flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-white font-bold text-sm shadow-xl shadow-emerald-600/25 active:scale-95"
-                  >
-                    <PlusCircle className="w-4 h-4" />
-                    <span>یەکەم موڵکی خۆت تۆمار بکە</span>
-                  </button>
+              isUnlocked ? (
+                /* Admin View When Portfolio is Empty */
+                <div className="p-12 sm:p-16 text-center rounded-3xl glass-card border border-amber-500/30 space-y-4 max-w-2xl mx-auto my-6">
+                  <div className="w-16 h-16 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center mx-auto text-amber-400">
+                    <Sparkles className="w-8 h-8" />
+                  </div>
+                  <h3 className="text-xl sm:text-2xl font-black text-white">پۆرتفۆلیۆی نوسینگە خاوێنە</h3>
+                  <p className="text-sm text-slate-300 leading-relaxed max-w-lg mx-auto">
+                    دەتوانیت دەستبکەیت بە زیادکردنی موڵکە ڕاستەقینەکانی نەشڤیل هاوس، یان داتای نموونەیی سەرەتایی تاقی بکەیتەوە.
+                  </p>
+                  <div className="flex flex-wrap items-center justify-center gap-3 pt-3">
+                    <button
+                      onClick={handleOpenAdd}
+                      className="flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-bold text-sm shadow-xl shadow-amber-500/25 active:scale-95"
+                    >
+                      <PlusCircle className="w-4 h-4" />
+                      <span>زیادکردنی یەکەم موڵک</span>
+                    </button>
 
-                  <button
-                    onClick={handleRestoreDemo}
-                    className="flex items-center gap-1.5 px-4 py-3 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-400 hover:text-white font-semibold text-xs"
-                    title="ئەگەر دووبارە ویستت داتای نموونەیی تاقیبکەیتەوە"
-                  >
-                    <RotateCcw className="w-3.5 h-3.5" />
-                    <span>گەڕاندنەوەی داتای نموونەیی</span>
-                  </button>
+                    <button
+                      onClick={handleRestoreDemo}
+                      className="flex items-center gap-1.5 px-4 py-3 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 hover:text-white font-semibold text-xs"
+                    >
+                      <RotateCcw className="w-3.5 h-3.5" />
+                      <span>بارکردنی موڵکە نموونەییەکان</span>
+                    </button>
+                  </div>
                 </div>
-              </div>
+              ) : (
+                /* Customer View When Portfolio is Updating */
+                <div className="p-12 sm:p-16 text-center rounded-3xl glass-card border border-slate-800 space-y-4 max-w-xl mx-auto my-6">
+                  <div className="w-16 h-16 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center mx-auto text-amber-400">
+                    <Building2 className="w-8 h-8" />
+                  </div>
+                  <h3 className="text-xl font-black text-white">کۆمپانیای نەشڤیل هاوس (Nashville House)</h3>
+                  <p className="text-sm text-slate-300 leading-relaxed max-w-md mx-auto">
+                    لیستی موڵکەکان لە ئێستادا نوێ دەکرێتەوە. بۆ دۆزینەوەی باشترین خانوو، ڤێلا، شوقە یان زەوی، پەیوەندی بە ڕاوێژکارانی نەشڤیل هاوس بکەن.
+                  </p>
+                  <div className="pt-2">
+                    <a
+                      href="https://wa.me/?text=سڵاو،%20دەمەوێت%20ڕاوێژ%20بکەم%20دەربارەی%20کڕین%20یان%20فرۆشتنی%20موڵک"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-lg shadow-emerald-600/20"
+                    >
+                      <span>پەیوەندی لەگەڵ نوسینگە لە واتسئەپ</span>
+                    </a>
+                  </div>
+                </div>
+              )
             ) : filteredProperties.length === 0 ? (
               <div className="p-12 text-center rounded-2xl glass-card border border-slate-800 space-y-3">
                 <Building2 className="w-12 h-12 text-slate-600 mx-auto" />
@@ -1015,6 +1086,7 @@ export default function HomePage() {
                       key={property.id}
                       property={property}
                       lang={lang}
+                      isAdmin={isUnlocked}
                       onView={(p) => setDetailProperty(p)}
                       onEdit={handleEditProperty}
                       onDelete={handleDeleteProperty}
@@ -1073,13 +1145,15 @@ export default function HomePage() {
                           <p className="text-xs text-slate-400 mt-0.5">{sec.desc}</p>
                         </div>
                       </div>
-                      <button
-                        onClick={handleOpenAdd}
-                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-amber-400 text-xs font-bold border border-slate-800 transition-all"
-                      >
-                        <PlusCircle className="w-3.5 h-3.5" />
-                        <span>زیادکردن لەم بەشە</span>
-                      </button>
+                      {isUnlocked && (
+                        <button
+                          onClick={handleOpenAdd}
+                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-amber-400 text-xs font-bold border border-slate-800 transition-all"
+                        >
+                          <PlusCircle className="w-3.5 h-3.5" />
+                          <span>زیادکردن لەم بەشە</span>
+                        </button>
+                      )}
                     </div>
 
                     {sec.items.length === 0 ? (
@@ -1093,6 +1167,7 @@ export default function HomePage() {
                             key={property.id}
                             property={property}
                             lang={lang}
+                            isAdmin={isUnlocked}
                             onView={(p) => setDetailProperty(p)}
                             onEdit={handleEditProperty}
                             onDelete={handleDeleteProperty}
@@ -1111,6 +1186,7 @@ export default function HomePage() {
                     key={property.id}
                     property={property}
                     lang={lang}
+                    isAdmin={isUnlocked}
                     onView={(p) => setDetailProperty(p)}
                     onEdit={handleEditProperty}
                     onDelete={handleDeleteProperty}
@@ -1131,8 +1207,8 @@ export default function HomePage() {
           />
         )}
 
-        {/* TAB 4: CONTRACTS & LEASING */}
-        {activeTab === 'contracts' && (
+        {/* TAB 4: CONTRACTS & LEASING (ADMIN ONLY) */}
+        {isUnlocked && activeTab === 'contracts' && (
           <ContractsView
             contracts={contracts}
             properties={properties}
@@ -1142,8 +1218,8 @@ export default function HomePage() {
           />
         )}
 
-        {/* TAB 5: ACCOUNTING & INVESTMENT */}
-        {activeTab === 'accounting' && (
+        {/* TAB 5: ACCOUNTING & INVESTMENT (ADMIN ONLY) */}
+        {isUnlocked && activeTab === 'accounting' && (
           <AccountingView
             transactions={transactions}
             properties={properties}
@@ -1173,6 +1249,7 @@ export default function HomePage() {
         onClose={() => setDetailProperty(null)}
         onEdit={handleEditProperty}
         onDelete={handleDeleteProperty}
+        isAdmin={isUnlocked}
         lang={lang}
       />
 

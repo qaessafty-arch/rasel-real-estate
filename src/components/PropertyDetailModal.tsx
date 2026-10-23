@@ -24,7 +24,8 @@ import {
   ShieldAlert,
   Percent,
   Image as ImageIcon,
-  Box
+  Box,
+  Navigation
 } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import { Property } from '@/types';
@@ -51,6 +52,7 @@ interface PropertyDetailModalProps {
   onEdit: (property: Property) => void;
   onDelete: (id: string) => void;
   lang?: Language;
+  isAdmin?: boolean;
 }
 
 export const PropertyDetailModal: React.FC<PropertyDetailModalProps> = ({
@@ -59,6 +61,7 @@ export const PropertyDetailModal: React.FC<PropertyDetailModalProps> = ({
   onEdit,
   onDelete,
   lang = 'ckb',
+  isAdmin = false,
 }) => {
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [copied, setCopied] = useState(false);
@@ -402,6 +405,11 @@ export const PropertyDetailModal: React.FC<PropertyDetailModalProps> = ({
                   {areaInfo.badge}
                 </span>
               )}
+              {areaInfo.sqft && (
+                <span className="block text-[11px] text-slate-400 font-mono mt-0.5">
+                  ({areaInfo.sqft})
+                </span>
+              )}
             </div>
             <div className="p-4 rounded-xl bg-slate-950/40 border border-slate-800 text-center">
               <span className="text-xs text-slate-400 block mb-1">{t.bedrooms}</span>
@@ -442,77 +450,131 @@ export const PropertyDetailModal: React.FC<PropertyDetailModalProps> = ({
             </div>
           )}
 
-          {/* Private Owner & Stakeholders Card */}
-          <div className="p-4 rounded-2xl bg-amber-950/20 border border-amber-500/30 space-y-3">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-amber-400 flex items-center gap-1.5">
-                <User className="w-4 h-4" />
-                زانیاری لایەنەکان و عەمولە (تایبەت بە نوسینگە)
-              </span>
-              <span className="text-[11px] px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 font-semibold">نهێنی</span>
-            </div>
+          {/* Confidential Admin Owner & Stakeholders Card (Admin Only) */}
+          {isAdmin ? (
+            <div className="p-4 rounded-2xl bg-amber-950/20 border border-amber-500/30 space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-amber-400 flex items-center gap-1.5">
+                  <User className="w-4 h-4" />
+                  زانیاری لایەنەکان و عەمولە (تایبەت بە نوسینگە)
+                </span>
+                <span className="text-[11px] px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 font-semibold">نهێنی - تایبەت بە ئەدمین</span>
+              </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
-              <div>
-                <span className="text-slate-400 block mb-0.5">{t.owner_name}:</span>
-                <span className="font-bold text-white text-sm">{property.owner_contact?.name || 'دیاری نەکراوە'}</span>
-                {property.owner_contact?.phone && (
-                  <a href={`tel:${property.owner_contact.phone}`} className="font-mono text-amber-400 block mt-1 hover:underline">
-                    📞 {property.owner_contact.phone}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+                <div>
+                  <span className="text-slate-400 block mb-0.5">{t.owner_name}:</span>
+                  <span className="font-bold text-white text-sm">{property.owner_contact?.name || 'دیاری نەکراوە'}</span>
+                  {property.owner_contact?.phone && (
+                    <a href={`tel:${property.owner_contact.phone}`} className="font-mono text-amber-400 block mt-1 hover:underline">
+                      📞 {property.owner_contact.phone}
+                    </a>
+                  )}
+                </div>
+
+                <div>
+                  <span className="text-slate-400 block mb-0.5">{t.agency_name}:</span>
+                  <span className="font-bold text-white text-sm">{property.agency_name || 'Nashville House'}</span>
+                  {property.freelancer_name && (
+                    <span className="text-slate-300 block mt-1">
+                      👤 {t.freelancer_name}: <strong className="text-amber-300">{property.freelancer_name}</strong>
+                    </span>
+                  )}
+                </div>
+
+                <div>
+                  <span className="text-slate-400 block mb-0.5">{t.commission}:</span>
+                  <span className="font-mono font-bold text-emerald-400 text-sm">
+                    {formatPrice(property.commission_amount || 0, property.currency, lang)}
+                  </span>
+                  <span className="text-slate-400 block mt-1">
+                    {t.net_to_owner}: <strong className="text-white font-mono">{formatPrice(property.net_to_owner || (property.price - (property.commission_amount || 0)), property.currency, lang)}</strong>
+                  </span>
+                </div>
+              </div>
+            </div>
+          ) : (
+            /* Public Customer Contact Card */
+            <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-br from-amber-500/10 via-slate-900 to-slate-950 border border-amber-500/30 space-y-3.5">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400">
+                    <Building2 className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <h5 className="text-xs sm:text-sm font-black text-white">کۆمپانیای نەشڤیل هاوس (Nashville House)</h5>
+                    <span className="text-[11px] text-amber-400 font-semibold">بۆ کڕین، فرۆشتن، کرێ و وەبەرهێنان</span>
+                  </div>
+                </div>
+                <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                  بەردەستە بۆ سەردانیکردن
+                </span>
+              </div>
+
+              <p className="text-xs text-slate-300 leading-relaxed">
+                بۆ ڕێکخستنی کاتی سەردانیکردنی ئەم موڵکە، وەرگرتنی زانیاری زیاتر یان دەستپێکردنی گفتوگۆی کڕین و مامەڵە، ڕاستەوخۆ پەیوەندی بە نوسینگەی نەشڤیل هاوس بکەن.
+              </p>
+
+              <div className="flex flex-wrap items-center gap-2.5 pt-1">
+                <a
+                  href={`https://wa.me/?text=${encodeURIComponent('سڵاو، دەمەوێت پەیوەندی بکەم لەسەر موڵکی: ' + property.title + ' بە کۆدی: ' + property.property_code + ' لەسەر ماڵپەڕی نەشڤیل هاوس')}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex-1 py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/20 transition-all"
+                >
+                  <Send className="w-4 h-4" />
+                  <span>پەیوەندی لە واتسئەپ (WhatsApp)</span>
+                </a>
+
+                {property.lat && property.lng && (
+                  <a
+                    href={`https://www.google.com/maps/dir/?api=1&destination=${property.lat},${property.lng}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="py-3 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-sky-400 hover:text-white font-bold text-xs flex items-center gap-1.5 border border-slate-700 transition-all"
+                  >
+                    <Navigation className="w-4 h-4" />
+                    <span>ڕێگای Google Maps</span>
                   </a>
                 )}
               </div>
-
-              <div>
-                <span className="text-slate-400 block mb-0.5">{t.agency_name}:</span>
-                <span className="font-bold text-white text-sm">{property.agency_name || 'Rasel Real Estate'}</span>
-                {property.freelancer_name && (
-                  <span className="text-slate-300 block mt-1">
-                    👤 {t.freelancer_name}: <strong className="text-amber-300">{property.freelancer_name}</strong>
-                  </span>
-                )}
-              </div>
-
-              <div>
-                <span className="text-slate-400 block mb-0.5">{t.commission}:</span>
-                <span className="font-mono font-bold text-emerald-400 text-sm">
-                  {formatPrice(property.commission_amount || 0, property.currency, lang)}
-                </span>
-                <span className="text-slate-400 block mt-1">
-                  {t.net_to_owner}: <strong className="text-white font-mono">{formatPrice(property.net_to_owner || (property.price - (property.commission_amount || 0)), property.currency, lang)}</strong>
-                </span>
-              </div>
             </div>
-          </div>
+          )}
 
         </div>
 
         {/* Modal Footer Actions */}
         <div className="p-4 sm:p-6 border-t border-slate-800 bg-slate-950/80 flex items-center justify-between gap-3">
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => {
-                onEdit(property);
-                onClose();
-              }}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs transition-all"
-            >
-              <Edit3 className="w-4 h-4 stroke-[2.5]" />
-              <span>{t.edit}</span>
-            </button>
-            <button
-              onClick={() => {
-                if (confirm(t.confirm_delete)) {
-                  onDelete(property.id);
+          {isAdmin ? (
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => {
+                  onEdit(property);
                   onClose();
-                }
-              }}
-              className="flex items-center gap-2 px-3 py-2.5 rounded-xl bg-rose-950/40 hover:bg-rose-900/60 text-rose-300 border border-rose-900/50 text-xs font-semibold transition-all"
-            >
-              <Trash2 className="w-4 h-4" />
-              <span>{t.delete}</span>
-            </button>
-          </div>
+                }}
+                className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs transition-all"
+              >
+                <Edit3 className="w-4 h-4 stroke-[2.5]" />
+                <span>{t.edit}</span>
+              </button>
+              <button
+                onClick={() => {
+                  if (confirm(t.confirm_delete)) {
+                    onDelete(property.id);
+                    onClose();
+                  }
+                }}
+                className="flex items-center gap-2 px-3 py-2.5 rounded-xl bg-rose-950/40 hover:bg-rose-900/60 text-rose-300 border border-rose-900/50 text-xs font-semibold transition-all"
+              >
+                <Trash2 className="w-4 h-4" />
+                <span>{t.delete}</span>
+              </button>
+            </div>
+          ) : (
+            <div className="text-xs text-slate-400 font-medium">
+              کۆدی موڵک: <span className="font-mono text-amber-400 font-bold">{property.property_code}</span>
+            </div>
+          )}
 
           <button
             onClick={onClose}

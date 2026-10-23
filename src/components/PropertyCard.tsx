@@ -22,6 +22,7 @@ interface PropertyCardProps {
   onEdit: (property: Property) => void;
   onDelete: (id: string) => void;
   lang?: Language;
+  isAdmin?: boolean;
 }
 
 export const PropertyCard: React.FC<PropertyCardProps> = ({
@@ -30,6 +31,7 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
   onEdit,
   onDelete,
   lang = 'ckb',
+  isAdmin = false,
 }) => {
   const t = translations[lang] as any;
   const statusInfo = getPropertyStatusLabel(property.status, lang);
@@ -172,25 +174,34 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
             <Send className="w-3.5 h-3.5" />
           </button>
           
-          <button
-            onClick={() => onEdit(property)}
-            className="p-2 rounded-xl bg-slate-900 hover:bg-amber-950/40 text-slate-400 hover:text-amber-400 border border-slate-800 hover:border-amber-500/30 transition-all"
-            title={t.edit}
-          >
-            <Edit3 className="w-3.5 h-3.5" />
-          </button>
+          {/* Admin Edit & Delete Controls (Only for Logged-in Staff) */}
+          {isAdmin && (
+            <>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onEdit(property);
+                }}
+                className="p-2 rounded-xl bg-slate-900 hover:bg-amber-950/40 text-slate-400 hover:text-amber-400 border border-slate-800 hover:border-amber-500/30 transition-all"
+                title={t.edit}
+              >
+                <Edit3 className="w-3.5 h-3.5" />
+              </button>
 
-          <button
-            onClick={() => {
-              if (confirm(t.confirm_delete)) {
-                onDelete(property.id);
-              }
-            }}
-            className="p-2 rounded-xl bg-slate-900 hover:bg-rose-950/40 text-slate-400 hover:text-rose-400 border border-slate-800 hover:border-rose-500/30 transition-all"
-            title={t.delete}
-          >
-            <Trash2 className="w-3.5 h-3.5" />
-          </button>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (confirm(t.confirm_delete)) {
+                    onDelete(property.id);
+                  }
+                }}
+                className="p-2 rounded-xl bg-slate-900 hover:bg-rose-950/40 text-slate-400 hover:text-rose-400 border border-slate-800 hover:border-rose-500/30 transition-all"
+                title={t.delete}
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+              </button>
+            </>
+          )}
         </div>
 
       </div>

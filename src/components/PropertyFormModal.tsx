@@ -197,7 +197,7 @@ export const PropertyFormModal: React.FC<PropertyFormModalProps> = ({
         setOlkInput(olk || '');
       }
     } else {
-      const nextCode = `RSL-${100 + existingCount + 1}`;
+      const nextCode = `NVH-${100 + existingCount + 1}`;
       setFormData({
         id: `prop-${Date.now()}`,
         property_code: nextCode,
@@ -651,7 +651,7 @@ export const PropertyFormModal: React.FC<PropertyFormModalProps> = ({
                   type="text"
                   value={formData.property_code}
                   onChange={(e) => setFormData({ ...formData, property_code: e.target.value })}
-                  placeholder="RSL-101"
+                  placeholder="NVH-101"
                   className="w-full px-3 py-2.5 rounded-xl bg-slate-950 border border-slate-800 font-mono text-amber-400 text-xs outline-none"
                 />
               </div>

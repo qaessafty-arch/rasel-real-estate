@@ -64,6 +64,9 @@ export function getPropertyStatusLabel(status: string, lang: Language = 'ckb'): 
 export function formatArea(areaSqm?: number, landDetails?: Property['land_details'], lang: Language = 'ckb'): {
   primary: string;
   badge?: string;
+  dimensions?: string;
+  donumBreakdown?: string;
+  sqft?: string;
   fullDescription: string;
 } {
   const sqmUnit = lang === 'en' ? 'm²' : 'م²';
@@ -75,11 +78,17 @@ export function formatArea(areaSqm?: number, landDetails?: Property['land_detail
   }
 
   const primary = `${formatNumber(areaSqm)} ${sqmUnit}`;
+  const sqftVal = Math.round(areaSqm * 10.7639);
+  const sqft = `${formatNumber(sqftVal)} ${lang === 'en' ? 'sq ft' : 'پێ²'}`;
+
   let badge: string | undefined = undefined;
+  let dimensions: string | undefined = undefined;
+  let donumBreakdown: string | undefined = undefined;
 
   // Dimensions badge (e.g. 10 × 20m)
   if (landDetails?.frontage_meter && landDetails?.depth_meter) {
-    badge = `${landDetails.frontage_meter} × ${landDetails.depth_meter}م`;
+    dimensions = `${landDetails.frontage_meter}م × ${landDetails.depth_meter}م`;
+    badge = dimensions;
   }
 
   // If >= 2500 sqm (or explicitly has donum), calculate donums and olks
@@ -96,11 +105,15 @@ export function formatArea(areaSqm?: number, landDetails?: Property['land_detail
     if (leftoverSqm > 0) {
       donumStr += ` (${leftoverSqm} ${sqmUnit})`;
     }
+    donumBreakdown = donumStr;
     badge = donumStr;
     return {
       primary,
       badge,
-      fullDescription: `${primary} (${donumStr})`
+      dimensions,
+      donumBreakdown,
+      sqft,
+      fullDescription: `${primary} • ${donumStr}${dimensions ? ` (${dimensions})` : ''}`
     };
   }
 
@@ -108,11 +121,14 @@ export function formatArea(areaSqm?: number, landDetails?: Property['land_detail
     return {
       primary,
       badge,
+      dimensions,
+      donumBreakdown,
+      sqft,
       fullDescription: `${primary} (${badge})`
     };
   }
 
-  return { primary, fullDescription: primary };
+  return { primary, dimensions, donumBreakdown, sqft, fullDescription: primary };
 }
 
 export function donumToSqm(donum: number, olk: number = 0): number {
@@ -134,7 +150,7 @@ export function generateWhatsAppMessage(property: Property, lang: Language = 'ck
   const type = getPropertyTypeLabel(property.property_type, lang);
   const areaInfo = formatArea(property.area_sqm, property.land_details, lang);
 
-  const text = `🏡 *NASHVILLE HOUSE*
+  const text = `🏡 *NASHVILLE HOUSE REAL ESTATE*
 ━━━━━━━━━━━━━━━━━
 📌 *${property.title}*
 🆔 ${t.code || 'کۆد'}: *${property.property_code}*
@@ -146,7 +162,8 @@ ${property.project_name ? `🏢 ${t.project}: *${property.project_name}* (نهۆ
 ${property.payment_method === 'installments' ? `💳 پێشەکی: ${formatPrice(property.down_payment || 0, property.currency, lang)} - قیست: ${property.installment_cycle || 'مانگانە'}` : ''}
 ${property.land_details?.frontage_meter ? `📐 بەرەی شەقام: ${property.land_details.frontage_meter}م ${property.land_details.depth_meter ? `× ${property.land_details.depth_meter}م قووڵی` : ''} | پانی شەقام: ${property.land_details.street_width || '—'}م` : ''}
 ${property.video_url ? `🎥 ڤیدیۆ: ${property.video_url}` : ''}
-📞 بۆ پەیوەندی و زانیاری زیاتر: ${property.owner_contact?.phone || '0750xxxxxxx'}`;
+🌐 ماڵپەڕ: https://nashvillehouse.site
+📞 پەیوەندی بە نوسینگەی نەشڤیل هاوس (Nashville House): 0750 000 0000`;
 
   return encodeURIComponent(text);
 }

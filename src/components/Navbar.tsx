@@ -111,13 +111,20 @@ export const Navbar: React.FC<NavbarProps> = ({
     adminOnly?: boolean;
   }
 
-  const navItems: NavItem[] = [
+  const publicNavItems: NavItem[] = [
+    { id: 'properties', label: t.properties, icon: Building2, badge: propertiesCount },
+    { id: 'map', label: t.map, icon: MapPin },
+  ];
+
+  const adminNavItems: NavItem[] = [
     { id: 'dashboard', label: t.dashboard, icon: Home },
     { id: 'properties', label: t.properties, icon: Building2, badge: propertiesCount },
     { id: 'map', label: t.map, icon: MapPin },
     { id: 'contracts', label: t.contracts, icon: FileText, adminOnly: true },
     { id: 'accounting', label: t.accounting, icon: DollarSign, adminOnly: true },
   ];
+
+  const navItems = isAdmin ? adminNavItems : publicNavItems;
 
   const languages: { code: Language; label: string; flag: string }[] = [
     { code: 'ckb', label: 'کوردی (سۆرانی)', flag: '☀️' },
@@ -387,29 +394,33 @@ export const Navbar: React.FC<NavbarProps> = ({
               )}
             </div>
 
-            {/* Supabase status badge */}
-            <div className="hidden xl:flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border border-slate-800 bg-slate-900/60 text-slate-400">
-              {isSupabaseConfigured ? (
-                <>
-                  <Database className="w-3.5 h-3.5 text-emerald-400" />
-                  <span className="text-emerald-400">{t.connected_supabase}</span>
-                </>
-              ) : (
-                <>
-                  <HardDrive className="w-3.5 h-3.5 text-amber-400" />
-                  <span className="text-slate-300">{t.local_storage}</span>
-                </>
-              )}
-            </div>
+            {/* Supabase status badge (Admin Only) */}
+            {isAdmin && (
+              <div className="hidden xl:flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border border-slate-800 bg-slate-900/60 text-slate-400">
+                {isSupabaseConfigured ? (
+                  <>
+                    <Database className="w-3.5 h-3.5 text-emerald-400" />
+                    <span className="text-emerald-400">{t.connected_supabase}</span>
+                  </>
+                ) : (
+                  <>
+                    <HardDrive className="w-3.5 h-3.5 text-amber-400" />
+                    <span className="text-slate-300">{t.local_storage}</span>
+                  </>
+                )}
+              </div>
+            )}
 
-            {/* Add Property Button (Prompts login if not admin) */}
-            <button
-              onClick={onOpenAddModal}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-white font-bold text-sm shadow-lg shadow-emerald-600/20 transition-all active:scale-95"
-            >
-              <PlusCircle className="w-4 h-4 stroke-[2.5]" />
-              <span>{t.new_property}</span>
-            </button>
+            {/* Add Property Button (Admin Only) */}
+            {isAdmin && (
+              <button
+                onClick={onOpenAddModal}
+                className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-white font-bold text-sm shadow-lg shadow-emerald-600/20 transition-all active:scale-95"
+              >
+                <PlusCircle className="w-4 h-4 stroke-[2.5]" />
+                <span>{t.new_property}</span>
+              </button>
+            )}
 
             {/* Admin Status & Actions */}
             {isAdmin ? (
@@ -444,10 +455,11 @@ export const Navbar: React.FC<NavbarProps> = ({
             ) : (
               <button
                 onClick={onOpenLoginModal}
-                className="flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 text-xs font-bold transition-all shadow-md active:scale-95"
+                className="flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-slate-900/90 hover:bg-slate-850 text-slate-300 hover:text-amber-400 border border-slate-800 hover:border-amber-500/40 text-xs font-bold transition-all shadow-sm active:scale-95"
+                title="چوونەژوورەوەی ستاف و بەڕێوەبەر"
               >
-                <Key className="w-3.5 h-3.5" />
-                <span>چوونەژوورەوەی ئەدمین</span>
+                <Lock className="w-3.5 h-3.5 text-amber-400" />
+                <span>{lang === 'en' ? 'Staff Portal' : lang === 'ar' ? 'بوابة الموظفين' : 'بەشی ستاف'}</span>
               </button>
             )}
 
@@ -458,10 +470,11 @@ export const Navbar: React.FC<NavbarProps> = ({
             {!isAdmin && (
               <button
                 onClick={onOpenLoginModal}
-                className="px-2 py-1.5 rounded-lg bg-amber-500/10 text-amber-400 border border-amber-500/30 text-xs font-bold flex items-center gap-1"
+                className="px-2.5 py-1.5 rounded-lg bg-slate-900 text-amber-400 border border-slate-800 text-xs font-bold flex items-center gap-1"
+                title="چوونەژوورەوەی ستاف"
               >
-                <Key className="w-3 h-3" />
-                <span>ئەدمین</span>
+                <Lock className="w-3 h-3 text-amber-400" />
+                <span>ستاف</span>
               </button>
             )}
             <button
@@ -475,12 +488,14 @@ export const Navbar: React.FC<NavbarProps> = ({
             >
               {lang === 'ckb' ? 'کوردی' : lang === 'ar' ? 'عربي' : 'EN'}
             </button>
-            <button
-              onClick={onOpenAddModal}
-              className="p-2 rounded-lg bg-emerald-600 text-white"
-            >
-              <PlusCircle className="w-5 h-5" />
-            </button>
+            {isAdmin && (
+              <button
+                onClick={onOpenAddModal}
+                className="p-2 rounded-lg bg-emerald-600 text-white"
+              >
+                <PlusCircle className="w-5 h-5" />
+              </button>
+            )}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="p-2.5 rounded-xl bg-slate-900 text-slate-300 hover:text-white border border-slate-800"
