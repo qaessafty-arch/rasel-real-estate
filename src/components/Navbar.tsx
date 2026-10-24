@@ -156,20 +156,16 @@ export const Navbar: React.FC<NavbarProps> = ({
   return (
     <header className="sticky top-0 z-40 w-full overflow-x-clip glass-panel border-b border-slate-800/80 bg-slate-950/90 backdrop-blur-md">
       <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-18 sm:h-20 gap-2 sm:gap-4">
+        <div className="flex items-center justify-between h-16 gap-2 sm:gap-4">
           
           {/* 1. Logo & Agency Title */}
           <div className="flex items-center gap-2.5 sm:gap-3 shrink-0">
-            <div className="relative flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 rounded-2xl overflow-hidden bg-slate-950 border border-slate-700/80 shadow-md shadow-sky-950/50 shrink-0">
+            <div className="relative flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 rounded-xl overflow-hidden bg-slate-950 border border-slate-800 shrink-0">
               <img
                 src="/logo.png"
                 alt="Nashville House Logo"
                 className="w-full h-full object-cover scale-105"
               />
-              <span className="absolute -top-1 -right-1 flex h-2.5 w-2.5">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
-              </span>
             </div>
             <div className="leading-tight">
               <h1 className="text-base sm:text-xl font-black tracking-wider text-white whitespace-nowrap">
@@ -190,8 +186,8 @@ export const Navbar: React.FC<NavbarProps> = ({
                   onClick={() => handleNavClick(item)}
                   className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all duration-200 ${
                     isActive
-                      ? 'bg-amber-500 text-slate-950 shadow-sm font-black'
-                      : 'text-slate-300 hover:text-white hover:bg-slate-800/60'
+                      ? 'bg-slate-800 text-white'
+                      : 'text-slate-400 hover:text-white'
                   }`}
                 >
                   <Icon className="w-3.5 h-3.5" />
@@ -207,65 +203,6 @@ export const Navbar: React.FC<NavbarProps> = ({
               );
             })}
 
-            {/* Category Division Menu Trigger */}
-            <div className="relative">
-              <button
-                onClick={() => setDivisionMenuOpen(!divisionMenuOpen)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold border transition-all ${
-                  selectedDivision && selectedDivision !== 'all'
-                    ? 'bg-amber-500/15 text-amber-300 border-amber-500/40 shadow-sm'
-                    : 'text-slate-300 hover:text-white border-transparent hover:bg-slate-800/60'
-                }`}
-                title={t.divide_menu || 'مێنیوی دابەشکردنی بەشەکان'}
-              >
-                <Layers className="w-3.5 h-3.5 text-amber-400" />
-                <span>{t.divisions || 'بەشەکان'}</span>
-                {selectedDivision && selectedDivision !== 'all' && (
-                  <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
-                )}
-                <ChevronDown className="w-3 h-3 text-slate-400" />
-              </button>
-
-              {divisionMenuOpen && (
-                <div className="absolute top-full mt-2 w-64 rounded-xl bg-slate-900 border border-slate-800 shadow-2xl py-1.5 z-50 rtl:right-auto rtl:left-0">
-                  <div className="px-3 py-1.5 text-[10px] uppercase font-bold text-slate-400 border-b border-slate-800 flex items-center justify-between">
-                    <span className="flex items-center gap-1">
-                      <Layers className="w-3 h-3 text-amber-400" />
-                      <span>{t.divide_menu || 'دابەشکردنی بەشەکان'}</span>
-                    </span>
-                    <span className="text-[9px] text-amber-400 font-mono">NASHVILLE</span>
-                  </div>
-                  <div className="p-1 space-y-0.5">
-                    {divisionOptions.map((div) => (
-                      <button
-                        key={div.id}
-                        onClick={() => {
-                          if (onSelectDivision) onSelectDivision(div.id);
-                          setActiveTab('properties');
-                          setDivisionMenuOpen(false);
-                        }}
-                        className={`w-full text-right rtl:text-right ltr:text-left px-3 py-2 rounded-lg text-xs transition-all flex items-center justify-between ${
-                          selectedDivision === div.id
-                            ? 'bg-amber-500/15 text-amber-300 font-bold border border-amber-500/30'
-                            : 'text-slate-300 hover:bg-slate-800 hover:text-white border border-transparent'
-                        }`}
-                      >
-                        <div className="flex items-center gap-2">
-                          <span className="text-sm">{div.icon}</span>
-                          <div>
-                            <div className="font-semibold text-white">{div.label}</div>
-                            <div className="text-[10px] text-slate-400 font-normal leading-tight">{div.desc}</div>
-                          </div>
-                        </div>
-                        {selectedDivision === div.id && (
-                          <span className="w-2 h-2 rounded-full bg-amber-400" />
-                        )}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
           </nav>
 
           {/* 3. Right Cluster: Language, Theme & Staff / Logout Controls */}
@@ -308,6 +245,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             </div>
 
             {/* UI Theme & Background Selector */}
+            {isStaff && (
             <div className="relative">
               <button
                 onClick={() => setThemeMenuOpen(!themeMenuOpen)}
@@ -394,6 +332,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 </div>
               )}
             </div>
+            )}
 
             {/* 4. Staff Account & Prominent LOG OUT Button */}
             {isStaff ? (
@@ -428,10 +367,10 @@ export const Navbar: React.FC<NavbarProps> = ({
             ) : (
               <button
                 onClick={onOpenLoginModal}
-                className="flex items-center gap-1.5 px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 text-xs font-bold transition-all shadow-sm active:scale-95 whitespace-nowrap"
+                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-slate-500 hover:text-white text-xs transition-colors whitespace-nowrap"
                 title="چوونەژوورەوەی ستاف و بەڕێوەبەر"
               >
-                <Lock className="w-3.5 h-3.5 text-amber-400" />
+                <Lock className="w-3.5 h-3.5" />
                 <span>بەشی ستاف</span>
               </button>
             )}

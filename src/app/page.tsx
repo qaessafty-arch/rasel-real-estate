@@ -592,43 +592,28 @@ export default function HomePage() {
         {activeTab === 'properties' && (
           <div className="space-y-6">
             
-            {/* Header with Title and Add Button */}
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-5 rounded-2xl glass-card border border-slate-800">
-              <div>
-                <h2 className="text-xl sm:text-2xl font-black text-white flex items-center gap-2">
-                  <Building2 className="w-6 h-6 text-amber-400" />
-                  <span>{t.properties}</span>
+            {isUnlocked ? (
+              <div className="flex flex-wrap items-center justify-between gap-4 pb-3 border-b border-slate-800/80">
+                <h2 className="text-lg font-bold text-white">{t.properties}</h2>
+                <button
+                  onClick={handleOpenAdd}
+                  className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-sm transition-colors"
+                >
+                  <PlusCircle className="w-4 h-4" />
+                  <span>{t.new_property}</span>
+                </button>
+              </div>
+            ) : (
+              <section className="text-center pt-6 sm:pt-14 pb-2">
+                <h2 className="text-3xl sm:text-5xl font-extrabold leading-tight tracking-tight text-white">
+                  موڵکی گونجاو بدۆزەرەوە<br />
+                  <span className="text-amber-400">لە هەرێمی کوردستان</span>
                 </h2>
-                <p className="text-xs text-slate-400 mt-0.5">
-                  {t.welcome_desc}
+                <p className="mt-4 text-slate-400 max-w-xl mx-auto leading-relaxed">
+                  کڕین، فرۆشتن و بەکرێدانی خانوو، شوقە، ڤیلا و زەوی لەگەڵ ڕاوێژکارانی نەشڤیل هاوس.
                 </p>
-              </div>
-
-              <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
-                {isUnlocked ? (
-                  <button
-                    onClick={handleOpenAdd}
-                    className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-bold text-sm shadow-lg shadow-amber-500/20 transition-all active:scale-95"
-                  >
-                    <PlusCircle className="w-4 h-4 stroke-[2.5]" />
-                    <span>{t.new_property}</span>
-                  </button>
-                ) : (
-                  <a
-                    href="https://wa.me/9647501500505?text=سڵاو،%20دەمەوێت%20ڕاوێژ%20بکەم%20دەربارەی%20کڕین%20یان%20فرۆشتنی%20موڵک%20لە%20نەشڤیل%20هاوس"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-lg shadow-emerald-600/20 transition-all active:scale-95"
-                  >
-                    <Send className="w-4 h-4 shrink-0" />
-                    <span className="flex items-center gap-1.5">
-                      <span>پەیوەندی لەگەڵ نەشڤیل هاوس</span>
-                      <span dir="ltr" className="font-mono">(0750 150 0505)</span>
-                    </span>
-                  </a>
-                )}
-              </div>
-            </div>
+              </section>
+            )}
 
             {/* Clear All Confirmation Modal Prompt */}
             {showClearConfirm && (
@@ -662,110 +647,63 @@ export default function HomePage() {
               </div>
             )}
 
-            {/* CATEGORY & DIVISION MENU ("مێنیوی دابەشکردنی بەشەکان") */}
-            <div className="p-4 sm:p-5 rounded-3xl glass-card border border-slate-800 space-y-4 shadow-xl">
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-2xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-400 shadow-inner">
-                    <Layers className="w-5 h-5 stroke-[2.2]" />
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <h3 className="text-sm sm:text-base font-black text-white">
-                        {t.divide_menu || 'مێنیوی دابەشکردنی بەشەکان'}
-                      </h3>
-                      <span className="text-[11px] px-2 py-0.5 rounded-full bg-slate-900 border border-slate-800 text-amber-400 font-mono font-bold">
-                        {filteredProperties.length} {t.properties}
-                      </span>
-                    </div>
-                    <p className="text-xs text-slate-400 mt-0.5">
-                      دابەشکردنی خێرا بەپێی نیشتەجێبوون، زەوی و باخچە، شوێنی بازرگانی، و پڕۆژە نوێیەکان
-                    </p>
-                  </div>
-                </div>
-
-                {/* Section Grouping Toggle Button */}
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => setIsDividedSections(!isDividedSections)}
-                    className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold border transition-all ${
-                      isDividedSections
-                        ? 'bg-amber-500 text-slate-950 border-amber-500 shadow-lg shadow-amber-500/25 scale-102'
-                        : 'bg-slate-900 text-slate-300 border-slate-800 hover:text-white hover:border-slate-700'
-                    }`}
-                    title="پیشاندانی هەموو بەشەکان بە دەستەبەندی جیاوازی سەر شاشە"
-                  >
-                    <LayoutGrid className="w-4 h-4" />
-                    <span>{isDividedSections ? (t.section_view || 'دابەشکراو بە بەشەکان (چالاکە)') : (t.section_view || 'دابەشکردن بەپێی بەش')}</span>
-                  </button>
-                </div>
-              </div>
-
-              {/* Major Divisions Selector Buttons */}
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2.5 pt-1">
+            {/* Category chips + deal type */}
+            <div className="space-y-4">
+              <div className="flex flex-wrap items-center justify-center gap-2">
                 {[
-                  { id: 'all' as PropertyDivision, label: t.divide_all || 'هەموو موڵکەکان', icon: '🏢', count: divisionCounts.all, desc: 'سەرجەم موڵکەکان' },
-                  { id: 'residential' as PropertyDivision, label: t.divide_residential || 'نیشتەجێبوون', icon: '🏡', count: divisionCounts.residential, desc: 'خانوو، ڤێلا، شوقە' },
-                  { id: 'land' as PropertyDivision, label: t.divide_land || 'زەوی و باخچە', icon: '🌾', count: divisionCounts.land, desc: 'کشتوکاڵی، نیشتەجێبوون' },
-                  { id: 'commercial' as PropertyDivision, label: t.divide_commercial || 'شوێنی بازرگانی', icon: '🏬', count: divisionCounts.commercial, desc: 'دووکان، ئۆفیس، کۆگا' },
-                  { id: 'projects' as PropertyDivision, label: t.divide_projects || 'پڕۆژە نوێیەکان', icon: '🏗️', count: divisionCounts.projects, desc: 'تاوەر و باڵەخانەکان' },
-                ].map((div) => {
-                  const isSelected = selectedDivision === div.id;
-                  return (
-                    <button
-                      key={div.id}
-                      onClick={() => setSelectedDivision(div.id)}
-                      className={`flex flex-col justify-between p-3 rounded-2xl border text-right rtl:text-right transition-all ${
-                        isSelected
-                          ? 'bg-amber-500/15 border-amber-500/60 shadow-lg shadow-amber-500/10 ring-1 ring-amber-500/40'
-                          : 'bg-slate-900/60 border-slate-800/80 hover:bg-slate-850 hover:border-slate-700'
-                      }`}
-                    >
-                      <div className="flex items-center justify-between w-full mb-1">
-                        <span className="text-xl">{div.icon}</span>
-                        <span className={`text-[11px] font-mono px-2 py-0.5 rounded-full font-bold ${
-                          isSelected ? 'bg-amber-500 text-slate-950' : 'bg-slate-800 text-slate-300'
-                        }`}>
-                          {div.count}
-                        </span>
-                      </div>
-                      <div>
-                        <div className={`text-xs font-bold ${isSelected ? 'text-amber-300' : 'text-white'}`}>
-                          {div.label}
-                        </div>
-                        <div className="text-[10px] text-slate-400 truncate mt-0.5 font-normal">
-                          {div.desc}
-                        </div>
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
-
-              {/* Quick Deal Type Row */}
-              <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-slate-800/80 text-xs">
-                <span className="text-[11px] text-slate-400 font-semibold flex items-center gap-1.5 ml-1">
-                  <span>{t.quick_filter_deal || 'جۆری مامەڵە'}:</span>
-                </span>
-                {[
-                  { id: 'all', label: 'هەموو مامەڵەکان' },
-                  { id: 'sale', label: '🏷️ فرۆشتن (نەقد)' },
-                  { id: 'rent', label: '🔑 بەکرێدان' },
-                  { id: 'exchange', label: '🔄 ئاڵوگۆڕ' },
-                  { id: 'investment', label: '💼 وەبەرهێنان' },
-                ].map((deal) => (
+                  { id: 'all' as PropertyDivision, label: t.divide_all || 'هەموو موڵکەکان', count: divisionCounts.all },
+                  { id: 'residential' as PropertyDivision, label: t.divide_residential || 'نیشتەجێبوون', count: divisionCounts.residential },
+                  { id: 'land' as PropertyDivision, label: t.divide_land || 'زەوی و باخچە', count: divisionCounts.land },
+                  { id: 'commercial' as PropertyDivision, label: t.divide_commercial || 'شوێنی بازرگانی', count: divisionCounts.commercial },
+                  { id: 'projects' as PropertyDivision, label: t.divide_projects || 'پڕۆژە نوێیەکان', count: divisionCounts.projects },
+                ].map((div) => (
                   <button
-                    key={deal.id}
-                    onClick={() => setSelectedPurpose(deal.id)}
-                    className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all ${
-                      selectedPurpose === deal.id
-                        ? 'bg-amber-500 text-slate-950 border-amber-500 font-bold shadow-sm'
-                        : 'bg-slate-900/60 text-slate-400 border-slate-800 hover:text-white hover:border-slate-700'
+                    key={div.id}
+                    onClick={() => setSelectedDivision(div.id)}
+                    aria-pressed={selectedDivision === div.id}
+                    className={`px-4 py-1.5 rounded-full border text-sm transition-colors ${
+                      selectedDivision === div.id
+                        ? 'border-amber-500 text-amber-400'
+                        : 'border-slate-800 text-slate-400 hover:text-white hover:border-slate-600'
                     }`}
                   >
-                    {deal.label}
+                    {div.label}
+                    {div.count > 0 && <span className="ms-1.5 text-xs text-slate-500 font-mono">{div.count}</span>}
                   </button>
                 ))}
+              </div>
+
+              <div className="flex flex-wrap items-center justify-center gap-3">
+                <div className="inline-flex p-1 rounded-xl bg-slate-900 border border-slate-800 text-sm">
+                  {[
+                    { id: 'all', label: 'هەموو' },
+                    { id: 'sale', label: 'فرۆشتن' },
+                    { id: 'rent', label: 'کرێ' },
+                    { id: 'exchange', label: 'ئاڵوگۆڕ' },
+                    { id: 'investment', label: 'وەبەرهێنان' },
+                  ].map((deal) => (
+                    <button
+                      key={deal.id}
+                      onClick={() => setSelectedPurpose(deal.id)}
+                      aria-pressed={selectedPurpose === deal.id}
+                      className={`px-3.5 py-1.5 rounded-lg transition-colors ${
+                        selectedPurpose === deal.id ? 'bg-slate-800 text-white' : 'text-slate-400 hover:text-white'
+                      }`}
+                    >
+                      {deal.label}
+                    </button>
+                  ))}
+                </div>
+                <button
+                  onClick={() => setIsDividedSections(!isDividedSections)}
+                  aria-pressed={isDividedSections}
+                  className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs border transition-colors ${
+                    isDividedSections ? 'border-amber-500 text-amber-400' : 'border-slate-800 text-slate-400 hover:text-white'
+                  }`}
+                >
+                  <LayoutGrid className="w-3.5 h-3.5" />
+                  <span>{t.section_view || 'دابەشکردن بەپێی بەش'}</span>
+                </button>
               </div>
             </div>
 
@@ -801,8 +739,9 @@ export default function HomePage() {
                 />
               </div>
 
-              {/* Filter Dropdowns Grid */}
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 text-xs">
+              <details className="group">
+                <summary className="cursor-pointer select-none text-center text-sm text-slate-400 hover:text-white list-none">{lang === 'en' ? 'More filters' : lang === 'ar' ? 'المزيد من الفلاتر' : 'فلتەری زیاتر'} ▾</summary>
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 text-xs mt-4">
                 
                 {/* 1. Type Filter */}
                 <div>
@@ -821,22 +760,6 @@ export default function HomePage() {
                     <option value="shop">{t.shop}</option>
                     <option value="office">{t.office}</option>
                     <option value="building">{t.building}</option>
-                  </select>
-                </div>
-
-                {/* 2. Purpose Filter (Sale / Rent / Exchange / Investment) */}
-                <div>
-                  <label className="block text-slate-400 font-semibold mb-1">{t.purpose}</label>
-                  <select
-                    value={selectedPurpose}
-                    onChange={(e) => setSelectedPurpose(e.target.value)}
-                    className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-800 text-white text-xs outline-none focus:border-amber-500"
-                  >
-                    <option value="all">{t.all_purposes}</option>
-                    <option value="sale">{t.for_sale}</option>
-                    <option value="rent">{t.for_rent}</option>
-                    <option value="exchange">{t.for_exchange}</option>
-                    <option value="investment">{t.for_investment}</option>
                   </select>
                 </div>
 
@@ -869,7 +792,8 @@ export default function HomePage() {
                   </select>
                 </div>
 
-                {/* 5. Status Filter */}
+                {/* 5. Status Filter (staff only) */}
+                {isStaff && (
                 <div>
                   <label className="block text-slate-400 font-semibold mb-1">{t.status}</label>
                   <select
@@ -885,6 +809,7 @@ export default function HomePage() {
                     <option value="under_maintenance">{t.under_maintenance}</option>
                   </select>
                 </div>
+                )}
 
                 {/* 6. City Filter */}
                 <div>
@@ -921,6 +846,7 @@ export default function HomePage() {
                 </div>
 
               </div>
+              </details>
 
               {/* Filter Reset if any active */}
               {isFilterActive && (
@@ -1021,39 +947,29 @@ export default function HomePage() {
                 </div>
               ) : (
                 /* Customer View When Portfolio is Updating */
-                <div className="p-12 sm:p-16 text-center rounded-3xl glass-card border border-slate-800 space-y-4 max-w-xl mx-auto my-6">
-                  <div className="w-20 h-20 rounded-3xl overflow-hidden border border-slate-700/80 mx-auto shadow-2xl shadow-sky-950/60 bg-slate-950 flex items-center justify-center">
-                    <img src="/logo.png" alt="Nashville House" className="w-full h-full object-cover scale-105" />
-                  </div>
-                  <h3 className="text-xl font-black text-white">کۆمپانیای نەشڤیل هاوس (Nashville House)</h3>
-                  <p className="text-sm text-slate-300 leading-relaxed max-w-md mx-auto">
-                    لیستی موڵکەکان لە ئێستادا نوێ دەکرێتەوە. بۆ دۆزینەوەی باشترین خانوو، ڤێلا، شوقە یان زەوی، پەیوەندی بە ڕاوێژکارانی نەشڤیل هاوس بکەن.
+                <div className="text-center py-14 max-w-md mx-auto space-y-3">
+                  <h3 className="text-lg font-bold text-white">لە ئێستادا لیستی موڵکەکان نوێ دەکرێتەوە</h3>
+                  <p className="text-sm text-slate-400 leading-relaxed">
+                    بۆ دۆزینەوەی باشترین خانوو، ڤیلا، شوقە یان زەوی، پەیوەندی بە ڕاوێژکارانی نەشڤیل هاوس بکە.
                   </p>
-                  <div className="flex flex-wrap items-center justify-center gap-2.5 pt-2">
-                    <a
-                      href="https://wa.me/9647501500505?text=سڵاو،%20دەمەوێت%20ڕاوێژ%20بکەم%20دەربارەی%20کڕین%20یان%20فرۆشتنی%20موڵک"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-lg shadow-emerald-600/20 active:scale-95"
-                    >
-                      <Send className="w-3.5 h-3.5 shrink-0" />
-                      <span className="flex items-center gap-1.5">
-                        <span>واتسئەپ ١:</span>
-                        <span dir="ltr" className="font-mono">0750 150 0505</span>
-                      </span>
-                    </a>
-                    <a
-                      href="https://wa.me/9647502146614?text=سڵاو،%20دەمەوێت%20ڕاوێژ%20بکەم%20دەربارەی%20کڕین%20یان%20فرۆشتنی%20موڵک"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-lg shadow-emerald-600/20 active:scale-95"
-                    >
-                      <Send className="w-3.5 h-3.5 shrink-0" />
-                      <span className="flex items-center gap-1.5">
-                        <span>واتسئەپ ٢:</span>
-                        <span dir="ltr" className="font-mono">0750 214 6614</span>
-                      </span>
-                    </a>
+                  <div className="flex flex-wrap items-center justify-center gap-2.5 pt-3">
+                    {[
+                      { n: '9647501500505', d: '0750 150 0505', primary: true },
+                      { n: '9647502146614', d: '0750 214 6614', primary: false },
+                    ].map((c) => (
+                      <a
+                        key={c.n}
+                        href={`https://wa.me/${c.n}?text=سڵاو،%20دەمەوێت%20ڕاوێژ%20بکەم%20دەربارەی%20کڕین%20یان%20فرۆشتنی%20موڵک`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-colors ${
+                          c.primary ? 'bg-emerald-600 hover:bg-emerald-500 text-white' : 'border border-slate-800 text-slate-300 hover:text-white hover:border-slate-600'
+                        }`}
+                      >
+                        <span>واتسئەپ</span>
+                        <span dir="ltr" className="font-mono">{c.d}</span>
+                      </a>
+                    ))}
                   </div>
                 </div>
               )
@@ -1382,61 +1298,14 @@ export default function HomePage() {
       />
 
       {/* Footer */}
-      <footer className="mt-auto border-t border-slate-900 bg-slate-950/90 py-6 text-center text-xs text-slate-500">
-        <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3">
-          <div className="flex items-center gap-2">
-            <img src="/logo.png" alt="Nashville House" className="w-5 h-5 rounded-md object-cover" />
-            <span className="font-bold text-slate-400">{t.agency_title}</span>
-            <span>—</span>
-            <span>{t.agency_subtitle}</span>
-          </div>
-          <div className="flex flex-wrap items-center gap-2.5 text-[11px] text-slate-500">
-            <Link 
-              href="/guide" 
-              className="text-amber-400 hover:text-amber-300 font-bold underline underline-offset-4 flex items-center gap-1"
-            >
-              📖 ڕێبەری بەکارهێنان
-            </Link>
-            <span className="hidden sm:inline">•</span>
-            <span>
-              {lang === 'en' 
-                ? 'Private, secure, optimized for mobile, tablet and desktop'
-                : lang === 'ar'
-                ? 'خاص، آمن، ومتوافق مع الهواتف الذكية وأجهزة الكمبيوتر'
-                : 'تایبەت، پارێزراو و پشتگیریکراو لە مۆبایل و کۆمپیوتەر'}
-            </span>
-          </div>
-        </div>
-
-        {/* Contact Numbers Strip */}
-        <div className="mt-4 pt-3 border-t border-slate-900/80 max-w-7xl mx-auto px-4 flex flex-wrap items-center justify-between gap-3 text-xs">
-          <div className="flex flex-wrap items-center gap-3">
-            <span className="text-slate-400 font-semibold">پەیوەندی و واتسئەپ:</span>
-            <a href="https://wa.me/9647501500505" target="_blank" rel="noopener noreferrer" className="font-mono text-emerald-400 hover:text-emerald-300 font-bold flex items-center gap-1.5 bg-emerald-950/40 border border-emerald-900/60 px-2.5 py-1 rounded-lg transition-colors">
-              <span>📱</span>
-              <span dir="ltr">0750 150 0505</span>
-            </a>
-            <a href="https://wa.me/9647502146614" target="_blank" rel="noopener noreferrer" className="font-mono text-emerald-400 hover:text-emerald-300 font-bold flex items-center gap-1.5 bg-emerald-950/40 border border-emerald-900/60 px-2.5 py-1 rounded-lg transition-colors">
-              <span>📱</span>
-              <span dir="ltr">0750 214 6614</span>
-            </a>
-          </div>
-          <div className="text-[11px] text-slate-500 font-mono">
-            Erbil, Kurdistan Region, Iraq
-          </div>
-        </div>
-
-        {/* Developer Watermark */}
-        <div className="mt-4 pt-3 border-t border-slate-900/80 max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2 text-[11px] text-slate-500 font-mono">
-          <div className="text-slate-600">
-            © {new Date().getFullYear()} Nashville House Real Estate. All rights reserved.
-          </div>
-          <div className="flex items-center gap-1.5 select-none text-slate-400">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-            <span>developed by</span>
-            <span className="font-bold text-amber-400 bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 rounded-md hover:bg-amber-500/20 hover:border-amber-500/40 transition-colors">
-              null-tech
-            </span>
+      <footer className="mt-auto border-t border-slate-900 py-8 text-xs text-slate-500">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-wrap items-center justify-between gap-x-8 gap-y-3">
+          <div>© {new Date().getFullYear()} Nashville House · Erbil, Kurdistan Region</div>
+          <div className="flex flex-wrap items-center gap-5">
+            <a href="https://wa.me/9647501500505" target="_blank" rel="noopener noreferrer" dir="ltr" className="font-mono hover:text-white transition-colors">0750 150 0505</a>
+            <a href="https://wa.me/9647502146614" target="_blank" rel="noopener noreferrer" dir="ltr" className="font-mono hover:text-white transition-colors">0750 214 6614</a>
+            <Link href="/guide" className="hover:text-white transition-colors">ڕێبەری بەکارهێنان</Link>
+            <span className="text-slate-600">developed by null-tech</span>
           </div>
         </div>
       </footer>

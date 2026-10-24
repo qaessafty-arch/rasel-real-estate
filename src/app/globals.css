@@ -272,7 +272,7 @@ html[lang="ar"],
 /* 5. MINIMALISM (Quiet Scandinavian / Subtle Hairlines) */
 [data-theme="minimalism"] body {
   background-color: #0b0d10 !important;
-  background-image: radial-gradient(circle at 50% 0%, rgba(148, 163, 184, 0.04) 0%, transparent 60%) !important;
+  background-image: none !important;
   color: #e2e8f0 !important;
 }
 [data-theme="minimalism"] .obsidian-bg {
@@ -280,13 +280,13 @@ html[lang="ar"],
   background-image: none !important;
 }
 [data-theme="minimalism"] .glass-panel {
-  background: rgba(16, 20, 26, 0.96) !important;
-  border-color: rgba(255, 255, 255, 0.07) !important;
-  backdrop-filter: blur(8px) !important;
-  box-shadow: 0 4px 20px -5px rgba(0, 0, 0, 0.5) !important;
+  background: rgba(11, 13, 16, 0.92) !important;
+  border-color: #1e232b !important;
+  backdrop-filter: blur(10px) !important;
+  box-shadow: none !important;
 }
 [data-theme="minimalism"] .glass-card {
-  background: rgba(20, 24, 31, 0.92) !important;
+  background: #11141a !important;
   border-color: rgba(255, 255, 255, 0.06) !important;
   box-shadow: none !important;
 }
@@ -312,12 +312,12 @@ html[lang="ar"],
 }
 [data-theme="minimalism"] .text-amber-400,
 [data-theme="minimalism"] .text-amber-300 {
-  color: #cbd5e1 !important;
+  color: #e0a526 !important;
 }
 [data-theme="minimalism"] .bg-amber-500,
 [data-theme="minimalism"] .from-amber-500 {
-  background-color: #334155 !important;
-  color: #f8fafc !important;
+  background-color: #e0a526 !important;
+  color: #0b0d10 !important;
 }
 [data-theme="minimalism"] .to-amber-600 {
   --tw-gradient-to: #1e293b !important;
@@ -627,10 +627,6 @@ html[lang="ar"],
 /* 8. Minimalism Studio Dark (Clean Scandinavian Charcoal) */
 .bg-pattern-minimalism {
   background-color: #0b0d10;
-  background-image: 
-    radial-gradient(circle at 50% 0%, rgba(148, 163, 184, 0.05) 0%, transparent 65%),
-    radial-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px);
-  background-size: auto, 28px 28px;
 }
 
 /* ==========================================================================
