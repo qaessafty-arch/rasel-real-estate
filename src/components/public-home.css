@@ -151,6 +151,9 @@
   .pub-head{gap:8px}
   .pub-brand{font-size:15px;gap:8px}
   .pub-brand img{width:28px;height:28px}
+}
+@media(max-width:359px){
+  .pub-brand span{display:none}
   .pub-head .nav{display:none}
   .pub-tabs{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none!important;gap:24px;margin-inline:-16px;padding-inline:16px}
   .pub-tabs::-webkit-scrollbar{display:none}

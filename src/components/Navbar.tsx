@@ -165,7 +165,7 @@ export const Navbar: React.FC<NavbarProps> = ({
         <div className="flex items-center justify-between h-16 gap-2 sm:gap-4">
           
           {/* 1. Logo & Agency Title */}
-          <div className="flex items-center gap-2.5 sm:gap-3 shrink-0">
+          <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
             <div className="relative flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 rounded-xl overflow-hidden bg-slate-950 border border-slate-800 shrink-0">
               <img
                 src="/logo.png"
@@ -173,8 +173,8 @@ export const Navbar: React.FC<NavbarProps> = ({
                 className="w-full h-full object-cover scale-105"
               />
             </div>
-            <div className="leading-tight">
-              <h1 className="text-base sm:text-xl font-black tracking-wider text-white whitespace-nowrap">
+            <div className="leading-tight min-w-0">
+              <h1 className="text-base sm:text-xl font-black tracking-wider text-white truncate">
                 NASHVILLE <span className="text-amber-400 font-extrabold text-xs sm:text-sm tracking-normal">HOUSE</span>
               </h1>
               <p className="text-[10px] sm:text-xs text-slate-400 font-medium truncate max-w-[140px] sm:max-w-xs">{t.agency_subtitle}</p>
@@ -262,8 +262,9 @@ export const Navbar: React.FC<NavbarProps> = ({
             )}
 
             {/* UI Theme & Background Selector */}
+            {/* hidden on phones: the header has no room for it next to the ☰ menu */}
             {isStaff && (
-            <div className="relative">
+            <div className="relative hidden sm:block">
               <button
                 onClick={() => setThemeMenuOpen(!themeMenuOpen)}
                 className="p-2 sm:px-2.5 sm:py-1.5 rounded-xl bg-slate-900 hover:bg-slate-850 text-slate-300 hover:text-white border border-slate-800 hover:border-amber-500/30 text-xs font-bold transition-all shadow-sm flex items-center gap-1"
@@ -375,7 +376,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 <button
                   onClick={onLockSystem}
                   title="چوونەدەرەوە لە هەژمار (Logout)"
-                  className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-rose-950/40 hover:bg-rose-900/60 text-rose-300 hover:text-white border border-rose-900/50 hover:border-rose-600 text-xs font-bold transition-all shadow-sm active:scale-95 whitespace-nowrap"
+                  className="hidden sm:flex items-center gap-1 px-3 py-1.5 rounded-xl bg-rose-950/40 hover:bg-rose-900/60 text-rose-300 hover:text-white border border-rose-900/50 hover:border-rose-600 text-xs font-bold transition-all shadow-sm active:scale-95 whitespace-nowrap"
                 >
                   <LogOut className="w-3.5 h-3.5 text-rose-400" />
                   <span>دەرچوون</span>
