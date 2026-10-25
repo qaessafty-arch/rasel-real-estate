@@ -1,12 +1,11 @@
 /**
  * Authentication and Multi-Role Employee System
- * Supports Master Key 'Ibo0909', Administrator PINs, and Employee Accounts.
+ * Supports Administrator PINs and Employee Accounts.
  * Role-Based: 'admin' (full access) vs 'employee' (portfolio & contracts, no financials/settings/reset).
  */
 
 import { Employee, UserRole, UserSession } from '@/types';
 
-const MASTER_KEYS = ['Ibo0909', 'ibo0909'];
 const SESSION_STORAGE_KEY = 'rasel_auth_session_v3';
 const LEGACY_STORAGE_KEY = 'rasel_auth_unlocked';
 const CUSTOM_PIN_KEY = 'rasel_custom_pin_hash';
@@ -18,29 +17,9 @@ export const DEFAULT_EMPLOYEES: Employee[] = [
     id: 'emp-admin',
     name: 'بەڕێوەبەری گشتی (Admin)',
     username: 'admin',
-    pin: 'Ibo0909',
+    pin: '', // no default password: the admin signs in with the server ADMIN_PASSWORD
     phone: '0750 000 0000',
     role: 'admin',
-    status: 'active',
-    created_at: '2026-01-01T00:00:00.000Z',
-  },
-  {
-    id: 'emp-1',
-    name: 'ئاراس کەریم (Aras Karim)',
-    username: 'aras',
-    pin: '1122',
-    phone: '0750 111 2233',
-    role: 'employee',
-    status: 'active',
-    created_at: '2026-01-01T00:00:00.000Z',
-  },
-  {
-    id: 'emp-2',
-    name: 'سارا محەمەد (Sara Mohammed)',
-    username: 'sara',
-    pin: '3344',
-    phone: '0750 333 4455',
-    role: 'employee',
     status: 'active',
     created_at: '2026-01-01T00:00:00.000Z',
   },
@@ -223,20 +202,7 @@ export async function resolveUserCredentials(
   const trimmed = inputPin.trim();
   const trimmedUser = username?.trim().toLowerCase();
 
-  // A. Check Master Admin Key
-  if (MASTER_KEYS.includes(trimmed)) {
-    return {
-      id: 'emp-admin',
-      name: 'بەڕێوەبەری گشتی (Admin)',
-      username: 'admin',
-      pin: trimmed,
-      role: 'admin',
-      status: 'active',
-      created_at: '2026-01-01T00:00:00.000Z',
-    };
-  }
-
-  // B. Check Custom Admin PIN
+  // A. Check Custom Admin PIN
   if (typeof window !== 'undefined') {
     const customHash = localStorage.getItem(CUSTOM_PIN_KEY);
     if (customHash) {
@@ -255,7 +221,7 @@ export async function resolveUserCredentials(
     }
   }
 
-  // C. Check Employee Accounts
+  // B. Check Employee Accounts
   const employees = getEmployees();
 
   // If username provided, match username + pin

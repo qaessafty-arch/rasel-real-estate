@@ -2,8 +2,11 @@ import { NextRequest, NextResponse } from 'next/server';
 import crypto from 'crypto';
 
 const SESSION_COOKIE_NAME = 'rasel_session';
-const SESSION_SECRET = process.env.SESSION_SECRET || 'rasel-real-estate-super-secret-salt-2026';
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'Ibo0909';
+// No hardcoded fallbacks: set both in the hosting environment (see .env.local.example).
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || '';
+const SESSION_SECRET = process.env.SESSION_SECRET || crypto.randomBytes(32).toString('hex');
+if (!process.env.ADMIN_PASSWORD) console.warn('ADMIN_PASSWORD is not set: admin password login is disabled.');
+if (!process.env.SESSION_SECRET) console.warn('SESSION_SECRET is not set: using a random one, sessions reset on restart.');
 
 // Rate limiting in-memory bucket: IP -> { attempts: number, resetAt: number }
 const rateLimitMap = new Map<string, { attempts: number; resetAt: number }>();
@@ -82,9 +85,8 @@ export function verifyAdminPassword(input: string, customPinHash?: string | null
   if (!input) return false;
   const trimmed = input.trim();
 
-  // 1. Check default admin password (case-tolerant for master key)
-  const candidates = [ADMIN_PASSWORD, ADMIN_PASSWORD.toLowerCase()];
-  for (const candidate of candidates) {
+  // 1. Check default admin password 
+  for (const candidate of ADMIN_PASSWORD ? [ADMIN_PASSWORD] : []) {
     if (trimmed.length === candidate.length) {
       const match = crypto.timingSafeEqual(
         Buffer.from(trimmed, 'utf8'),

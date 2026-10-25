@@ -94,7 +94,7 @@ export default function GuidePage() {
                 <tr>
                   <td className="p-2.5 font-bold text-amber-400">چوونەژوورەوە</td>
                   <td className="p-2.5">دوگمەی «بەشی ستاف» لە سەرەوە</td>
-                  <td className="p-2.5">ئەدمین (<code className="text-amber-300">Ibo0909</code>) یان کارمەند (<code className="text-sky-300">1122, 3344</code>)</td>
+                  <td className="p-2.5">ئەدمین یان کارمەند (بە وشەی نهێنی تایبەت بە خۆیان)</td>
                 </tr>
                 <tr>
                   <td className="p-2.5 font-bold text-amber-400">زیادکردنی موڵک</td>
@@ -155,9 +155,7 @@ export default function GuidePage() {
             <li>پەنجەرەیەکی ڕەش دەکرێتەوە کە تەنها خانەی وشەی نهێنی تێدایە.</li>
             <li>وشەی نهێنی بنووسە:
               <div className="mt-1.5 p-3 rounded-xl bg-slate-950 border border-slate-800 space-y-1 font-mono text-[11px]">
-                <div>👑 بۆ ئەدمین (بەڕێوەبەر): <span className="text-amber-400 font-bold">Ibo0909</span></div>
-                <div>👤 بۆ کارمەند ١ (ئاراس): <span className="text-sky-400 font-bold">1122</span></div>
-                <div>👤 بۆ کارمەند ٢ (سارا): <span className="text-sky-400 font-bold">3344</span></div>
+                <div>وشەی نهێنی یان PINی خۆت بنووسە. ئەگەر نیتە، داوای لە بەڕێوەبەر بکە.</div>
               </div>
             </li>
             <li>کلیک لە دوگمەی زەردی <strong className="text-amber-400">«چوونەژوورەوە»</strong> بکە. دەستبەجێ دەسەڵاتەکانت چالاک دەبن.</li>
@@ -211,7 +209,7 @@ export default function GuidePage() {
                 <span>سڕینەوە (Delete)</span>
               </div>
               <p className="text-slate-400 leading-relaxed">
-                ئایکۆنی سەتڵی خۆڵ دابگرە. <strong>تەنها بۆ ئەدمین (<code className="text-amber-300">Ibo0909</code>) دەردەکەوێت!</strong> کارمەند و کڕیار بە هیچ شێوەیەک ناتوانن موڵک بسڕنەوە.
+                ئایکۆنی سەتڵی خۆڵ دابگرە. <strong>تەنها بۆ ئەدمین دەردەکەوێت!</strong> کارمەند و کڕیار بە هیچ شێوەیەک ناتوانن موڵک بسڕنەوە.
               </p>
             </div>
           </div>
@@ -258,7 +256,7 @@ export default function GuidePage() {
           <div className="p-3.5 rounded-xl bg-slate-950/80 border border-rose-800/60 space-y-2 text-xs">
             <div className="font-bold text-amber-400">🔒 ئەم دوگمەیە تەنها بۆ ئەدمین دەردەکەوێت:</div>
             <ol className="list-decimal list-inside space-y-1.5 text-slate-300 pr-1">
-              <li>بە وشەی نهێنی <code className="text-amber-300">Ibo0909</code> بچۆ ژوورەوە.</li>
+              <li>وەک ئەدمین بچۆ ژوورەوە.</li>
               <li>لە شریتە ڕەشەکەی ستاف لە سەرەوە، دوگمەیەکی سوور دەبینیت بە ناوی <strong className="text-rose-400">«سفرکردنەوە بۆ کڕیار»</strong>.</li>
               <li>کلیکی لێ بکە، پەیامێکی دڵنیابوونەوە دەردەکەوێت، کلیک لەسەر <strong className="text-rose-400">«بەڵێ، هەموو داتاکان بسڕەوە»</strong> بکە.</li>
               <li>دەستبەجێ هەموو داتاکان پاک دەبنەوە و سیستەمەکە سپی دەبێتەوە.</li>

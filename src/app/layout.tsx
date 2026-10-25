@@ -43,11 +43,11 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link 
-          href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400..900&display=swap" 
+          href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400..700&family=Newsreader:opsz,wght@6..72,400..600&family=Noto+Naskh+Arabic:wght@500..700&family=Noto+Sans+Arabic:wght@400..700&display=swap" 
           rel="stylesheet" 
         />
       </head>
-      <body className="bg-slate-950 text-slate-100 antialiased selection:bg-amber-500 selection:text-slate-900 overflow-x-hidden min-h-screen">
+      <body className="bg-slate-950 text-slate-100 antialiased selection:bg-amber-500 selection:text-slate-900 min-h-screen">
         {children}
       </body>
     </html>

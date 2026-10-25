@@ -34,6 +34,7 @@ import { Property, Contract, FinancialTransaction, PropertyStatus, UITheme, UIBa
 import { formatArea, formatPrice, getPropertyStatusLabel, getPropertyTypeLabel, getPropertyPurposeLabel, generateWhatsAppMessage } from '@/lib/utils';
 import { dataService } from '@/lib/storage';
 import { Navbar } from '@/components/Navbar';
+import { PublicHome } from '@/components/PublicHome';
 import { LoginModal } from '@/components/LoginModal';
 import { DashboardStats } from '@/components/DashboardStats';
 import { PropertyCard } from '@/components/PropertyCard';
@@ -188,6 +189,7 @@ export default function HomePage() {
   };
 
   // Decoupled Property Filters and Live Search Hook
+  const filters = usePropertyFilters(properties);
   const {
     searchQuery,
     setSearchQuery,
@@ -212,7 +214,7 @@ export default function HomePage() {
     resetFilters,
     filteredProperties,
     divisionCounts,
-  } = usePropertyFilters(properties);
+  } = filters;
 
   // Check initial login state
   useEffect(() => {
@@ -383,7 +385,51 @@ export default function HomePage() {
 
   const resetAllFilters = resetFilters;
 
+  const handleLoginSuccess = (user?: UserSession | null) => {
+    if (user) {
+      setCurrentUser(user);
+    } else {
+      const current = getCurrentUser();
+      if (current) setCurrentUser(current);
+      else {
+        setCurrentUser({
+          id: 'emp-admin',
+          name: 'بەڕێوەبەری گشتی (Admin)',
+          username: 'admin',
+          role: 'admin',
+        });
+      }
+    }
+    setLoginModalOpen(false);
+  };
+
   if (!authChecked) return null;
+
+  if (!isStaff) {
+    return (
+      <>
+        <LoginModal isOpen={loginModalOpen} onClose={() => setLoginModalOpen(false)} onSuccess={handleLoginSuccess} />
+        <PublicHome
+          lang={lang}
+          onChangeLang={handleSelectLang}
+          properties={properties}
+          loading={loading}
+          filters={filters}
+          onView={setDetailProperty}
+          onOpenLogin={() => setLoginModalOpen(true)}
+        />
+        <PropertyDetailModal
+          property={detailProperty}
+          onClose={() => setDetailProperty(null)}
+          onEdit={handleEditProperty}
+          onDelete={handleDeleteProperty}
+          isAdmin={false}
+          isStaff={false}
+          lang={lang}
+        />
+      </>
+    );
+  }
 
   return (
     <div dir={lang === 'en' ? 'ltr' : 'rtl'} className={`min-h-screen w-full max-w-full overflow-x-hidden flex flex-col ${getBgClass(bgPattern)} text-slate-100 font-sans selection:bg-amber-500 selection:text-slate-950 transition-colors duration-300`}>
@@ -392,23 +438,7 @@ export default function HomePage() {
       <LoginModal
         isOpen={loginModalOpen}
         onClose={() => setLoginModalOpen(false)}
-        onSuccess={(user) => {
-          if (user) {
-            setCurrentUser(user);
-          } else {
-            const current = getCurrentUser();
-            if (current) setCurrentUser(current);
-            else {
-              setCurrentUser({
-                id: 'emp-admin',
-                name: 'بەڕێوەبەری گشتی (Admin)',
-                username: 'admin',
-                role: 'admin',
-              });
-            }
-          }
-          setLoginModalOpen(false);
-        }}
+        onSuccess={handleLoginSuccess}
       />
 
       {/* Main Top Navigation */}
