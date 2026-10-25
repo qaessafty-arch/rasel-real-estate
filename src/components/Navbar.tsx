@@ -26,7 +26,9 @@ import {
   Users,
   ShieldCheck,
   UserCheck,
-  BookOpen
+  BookOpen,
+  Sun,
+  Moon
 } from 'lucide-react';
 import { isSupabaseConfigured } from '@/lib/supabase';
 import { Language, translations } from '@/lib/i18n';
@@ -53,6 +55,8 @@ interface NavbarProps {
   onChangeBgPattern?: (bg: UIBackground) => void;
   selectedDivision?: PropertyDivision;
   onSelectDivision?: (division: PropertyDivision) => void;
+  mode?: 'light' | 'dark';
+  onToggleMode?: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -76,6 +80,8 @@ export const Navbar: React.FC<NavbarProps> = ({
   onChangeBgPattern,
   selectedDivision = 'all',
   onSelectDivision,
+  mode = 'dark',
+  onToggleMode,
 }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [langMenuOpen, setLangMenuOpen] = useState(false);
@@ -243,6 +249,17 @@ export const Navbar: React.FC<NavbarProps> = ({
                 </div>
               )}
             </div>
+
+            {isStaff && onToggleMode && (
+              <button
+                onClick={onToggleMode}
+                className="p-2 rounded-xl bg-slate-900 text-slate-300 border border-slate-800"
+                aria-label={mode === 'dark' ? 'Light theme' : 'Dark theme'}
+                title={mode === 'dark' ? 'Light theme' : 'Dark theme'}
+              >
+                {mode === 'dark' ? <Sun className="w-3.5 h-3.5" /> : <Moon className="w-3.5 h-3.5" />}
+              </button>
+            )}
 
             {/* UI Theme & Background Selector */}
             {isStaff && (

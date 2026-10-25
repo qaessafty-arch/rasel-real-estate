@@ -148,20 +148,46 @@ export function usePropertyFilters(properties: Property[]) {
     selectedDivision,
   ]);
 
-  // Counts by Division
-  const divisionCounts = useMemo(() => {
+  // Listings by Division
+  const divisionLists = useMemo(() => {
     const resTypes = ['house', 'villa', 'apartment'];
     const landTypes = ['residential_land', 'commercial_land', 'agricultural_land', 'agriculture_land', 'industrial_land', 'farm'];
     const commTypes = ['shop', 'office', 'building', 'warehouse', 'showroom'];
 
     return {
-      all: properties.length,
-      residential: properties.filter((p) => resTypes.includes(p.property_type)).length,
-      land: properties.filter((p) => landTypes.includes(p.property_type)).length,
-      commercial: properties.filter((p) => commTypes.includes(p.property_type)).length,
-      projects: properties.filter((p) => Boolean(p.project_name) || p.property_type === 'building').length,
+      all: properties,
+      residential: properties.filter((p) => resTypes.includes(p.property_type)),
+      land: properties.filter((p) => landTypes.includes(p.property_type)),
+      commercial: properties.filter((p) => commTypes.includes(p.property_type)),
+      projects: properties.filter((p) => Boolean(p.project_name) || p.property_type === 'building'),
     };
   }, [properties]);
+
+  const divisionCounts = useMemo(() => ({
+    all: divisionLists.all.length,
+    residential: divisionLists.residential.length,
+    land: divisionLists.land.length,
+    commercial: divisionLists.commercial.length,
+    projects: divisionLists.projects.length,
+  }), [divisionLists]);
+
+  // A listing photo per division for the public "browse by type" tiles, not repeating a photo
+  // another tile already uses (a project can also count as residential or commercial).
+  const divisionCovers = useMemo(() => {
+    const used = new Set<string>();
+    const cover = (list: Property[]) => {
+      const imgs = list.map((p) => p.images?.[0]).filter(Boolean) as string[];
+      const pick = imgs.find((i) => !used.has(i)) ?? imgs[0];
+      if (pick) used.add(pick);
+      return pick;
+    };
+    return {
+      residential: cover(divisionLists.residential),
+      land: cover(divisionLists.land),
+      commercial: cover(divisionLists.commercial),
+      projects: cover(divisionLists.projects),
+    };
+  }, [divisionLists]);
 
   return {
     searchQuery,
@@ -187,5 +213,6 @@ export function usePropertyFilters(properties: Property[]) {
     resetFilters,
     filteredProperties,
     divisionCounts,
+    divisionCovers,
   };
 }

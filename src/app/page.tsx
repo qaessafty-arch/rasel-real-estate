@@ -104,6 +104,23 @@ export default function HomePage() {
     }
   }, []);
 
+  // Light/dark for the staff view; same nh_mode key as the public home page.
+  const [mode, setMode] = useState<'light' | 'dark'>('dark');
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem('nh_mode');
+      if (saved === 'light' || saved === 'dark') setMode(saved);
+    } catch {}
+  }, []);
+  useEffect(() => {
+    document.documentElement.setAttribute('data-mode', mode);
+  }, [mode]);
+  const toggleMode = () => {
+    const next = mode === 'dark' ? 'light' : 'dark';
+    setMode(next);
+    try { localStorage.setItem('nh_mode', next); } catch {}
+  };
+
   const handleThemeChange = (newTheme: UITheme) => {
     setTheme(newTheme);
     if (typeof window !== 'undefined') {
@@ -463,6 +480,8 @@ export default function HomePage() {
         onChangeBgPattern={handleBgPatternChange}
         selectedDivision={selectedDivision}
         onSelectDivision={(div) => setSelectedDivision(div)}
+        mode={mode}
+        onToggleMode={toggleMode}
       />
 
       {/* Main Workspace Body */}

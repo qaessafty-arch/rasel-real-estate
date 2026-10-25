@@ -29,7 +29,7 @@ const WA = [
 
 const FALLBACK_IMG ='https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80';
 
-const copy: Record<Language, { title: string; sub: string; whatsapp: string; orWa: string; search: string; listings: string; cities: string; all: string; props: string; empty: string; emptyDesc: string; play: string; pause: string; finalTitle: string; finalSub: string }> = {
+const copy: Record<Language, { title: string; sub: string; whatsapp: string; orWa: string; search: string; listings: string; cities: string; browseType: string; ownerTitle: string; ownerSub: string; all: string; props: string; empty: string; emptyDesc: string; play: string; pause: string; finalTitle: string; finalSub: string }> = {
   ckb: {
     title: 'موڵک لە هەولێر و هەموو کوردستان',
     sub: 'ڤیلا، شوقە، خانوو و زەوی. بە واتسئەپ پەیوەندیمان پێوە بکە.',
@@ -38,6 +38,9 @@ const copy: Record<Language, { title: string; sub: string; whatsapp: string; orW
     search: 'گەڕان',
     listings: 'موڵک',
     cities: 'شار',
+    browseType: 'بەپێی جۆر بگەڕێ',
+    ownerTitle: 'موڵکێکت هەیە بۆ فرۆشتن یان کرێ؟',
+    ownerSub: 'وێنە، شوێن و نرخەکەی لە واتسئەپ بۆمان بنێرە.',
     all: 'هەموو',
     props: 'موڵکەکان',
     empty: 'لیستی موڵکەکان نوێ دەکرێتەوە',
@@ -55,6 +58,9 @@ const copy: Record<Language, { title: string; sub: string; whatsapp: string; orW
     search: 'بحث',
     listings: 'عقار',
     cities: 'مدن',
+    browseType: 'تصفح حسب النوع',
+    ownerTitle: 'لديك عقار للبيع أو الإيجار؟',
+    ownerSub: 'أرسل لنا الصور والموقع والسعر عبر واتساب.',
     all: 'الكل',
     props: 'العقارات',
     empty: 'قائمة العقارات قيد التحديث',
@@ -72,6 +78,9 @@ const copy: Record<Language, { title: string; sub: string; whatsapp: string; orW
     search: 'Search',
     listings: 'listings',
     cities: 'cities',
+    browseType: 'Browse by type',
+    ownerTitle: 'Selling or renting out a property?',
+    ownerSub: 'Send us photos, the location and your price on WhatsApp.',
     all: 'All',
     props: 'Properties',
     empty: 'The listings are being updated',
@@ -226,6 +235,28 @@ export const PublicHome: React.FC<PublicHomeProps> = ({ lang, onChangeLang, prop
           </dl>
         )}
 
+        {/* Category browse (Airbnb pattern): each tile uses a real listing photo from that type. */}
+        {divisions.some((d) => d.id !== 'all' && d.count > 0) && (
+          <section className="pub-cats">
+            <h2>{c.browseType}</h2>
+            <div className="row">
+              {divisions.filter((d) => d.id !== 'all' && d.count > 0).map((d) => (
+                <button
+                  key={d.id}
+                  className="pub-cat"
+                  onClick={() => { f.setSelectedDivision(d.id as any); setView('grid'); toList(); }}
+                >
+                  <span className="img">
+                    <img src={f.divisionCovers[d.id as keyof typeof f.divisionCovers] || FALLBACK_IMG} alt="" loading="lazy" />
+                  </span>
+                  <span className="label">{d.label}</span>
+                  <small className="pub-ltr">{d.count}</small>
+                </button>
+              ))}
+            </div>
+          </section>
+        )}
+
         <section className="pub-search">
           {f.searchQuery && (
             <p className="pub-query">
@@ -355,8 +386,16 @@ export const PublicHome: React.FC<PublicHomeProps> = ({ lang, onChangeLang, prop
 
       <section className="pub-final">
         <div className="pub-wrap">
-          <h2>{c.finalTitle}</h2>
-          <p>{c.finalSub}</p>
+          <div className="cols">
+            <div>
+              <h2>{c.finalTitle}</h2>
+              <p>{c.finalSub}</p>
+            </div>
+            <div>
+              <h2>{c.ownerTitle}</h2>
+              <p>{c.ownerSub}</p>
+            </div>
+          </div>
           <div className="nums">
             {WA.map((w) => (
               <a key={w.n} className="pub-ltr" href={`https://wa.me/${w.n}`} target="_blank" rel="noopener noreferrer">{w.d}</a>

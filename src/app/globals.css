@@ -269,66 +269,116 @@ html[lang="ar"],
   color: #ffffff !important;
 }
 
-/* 5. MINIMALISM (Quiet Scandinavian / Subtle Hairlines) */
-[data-theme="minimalism"] body {
-  background-color: #0b0d10 !important;
+/* 5. MINIMALISM: the staff default, matching the public home page (public-home.css):
+   black/white interface, warm neutrals, square-ish corners, no glass or glow, serif headings.
+   html[data-mode] (light|dark) shares the visitor's nh_mode choice. */
+[data-theme="minimalism"] {
+  --nh-paper: #121211; --nh-surface: #1a1a18; --nh-surface2: #242422; --nh-line: #2e2d2a;
+  --nh-ink: #ecebe6; --nh-ink2: #c9c7c0; --nh-muted: #9b9991;
+}
+[data-theme="minimalism"][data-mode="light"] {
+  --nh-paper: #f5f4f0; --nh-surface: #ffffff; --nh-surface2: #ecebe6; --nh-line: #d8d6cf;
+  --nh-ink: #151514; --nh-ink2: #3a3936; --nh-muted: #5f5e59;
+}
+html[data-theme="minimalism"] { background-color: var(--nh-paper) !important; scrollbar-color: var(--nh-line) var(--nh-paper) !important; }
+html[data-theme="minimalism"][data-mode="light"] { color-scheme: light !important; }
+[data-theme="minimalism"] body,
+[data-theme="minimalism"] .obsidian-bg,
+[data-theme="minimalism"] .bg-pattern-minimalism {
+  background-color: var(--nh-paper) !important;
   background-image: none !important;
-  color: #e2e8f0 !important;
+  color: var(--nh-ink) !important;
 }
-[data-theme="minimalism"] .obsidian-bg {
-  background-color: #0b0d10 !important;
-  background-image: none !important;
-}
-[data-theme="minimalism"] .glass-panel {
-  background: rgba(11, 13, 16, 0.92) !important;
-  border-color: #1e232b !important;
-  backdrop-filter: blur(10px) !important;
-  box-shadow: none !important;
-}
-[data-theme="minimalism"] .glass-card {
-  background: #11141a !important;
-  border-color: rgba(255, 255, 255, 0.06) !important;
-  box-shadow: none !important;
-}
+[data-theme="minimalism"] .glass-panel,
+[data-theme="minimalism"] .glass-card,
 [data-theme="minimalism"] .frosted-glass-card {
-  background: rgba(18, 22, 28, 0.92) !important;
-  border-color: rgba(255, 255, 255, 0.08) !important;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3) !important;
+  background: var(--nh-surface) !important;
+  border-color: var(--nh-line) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  box-shadow: none !important;
 }
-[data-theme="minimalism"] .frosted-glass-card:hover {
-  border-color: rgba(148, 163, 184, 0.3) !important;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4) !important;
+[data-theme="minimalism"] .frosted-glass-card:hover { border-color: var(--nh-muted) !important; }
+[data-theme="minimalism"] [class*="bg-slate-950"],
+[data-theme="minimalism"] [class*="bg-[#0b0d10]"] { background-color: var(--nh-paper) !important; }
+[data-theme="minimalism"] [class*="bg-slate-900"] { background-color: var(--nh-surface) !important; }
+[data-theme="minimalism"] [class*="bg-slate-800"],
+[data-theme="minimalism"] [class*="bg-slate-850"],
+[data-theme="minimalism"] [class*="bg-slate-700"] { background-color: var(--nh-surface2) !important; }
+[data-theme="minimalism"] [class*="border-slate-"],
+[data-theme="minimalism"] [class*="border-white/"],
+[data-theme="minimalism"] [class*="border-amber-"],
+[data-theme="minimalism"] .gold-border { border-color: var(--nh-line) !important; }
+[data-theme="minimalism"] [class*="divide-slate-"] > * + * { border-color: var(--nh-line) !important; }
+/* :not(.pub *) keeps the public home page (which sets its own heading colours) out of this */
+[data-theme="minimalism"] :is(h1, h2, h3, h4):not(.pub *) {
+  font-family: 'Newsreader', 'Noto Naskh Arabic', Georgia, serif !important;
+  color: var(--nh-ink);
 }
+[data-theme="minimalism"] .text-slate-100,
+[data-theme="minimalism"] .text-slate-200,
+[data-theme="minimalism"] .text-slate-300 { color: var(--nh-ink2) !important; }
+[data-theme="minimalism"] .text-slate-400,
+[data-theme="minimalism"] .text-slate-500,
+[data-theme="minimalism"] .text-slate-600 { color: var(--nh-muted) !important; }
+/* text-white stays white where it sits on a photo or dark badge */
+[data-theme="minimalism"] .text-white:not(.absolute *):not(.absolute):not([class*="bg-black"]):not([class*="bg-red"]):not([class*="bg-emerald"]):not([class*="bg-green"]) { color: var(--nh-ink) !important; }
+/* One accent: the ink colour. Gold buttons, gold text and gold gradients all collapse to it. */
 [data-theme="minimalism"] .gold-gradient-text {
-  background: linear-gradient(135deg, #ffffff 0%, #cbd5e1 60%, #94a3b8 100%) !important;
-  -webkit-background-clip: text !important;
-  -webkit-text-fill-color: transparent !important;
+  background: none !important;
+  -webkit-text-fill-color: var(--nh-ink) !important;
+  color: var(--nh-ink) !important;
 }
-[data-theme="minimalism"] .gold-border,
-[data-theme="minimalism"] .border-amber-500\/30,
-[data-theme="minimalism"] .border-amber-500\/40,
-[data-theme="minimalism"] .border-amber-500\/20 {
-  border-color: rgba(148, 163, 184, 0.22) !important;
-}
-[data-theme="minimalism"] .text-amber-400,
-[data-theme="minimalism"] .text-amber-300 {
-  color: #e0a526 !important;
-}
+[data-theme="minimalism"] [class*="text-amber-"],
+[data-theme="minimalism"] [class*="text-yellow-"] { color: var(--nh-ink) !important; }
 [data-theme="minimalism"] .bg-amber-500,
-[data-theme="minimalism"] .from-amber-500 {
-  background-color: #e0a526 !important;
-  color: #0b0d10 !important;
+[data-theme="minimalism"] .bg-amber-400,
+[data-theme="minimalism"] .bg-amber-600,
+[data-theme="minimalism"] [class*="from-amber-"] {
+  background: var(--nh-ink) !important;
+  color: var(--nh-paper) !important;
 }
-[data-theme="minimalism"] .to-amber-600 {
-  --tw-gradient-to: #1e293b !important;
-}
+[data-theme="minimalism"] .bg-amber-500 *,
+[data-theme="minimalism"] [class*="from-amber-"] * { color: var(--nh-paper) !important; }
+[data-theme="minimalism"] [class*="bg-amber-500/"],
+[data-theme="minimalism"] [class*="bg-amber-400/"] { background-color: var(--nh-surface2) !important; }
+[data-theme="minimalism"] [class*="shadow-"]:not(.leaflet-container *) { box-shadow: none !important; }
+[data-theme="minimalism"] [class*="rounded-xl"],
+[data-theme="minimalism"] [class*="rounded-2xl"],
+[data-theme="minimalism"] [class*="rounded-3xl"],
+[data-theme="minimalism"] [class*="rounded-lg"],
+[data-theme="minimalism"] button.rounded-full,
+[data-theme="minimalism"] a.rounded-full { border-radius: 4px !important; }
 [data-theme="minimalism"] input,
 [data-theme="minimalism"] select,
 [data-theme="minimalism"] textarea {
-  background-color: #11141a !important;
-  border-color: #1e242f !important;
-  color: #e2e8f0 !important;
+  background-color: var(--nh-surface) !important;
+  border-color: var(--nh-line) !important;
+  color: var(--nh-ink) !important;
+  border-radius: 4px !important;
 }
+/* Pale status text (written for dark slate) needs darker shades to stay readable on light paper. */
+[data-theme="minimalism"][data-mode="light"] [class*="text-red-2"],
+[data-theme="minimalism"][data-mode="light"] [class*="text-red-3"],
+[data-theme="minimalism"][data-mode="light"] [class*="text-red-4"],
+[data-theme="minimalism"][data-mode="light"] [class*="text-rose-"] { color: #b42318 !important; }
+[data-theme="minimalism"][data-mode="light"] [class*="text-emerald-"],
+[data-theme="minimalism"][data-mode="light"] [class*="text-green-"] { color: #1a6e43 !important; }
+[data-theme="minimalism"][data-mode="light"] [class*="text-sky-"],
+[data-theme="minimalism"][data-mode="light"] [class*="text-blue-"],
+[data-theme="minimalism"][data-mode="light"] [class*="text-indigo-"],
+[data-theme="minimalism"][data-mode="light"] [class*="text-cyan-"] { color: #1d4f91 !important; }
+[data-theme="minimalism"][data-mode="light"] [class*="text-purple-"],
+[data-theme="minimalism"][data-mode="light"] [class*="text-violet-"] { color: #5b3a99 !important; }
+[data-theme="minimalism"][data-mode="light"] [class*="border-red-"] { border-color: #e7b4ae !important; }
+[data-theme="minimalism"][data-mode="light"] [class*="border-emerald-"],
+[data-theme="minimalism"][data-mode="light"] [class*="border-sky-"],
+[data-theme="minimalism"][data-mode="light"] [class*="border-blue-"] { border-color: var(--nh-line) !important; }
+[data-theme="minimalism"] input::placeholder,
+[data-theme="minimalism"] textarea::placeholder { color: var(--nh-muted) !important; }
+[data-theme="minimalism"] input:focus,
+[data-theme="minimalism"] select:focus,
+[data-theme="minimalism"] textarea:focus { border-color: var(--nh-ink) !important; box-shadow: none !important; }
 
 /* 6. DRY BRUTALISM (Raw Architectural / Heavy Borders & Hard Offset Shadows) */
 [data-theme="brutalism"] body {
